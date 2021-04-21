@@ -1,0 +1,55 @@
+{
+  "manifest_version": 2,
+  "name": "MSync",
+  "version": "2.1",
+
+  "description": "Extension to syncronize websites and MChad desktop app",
+
+  "icons": {
+    "48": "icons/icon-48.png"
+  },
+
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches": ["*://www.youtube.com/watch?v=*"],
+      "js": ["InjectBtnYoutube.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["*://www.twitch.tv/*"],
+      "js": ["InjectBtnTwitch.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["*://www.bilibili.com/video/*"],
+      "js": ["InjectBtnBiliBiliNotLive.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["*://www.nicovideo.jp/watch/*"],
+      "js": ["InjectBtnNNDNotLive.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["*://live2.nicovideo.jp/watch/*"],
+      "js": ["InjectBtnNNDLive.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["*://twitcasting.tv/*"],
+      "js": ["InjectBtnTwitcast.js"]
+    }    
+  ],
+  
+  "permissions": [
+    "*://www.youtube.com/*",
+    "*://twitcasting.tv/*",
+    "*://www.twitch.tv/*",
+    "*://www.bilibili.com/video/*",
+    "*://www.nicovideo.jp/watch/*",
+    "*://live2.nicovideo.jp/watch/*",
+    "*://live.nicovideo.jp/watch/*",
+    "https://repo.mchatx.org/"
+  ]
+}
