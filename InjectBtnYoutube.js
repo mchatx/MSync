@@ -800,8 +800,8 @@ var CaptionCanvas = document.createElement('canvas');
 CaptionCanvas.style.width = "100%";
 CaptionCanvas.style.height = "100%";
 var ctx = CaptionCanvas.getContext("2d");
-RepaintCaption();
 InnerCaptionDiv.appendChild(CaptionCanvas)
+var CaptionText = "Lorem ipsum dolor sit amet, autem iudico laboramus duo ne, ius debet definitiones at. Ex paulo munere quaerendum per. Te iusto definitionem eos, disputando disputationi sed ad.";
 
 function LoadButtons() {
 	UID = "Youtube " + document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
@@ -828,6 +828,7 @@ function StartHereClick(){
 	ExtContainer.appendChild(NoticeSpn);
 	ExtContainer.appendChild(CloseBtn);
 	ExtContainer.appendChild(CaptionDiv);
+	RepaintCaption();
 	dragElement(CaptionDiv);
 	resizeElement(CaptionDiv);
 	btn.remove();
@@ -1021,6 +1022,7 @@ function resizeElement(elmnt) {
 	function closeDragElement() {
 		document.onmouseup = null;
 		document.onmousemove = null;
+		//RepaintCaption();
 	};
 
 }
@@ -1029,12 +1031,42 @@ function RepaintCaption() {
 	CaptionCanvas.width = CaptionCanvas.clientWidth;
 	CaptionCanvas.height = CaptionCanvas.clientHeight;
 	ctx.textAlign = "center";
-	ctx.fillStyle = "red";
 	ctx.font = "30px Arial";
-	ctx.fillText("Hello World", CaptionCanvas.width/2.0, CaptionCanvas.height/2.0);
-	ctx.strokeStyle = "white";
-	ctx.strokeText("Hello World", CaptionCanvas.width/2.0, CaptionCanvas.height/2.0);
-	console.log(ctx.measureText("Hello World").width + " " + (Math.abs(ctx.measureText("Hello World").actualBoundingBoxLeft) + Math.abs(ctx.measureText("Hello World").actualBoundingBoxRight)));
+
+	const Textmetric  = ctx.measureText(CaptionText);
+	const textheight = Math.abs(Textmetric.actualBoundingBoxAscent) + Math.abs(Textmetric.actualBoundingBoxDescent);
+
+	var TextFragment = CaptionText.split(" ");
+	var TextContainer = [];
+	for (var StringContainer = "", i = 0; i < TextFragment.length;i++){
+		if (StringContainer == ""){
+			StringContainer = TextFragment[i];
+		} else {
+			StringContainer += " " + TextFragment[i];
+		}
+
+		if (ctx.measureText(StringContainer).width + 10 > CaptionCanvas.width){
+			if (StringContainer.lastIndexOf(" ") == -1){
+				TextContainer.push(StringContainer);
+				StringContainer = "";
+			} else {
+				TextContainer.push(StringContainer.substr(0, StringContainer.lastIndexOf(" ")));
+				StringContainer = StringContainer.substr(StringContainer.lastIndexOf(" ") + 1);
+			}
+		}
+
+		if (i == TextFragment.length - 1){
+			TextContainer.push(StringContainer);
+			const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
+
+			for (let j = 0; j < TextContainer.length; j++) {
+				ctx.fillStyle = "red";
+				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
+				ctx.strokeStyle = "white";
+				ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
+			}
+		}
+	}
 }
 //========================================= MChad Controller =========================================
 
