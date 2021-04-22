@@ -741,18 +741,67 @@ NoticeSpn.textContent = "Starting";
 NoticeSpn.style.fontSize = '15px';
 NoticeSpn.style.background = 'white';
 
+var CaptionDiv = document.createElement('div')
+CaptionDiv.style.position = 'absolute';
+CaptionDiv.style.width = '100px';
+CaptionDiv.style.height = '20px';
+
+var RResize = document.createElement('div');
+RResize.style.position = 'absolute';
+RResize.style.cursor = 'col-resize';
+RResize.style.right = '0';
+RResize.style.top = '0';
+RResize.style.height = '100%';
+RResize.style.width = '5px';
+RResize.style.backgroundColor = "Red";
+CaptionDiv.appendChild(RResize);
+
+var LResize = document.createElement('div');
+LResize.style.position = 'absolute';
+LResize.style.cursor = 'col-resize';
+LResize.style.left = '0';
+LResize.style.top = '0';
+LResize.style.height = '100%';
+LResize.style.width = '5px';
+LResize.style.backgroundColor = "blue";
+CaptionDiv.appendChild(LResize);
+
+var BResize = document.createElement('div');
+BResize.style.position = 'absolute';
+BResize.style.cursor = 'row-resize';
+BResize.style.left = '0';
+BResize.style.bottom = '0';
+BResize.style.height = '5px';
+BResize.style.width = '100%';
+BResize.style.backgroundColor = "green";
+CaptionDiv.appendChild(BResize);
+
+var TResize = document.createElement('div');
+TResize.style.position = 'absolute';
+TResize.style.cursor = 'row-resize';
+TResize.style.left = '0';
+TResize.style.top = '0';
+TResize.style.height = '5px';
+TResize.style.width = '100%';
+TResize.style.backgroundColor = "yellow";
+CaptionDiv.appendChild(TResize);
+
+var InnerCaptionDiv = document.createElement('div');
+InnerCaptionDiv.style.position = "absolute";
+InnerCaptionDiv.style.cursor = 'move';
+InnerCaptionDiv.style.left = '5px';
+InnerCaptionDiv.style.top = '5px';
+InnerCaptionDiv.style.height = 'calc(100% - 10px)';
+InnerCaptionDiv.style.width = 'calc(100% - 10px)';
+InnerCaptionDiv.style.backgroundColor = "grey";
+CaptionDiv.appendChild(InnerCaptionDiv);
+
 var CaptionCanvas = document.createElement('canvas');
-CaptionCanvas.id = "CaptionCanvas_MChat";
-CaptionCanvas.style.position = 'absolute';
-CaptionCanvas.style.cursor = 'move';
+CaptionCanvas.style.width = "100%";
+CaptionCanvas.style.height = "100%";
 var ctx = CaptionCanvas.getContext("2d");
-ctx.fillStyle = "#808080";
-ctx.fillRect(0, 0, CaptionCanvas.width, CaptionCanvas.height)
-ctx.font = "30px Arial";
-ctx.fillStyle = "red";
-ctx.fillText("Hello World",10,50);
-ctx.strokeStyle = "black";
-ctx.strokeText("Hello World", 10, 50);
+RepaintCaption();
+InnerCaptionDiv.appendChild(CaptionCanvas)
 
 function LoadButtons() {
 	UID = "Youtube " + document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
@@ -771,15 +820,16 @@ function CloseBtnClick(){
 	CloseBtn.remove();
 	NoticeSpn.remove();
 	BrowseBtn.remove();
-	CaptionCanvas.remove();
+	CaptionDiv.remove();
 }
 
 function StartHereClick(){
 	ExtContainer.appendChild(BrowseBtn);
 	ExtContainer.appendChild(NoticeSpn);
 	ExtContainer.appendChild(CloseBtn);
-	ExtContainer.appendChild(CaptionCanvas);
-	dragElement(document.getElementById("CaptionCanvas_MChat"));
+	ExtContainer.appendChild(CaptionDiv);
+	dragElement(CaptionDiv);
+	resizeElement(CaptionDiv);
 	btn.remove();
 	spn.remove();
 	LoadHereBtn.remove();
@@ -816,7 +866,7 @@ function StartHereClick(){
 
 function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  elmnt.onmousedown = dragMouseDown;
+  InnerCaptionDiv.onmousedown = dragMouseDown;
 
   function dragMouseDown(e) {
     e = e || window.event;
@@ -842,6 +892,149 @@ function dragElement(elmnt) {
     document.onmouseup = null;
     document.onmousemove = null;
   }
+}
+
+function resizeElement(elmnt) {
+	var x = 0, y = 0;
+	var w = 0, h = 0;
+	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+	//---------------------- RIGHT HANDLER ----------------------
+	RResize.onmousedown = MouseDownR;
+	
+	function MouseDownR(e) {
+		e = e || window.event;
+		e.preventDefault();
+	
+		x = e.clientX;
+	
+		const styles = window.getComputedStyle(elmnt);
+		w = parseInt(styles.width, 10);
+	
+	    document.onmouseup = closeDragElement;
+	    document.onmousemove = elementDragR;
+	};
+	
+	function elementDragR(e) {
+		e = e || window.event;
+		e.preventDefault();
+	
+		const dx = e.clientX - x;
+	
+		elmnt.style.width = `${w + dx}px`;
+		RepaintCaption();
+	};
+
+	//---------------------- LEFT HANDLER ----------------------
+	LResize.onmousedown = MouseDownL;
+
+	function MouseDownL(e) {
+		e = e || window.event;
+		e.preventDefault();
+	
+		x = e.clientX;
+		pos3 = e.clientX;
+	
+		const styles = window.getComputedStyle(elmnt);
+		w = parseInt(styles.width, 10);
+
+	    document.onmouseup = closeDragElement;
+	    document.onmousemove = elementDragL;
+	};
+	
+	function elementDragL(e) {
+		e = e || window.event;
+		e.preventDefault();
+		
+		const dx = e.clientX - x;
+
+		pos1 = pos3 - e.clientX;
+		pos3 = e.clientX;
+
+		elmnt.style.width = `${w - dx}px`;
+		elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+		RepaintCaption();
+	};
+
+	function closeDragElement() {
+		document.onmouseup = null;
+		document.onmousemove = null;
+	};
+
+	//---------------------- BOTTOM HANDLER ----------------------
+	BResize.onmousedown = MouseDownB;
+	
+	function MouseDownB(e) {
+		e = e || window.event;
+		e.preventDefault();
+	
+		y = e.clientY;
+	
+		const styles = window.getComputedStyle(elmnt);
+		h = parseInt(styles.height, 10);
+	
+	    document.onmouseup = closeDragElement;
+	    document.onmousemove = elementDragB;
+	};
+	
+	function elementDragB(e) {
+		e = e || window.event;
+		e.preventDefault();
+	
+		const dy = e.clientY - y;
+
+		elmnt.style.height = `${h + dy}px`;
+		RepaintCaption();
+	};
+
+	//---------------------- TOP HANDLER ----------------------
+	TResize.onmousedown = MouseDownT;
+
+	function MouseDownT(e) {
+		e = e || window.event;
+		e.preventDefault();
+	
+		y = e.clientY;
+		pos4 = e.clientY;
+	
+		const styles = window.getComputedStyle(elmnt);
+		h = parseInt(styles.height, 10);
+	
+	    document.onmouseup = closeDragElement;
+	    document.onmousemove = elementDragT;
+	};
+	
+	function elementDragT(e) {
+		e = e || window.event;
+		e.preventDefault();
+		
+		const dy = e.clientY - y;
+
+		pos2 = pos4 - e.clientY;
+		pos4 = e.clientY;
+
+		elmnt.style.height = `${h - dy}px`;
+		elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+		RepaintCaption();
+	};
+
+	function closeDragElement() {
+		document.onmouseup = null;
+		document.onmousemove = null;
+	};
+
+}
+
+function RepaintCaption() {
+	CaptionCanvas.width = CaptionCanvas.clientWidth;
+	CaptionCanvas.height = CaptionCanvas.clientHeight;
+	ctx.textAlign = "center";
+	ctx.fillStyle = "red";
+	ctx.font = "30px Arial";
+	ctx.fillText("Hello World", CaptionCanvas.width/2.0, CaptionCanvas.height/2.0);
+	ctx.strokeStyle = "white";
+	ctx.strokeText("Hello World", CaptionCanvas.width/2.0, CaptionCanvas.height/2.0);
+	console.log(ctx.measureText("Hello World").width + " " + (Math.abs(ctx.measureText("Hello World").actualBoundingBoxLeft) + Math.abs(ctx.measureText("Hello World").actualBoundingBoxRight)));
 }
 //========================================= MChad Controller =========================================
 
