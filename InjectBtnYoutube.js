@@ -675,12 +675,15 @@ function TGDecoding(input) {
 
 
 //----------------------------------------- MChad Controller -----------------------------------------
+
+//--------------------------------------- START MENU CONTROLLER ---------------------------------------
 var ExtContainer = document.createElement('div');
 ExtContainer.style.background = '';
 ExtContainer.id = "Extcontainer";
 ExtContainer.style.borderColor = 'black';
 ExtContainer.style.borderWidth = '5px'
 ExtContainer.style.width = '100%';
+ExtContainer.style.backgroundColor = "grey";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
@@ -699,109 +702,10 @@ spn.textContent = "";
 spn.style.fontSize = '15px';
 spn.style.background = 'white';
 
-var LoadHereBtn = document.createElement('button');
-LoadHereBtn.onclick = StartHereClick;
-LoadHereBtn.textContent = "Open Here";
-LoadHereBtn.style.float = "right";
-LoadHereBtn.style.margin = "5px"
-LoadHereBtn.style.background = 'white';
-LoadHereBtn.style.color = 'black';
-LoadHereBtn.style.fontSize = '15px';
-LoadHereBtn.style.cursor = 'pointer';
-LoadHereBtn.style.textAlign = 'center';
-LoadHereBtn.style.borderRadius = '15px';
-LoadHereBtn.style.padding = '8px';
-
-var CloseBtn = document.createElement('button');
-CloseBtn.onclick = CloseBtnClick;
-CloseBtn.textContent = "Close";
-CloseBtn.style.float = "right";
-CloseBtn.style.margin = "5px"
-CloseBtn.style.background = 'white';
-CloseBtn.style.color = 'black';
-CloseBtn.style.fontSize = '15px';
-CloseBtn.style.cursor = 'pointer';
-CloseBtn.style.textAlign = 'center';
-CloseBtn.style.borderRadius = '15px';
-CloseBtn.style.padding = '8px';
-
-var BrowseBtn = document.createElement('button');
-BrowseBtn.textContent = "Browse";
-BrowseBtn.style.margin = "5px"
-BrowseBtn.style.background = 'white';
-BrowseBtn.style.color = 'black';
-BrowseBtn.style.fontSize = '15px';
-BrowseBtn.style.cursor = 'pointer';
-BrowseBtn.style.textAlign = 'center';
-BrowseBtn.style.borderRadius = '15px';
-BrowseBtn.style.padding = '8px';
-
-var NoticeSpn = document.createElement('span');
-NoticeSpn.textContent = "Starting";
-NoticeSpn.style.fontSize = '15px';
-NoticeSpn.style.background = 'white';
-
-var CaptionDiv = document.createElement('div')
-CaptionDiv.style.position = 'absolute';
-CaptionDiv.style.width = '100px';
-CaptionDiv.style.height = '20px';
-
-var RResize = document.createElement('div');
-RResize.style.position = 'absolute';
-RResize.style.cursor = 'col-resize';
-RResize.style.right = '0';
-RResize.style.top = '0';
-RResize.style.height = '100%';
-RResize.style.width = '5px';
-RResize.style.backgroundColor = "Red";
-CaptionDiv.appendChild(RResize);
-
-var LResize = document.createElement('div');
-LResize.style.position = 'absolute';
-LResize.style.cursor = 'col-resize';
-LResize.style.left = '0';
-LResize.style.top = '0';
-LResize.style.height = '100%';
-LResize.style.width = '5px';
-LResize.style.backgroundColor = "blue";
-CaptionDiv.appendChild(LResize);
-
-var BResize = document.createElement('div');
-BResize.style.position = 'absolute';
-BResize.style.cursor = 'row-resize';
-BResize.style.left = '0';
-BResize.style.bottom = '0';
-BResize.style.height = '5px';
-BResize.style.width = '100%';
-BResize.style.backgroundColor = "green";
-CaptionDiv.appendChild(BResize);
-
-var TResize = document.createElement('div');
-TResize.style.position = 'absolute';
-TResize.style.cursor = 'row-resize';
-TResize.style.left = '0';
-TResize.style.top = '0';
-TResize.style.height = '5px';
-TResize.style.width = '100%';
-TResize.style.backgroundColor = "yellow";
-CaptionDiv.appendChild(TResize);
-
-var InnerCaptionDiv = document.createElement('div');
-InnerCaptionDiv.style.position = "absolute";
-InnerCaptionDiv.style.cursor = 'move';
-InnerCaptionDiv.style.left = '5px';
-InnerCaptionDiv.style.top = '5px';
-InnerCaptionDiv.style.height = 'calc(100% - 10px)';
-InnerCaptionDiv.style.width = 'calc(100% - 10px)';
-InnerCaptionDiv.style.backgroundColor = "grey";
-CaptionDiv.appendChild(InnerCaptionDiv);
-
-var CaptionCanvas = document.createElement('canvas');
-CaptionCanvas.style.width = "100%";
-CaptionCanvas.style.height = "100%";
-var ctx = CaptionCanvas.getContext("2d");
-InnerCaptionDiv.appendChild(CaptionCanvas)
-var CaptionText = "Lorem ipsum dolor sit amet, autem iudico laboramus duo ne, ius debet definitiones at. Ex paulo munere quaerendum per. Te iusto definitionem eos, disputando disputationi sed ad.";
+var SMLoadHereBtn = btn.cloneNode(false);
+SMLoadHereBtn.onclick = StartHereClick;
+SMLoadHereBtn.textContent = "Open Here";
+SMLoadHereBtn.style.float = "right";
 
 function LoadButtons() {
 	UID = "Youtube " + document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
@@ -809,31 +713,36 @@ function LoadButtons() {
 	target[0].prepend(ExtContainer);
 	ExtContainer.appendChild(btn);
 	ExtContainer.appendChild(spn);
-	ExtContainer.appendChild(LoadHereBtn);
-}
-
-function CloseBtnClick(){
-	ExtContainer.appendChild(btn);
-	ExtContainer.appendChild(spn);
-	spn.textContent = "";
-	ExtContainer.appendChild(LoadHereBtn);
-	CloseBtn.remove();
-	NoticeSpn.remove();
-	BrowseBtn.remove();
-	CaptionDiv.remove();
+	ExtContainer.appendChild(SMLoadHereBtn);
 }
 
 function StartHereClick(){
-	ExtContainer.appendChild(BrowseBtn);
-	ExtContainer.appendChild(NoticeSpn);
-	ExtContainer.appendChild(CloseBtn);
-	ExtContainer.appendChild(CaptionDiv);
-	RepaintCaption();
+	SummonMainMenu();
+
+	VidEle = document.getElementsByTagName('video');
+    for (let i = 0; i < VidEle.length; i++){
+        if (VidEle[i].className == "video-stream html5-main-video"){
+			DocLeftOffset = window.pageXOffset || document.documentElement.scrollLeft,
+			DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
+
+			ExtContainer.appendChild(CaptionDiv);
+
+			CaptionDiv.style.backgroundColor = CaptionColour;
+			CaptionDiv.style.width = (VidEle[i].getBoundingClientRect().right - VidEle[i].getBoundingClientRect().left)*0.8 + "px";
+			CaptionDiv.style.left = (VidEle[i].getBoundingClientRect().left + DocLeftOffset + (VidEle[i].getBoundingClientRect().right - VidEle[i].getBoundingClientRect().left)*0.1) + "px";
+			RepaintResizeRelocateCaption(VidEle[i]);
+			break;
+        }
+    }
+
+	CaptionDiv.onmouseover= CaptionMouseIn; 
+	CaptionDiv.onmouseout= CaptionMouseOut;
+
 	dragElement(CaptionDiv);
 	resizeElement(CaptionDiv);
 	btn.remove();
 	spn.remove();
-	LoadHereBtn.remove();
+	SMLoadHereBtn.remove();
 	if (ws != undefined){
 		ws.close();
 	}
@@ -864,175 +773,491 @@ function StartHereClick(){
 	})).replace(/\\/gi, "\\\\") + '" }');
 	*/
 }
+//======================================= START MENU CONTROLLER =======================================
+
+
+
+//--------------------------------------- MAIN MENU CONTROLLER ---------------------------------------
+var MMCloseBtn = btn.cloneNode(false);
+MMCloseBtn.onclick = MMCloseBtnClick;
+MMCloseBtn.textContent = "Close";
+MMCloseBtn.style.float = "right";
+
+var MMReloadCaptionBtn = btn.cloneNode(false);
+MMReloadCaptionBtn.onclick = MMReloadCaption;
+MMReloadCaptionBtn.textContent = "Reload Caption";
+MMReloadCaptionBtn.style.float = "right";
+
+var MMCaptionOptionBtn = btn.cloneNode(false);
+MMCaptionOptionBtn.onclick = MMCaptionOptionOpen;
+MMCaptionOptionBtn.textContent = "Caption Option";
+MMCaptionOptionBtn.style.float = "right";
+
+var MMBrowseBtn = btn.cloneNode(false);
+MMBrowseBtn.textContent = "Browse";
+
+var NoticeSpn = document.createElement('span');
+NoticeSpn.textContent = "Starting";
+NoticeSpn.style.fontSize = '15px';
+NoticeSpn.style.background = 'white';
+
+function RemoveMainMenu(){
+	MMCloseBtn.remove();
+	NoticeSpn.remove();
+	MMBrowseBtn.remove();
+	MMReloadCaptionBtn.remove();
+	MMCaptionOptionBtn.remove();
+}
+
+function SummonMainMenu(){
+	ExtContainer.appendChild(MMBrowseBtn);
+	ExtContainer.appendChild(NoticeSpn);
+	ExtContainer.appendChild(MMCloseBtn);
+	ExtContainer.appendChild(MMReloadCaptionBtn);
+	ExtContainer.appendChild(MMCaptionOptionBtn);
+}
+
+function MMCaptionOptionOpen(){
+	RemoveMainMenu();
+	SummonCaptionOption();
+}
+
+function MMReloadCaption(){
+	VidEle = document.getElementsByTagName('video');
+    for (let i = 0; i < VidEle.length; i++){
+        if (VidEle[i].className == "video-stream html5-main-video"){
+			DocLeftOffset = window.pageXOffset || document.documentElement.scrollLeft,
+			DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
+
+			CaptionDiv.style.backgroundColor = CaptionColour;
+			CaptionDiv.style.width = (VidEle[i].getBoundingClientRect().right - VidEle[i].getBoundingClientRect().left)*0.8 + "px";
+			CaptionDiv.style.left = (VidEle[i].getBoundingClientRect().left + DocLeftOffset + (VidEle[i].getBoundingClientRect().right - VidEle[i].getBoundingClientRect().left)*0.1) + "px";
+			RepaintResizeRelocateCaption(VidEle[i]);
+			break;
+        }
+    }
+}
+
+function MMCloseBtnClick(){
+	ExtContainer.appendChild(btn);
+	ExtContainer.appendChild(spn);
+	spn.textContent = "";
+	ExtContainer.appendChild(SMLoadHereBtn);
+	CaptionDiv.remove();
+
+	RemoveMainMenu();
+}
+//======================================= MAIN MENU CONTROLLER =======================================
+
+
+
+//------------------------------------- CAPTION OPTION CONTROLLER -------------------------------------
+var COCloseBtn = btn.cloneNode(false);
+COCloseBtn.onclick = COCloseBtnClick;
+COCloseBtn.textContent = "Back";
+COCloseBtn.style.float = "right";
+
+var CODefaultBtn = btn.cloneNode(false);
+CODefaultBtn.onclick = CODefaultBtnClick;
+CODefaultBtn.textContent = "Reset";
+CODefaultBtn.style.float = "Left";
+
+//	COLOUR PICKER FORM
+var COColourForm = document.createElement('div');
+COColourForm.style.float = "left";
+COColourForm.style.backgroundColor = "gray";
+
+var COColourInput = document.createElement('input');
+COColourInput.type = "color";
+COColourInput.style.left = "50%";
+COColourInput.onchange = COColourInputChange;
+COColourForm.appendChild(COColourInput);
+COColourForm.appendChild(document.createElement('br'));
+
+var COColourText = document.createElement('span');
+COColourText.textContent = "Background Colour";
+COColourText.style.textAlign = "center";
+COColourText.style.fontSize = '15px';
+COColourText.style.width = '100%';
+COColourText.style.background = 'white';
+COColourForm.appendChild(COColourText);
+
+//	OPACITY PICKER FORM
+var COOpacityForm = document.createElement('div');
+COOpacityForm.style.marginLeft = "10 px"
+COOpacityForm.style.float = "left";
+COOpacityForm.style.backgroundColor = "gray";
+
+var COOpacityInput = document.createElement('input');
+COOpacityInput.type = "range";
+COOpacityInput.min = 1;
+COOpacityInput.max = 255;
+COOpacityInput.oninput = COOpacityInputChange;
+COOpacityForm.appendChild(COOpacityInput);
+COOpacityForm.appendChild(document.createElement('br'));
+
+var COOpacityText = document.createElement('span');
+COOpacityText.textContent = "Opacity (%)";
+COOpacityText.style.textAlign = "center";
+COOpacityText.style.width = '100%';
+COOpacityText.style.fontSize = '15px';
+COOpacityText.style.background = 'white';
+COOpacityForm.appendChild(COOpacityText);
+
+//	FONT SIZE PICKER FORM
+var COFontSizeForm = document.createElement('div');
+COFontSizeForm.style.marginLeft = "10 px"
+COFontSizeForm.style.float = "left";
+COFontSizeForm.style.backgroundColor = "gray";
+
+var COFontSizeInput = document.createElement('input');
+COFontSizeInput.type = "number";
+COFontSizeInput.min = 1;
+COFontSizeInput.max = 1000;
+COFontSizeInput.oninput = COFontSizeInputChange;
+COFontSizeForm.appendChild(COFontSizeInput);
+COFontSizeForm.appendChild(document.createElement('br'));
+
+var COFontSizeText = document.createElement('span');
+COFontSizeText.textContent = "Font Size";
+COFontSizeText.style.textAlign = "center";
+COFontSizeText.style.width = '100%';
+COFontSizeText.style.fontSize = '15px';
+COFontSizeText.style.background = 'white';
+COFontSizeForm.appendChild(COFontSizeText);
+
+//	FONT FAMILY PICKER FORM
+
+function COFontSizeInputChange() {
+	CaptionFontSize = COFontSizeInput.value;
+	RepaintResizeRelocateCaption(null)
+}
+
+function CODefaultBtnClick() {
+	CaptionColour = "#00000064";
+	CaptionDiv.style.backgroundColor = CaptionColour;
+}
+
+function COOpacityInputChange() {
+	newopacity = parseInt(COOpacityInput.value).toString(16);
+	if (newopacity.length == 1){
+		newopacity = "0" + newopacity;
+	}
+	CaptionColour = COColourInput.value + newopacity;
+	CaptionDiv.style.backgroundColor = CaptionColour;
+	COOpacityText.textContent = "Opacity (" + (COOpacityInput.value/255*100).toString().substring(0, 3) + "%)";
+}
+
+function COColourInputChange() {
+	CaptionColour = COColourInput.value + CaptionColour.substring(7,9);
+	CaptionDiv.style.backgroundColor = CaptionColour;
+}
+
+function SummonCaptionOption(){
+	ExtContainer.appendChild(CODefaultBtn);
+	ExtContainer.appendChild(COColourForm);
+	ExtContainer.appendChild(COOpacityForm);
+	ExtContainer.appendChild(COFontSizeForm);
+	ExtContainer.appendChild(COCloseBtn);
+	COColourInput.value = CaptionColour.substring(0, 7);
+	COOpacityInput.value = parseInt(CaptionColour.substring(7,9), 16);
+	COOpacityText.textContent = "Opacity (" + (COOpacityInput.value/255*100).toString().substring(0, 3) + "%)";
+	COFontSizeInput.value = CaptionFontSize;
+}
+
+function COCloseBtnClick() {
+	COCloseBtn.remove();
+	COColourForm.remove();
+	COOpacityForm.remove();
+	COFontSizeForm.remove();
+	CODefaultBtn.remove();
+
+	SummonMainMenu();
+}
+//===================================== CAPTION OPTION CONTROLLER =====================================
+
+
+
+//-------------------------------------- GRAND CANVAS CONTROLLER --------------------------------------
+var CaptionDiv = document.createElement('div')
+CaptionDiv.style.position = 'absolute';
+CaptionDiv.style.width = '200px';
+CaptionDiv.style.height = '50px';
+CaptionDiv.id = "MCHAT_CAPTION";
+
+var RResize = document.createElement('div');
+RResize.style.position = 'absolute';
+RResize.style.cursor = 'col-resize';
+RResize.style.right = '0';
+RResize.style.top = '0';
+RResize.style.height = '100%';
+RResize.style.width = '5px';
+CaptionDiv.appendChild(RResize);
+
+var LResize = document.createElement('div');
+LResize.style.position = 'absolute';
+LResize.style.cursor = 'col-resize';
+LResize.style.left = '0';
+LResize.style.top = '0';
+LResize.style.height = '100%';
+LResize.style.width = '5px';
+CaptionDiv.appendChild(LResize);
+
+var BResize = document.createElement('div');
+BResize.style.position = 'absolute';
+BResize.style.cursor = 'row-resize';
+BResize.style.left = '0';
+BResize.style.bottom = '0';
+BResize.style.height = '5px';
+BResize.style.width = '100%';
+CaptionDiv.appendChild(BResize);
+
+var TResize = document.createElement('div');
+TResize.style.position = 'absolute';
+TResize.style.cursor = 'row-resize';
+TResize.style.left = '0';
+TResize.style.top = '0';
+TResize.style.height = '5px';
+TResize.style.width = '100%';
+CaptionDiv.appendChild(TResize);
+
+var InnerCaptionDiv = document.createElement('div');
+InnerCaptionDiv.style.position = "absolute";
+InnerCaptionDiv.style.cursor = 'move';
+InnerCaptionDiv.style.left = '5px';
+InnerCaptionDiv.style.top = '5px';
+InnerCaptionDiv.style.height = 'calc(100% - 10px)';
+InnerCaptionDiv.style.width = 'calc(100% - 10px)';
+CaptionDiv.appendChild(InnerCaptionDiv);
+
+var CaptionCanvas = document.createElement('canvas');
+CaptionCanvas.style.width = "100%";
+CaptionCanvas.style.height = "100%";
+var ctx = CaptionCanvas.getContext("2d");
+InnerCaptionDiv.appendChild(CaptionCanvas)
+
+var CaptionText = "Lorem ipsum dolor sit amet, autem iudico laboramus duo ne, ius debet definitiones at. Ex paulo munere quaerendum per. Te iusto definitionem eos, disputando disputationi sed ad.";
+var CaptionColour = "#00000064";
+var CaptionFontSize = 30;
+
+const rgba2hex = (rgba) => `#${rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/).slice(1).map((n, i) => (i === 3 ? Math.round(parseFloat(n) * 255) : parseFloat(n)).toString(16).padStart(2, '0').replace('NaN', '')).join('')}`
 
 function dragElement(elmnt) {
-  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  InnerCaptionDiv.onmousedown = dragMouseDown;
-
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
-  }
-
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-  }
-
-  function closeDragElement() {
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
-
-function resizeElement(elmnt) {
-	var x = 0, y = 0;
-	var w = 0, h = 0;
 	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-	//---------------------- RIGHT HANDLER ----------------------
-	RResize.onmousedown = MouseDownR;
-	
-	function MouseDownR(e) {
-		e = e || window.event;
-		e.preventDefault();
-	
-		x = e.clientX;
-	
-		const styles = window.getComputedStyle(elmnt);
-		w = parseInt(styles.width, 10);
-	
-	    document.onmouseup = closeDragElement;
-	    document.onmousemove = elementDragR;
-	};
-	
-	function elementDragR(e) {
-		e = e || window.event;
-		e.preventDefault();
-	
-		const dx = e.clientX - x;
-	
-		elmnt.style.width = `${w + dx}px`;
-		RepaintCaption();
-	};
-
-	//---------------------- LEFT HANDLER ----------------------
-	LResize.onmousedown = MouseDownL;
-
-	function MouseDownL(e) {
-		e = e || window.event;
-		e.preventDefault();
-	
-		x = e.clientX;
-		pos3 = e.clientX;
-	
-		const styles = window.getComputedStyle(elmnt);
-		w = parseInt(styles.width, 10);
-
-	    document.onmouseup = closeDragElement;
-	    document.onmousemove = elementDragL;
-	};
-	
-	function elementDragL(e) {
-		e = e || window.event;
-		e.preventDefault();
-		
-		const dx = e.clientX - x;
-
-		pos1 = pos3 - e.clientX;
-		pos3 = e.clientX;
-
-		elmnt.style.width = `${w - dx}px`;
-		elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-		RepaintCaption();
-	};
-
+	InnerCaptionDiv.onmousedown = dragMouseDown;
+  
+	function dragMouseDown(e) {
+	  e = e || window.event;
+	  e.preventDefault();
+	  pos3 = e.clientX;
+	  pos4 = e.clientY;
+	  document.onmouseup = closeDragElement;
+	  document.onmousemove = elementDrag;
+	}
+  
+	function elementDrag(e) {
+	  e = e || window.event;
+	  e.preventDefault();
+	  pos1 = pos3 - e.clientX;
+	  pos2 = pos4 - e.clientY;
+	  pos3 = e.clientX;
+	  pos4 = e.clientY;
+	  elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+	  elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+	}
+  
 	function closeDragElement() {
-		document.onmouseup = null;
-		document.onmousemove = null;
-	};
+	  document.onmouseup = null;
+	  document.onmousemove = null;
+	}
+  }
+  
+  function resizeElement(elmnt) {
+	  var x = 0, y = 0;
+	  var w = 0, h = 0;
+	  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  
+	  //---------------------- RIGHT HANDLER ----------------------
+	  RResize.onmousedown = MouseDownR;
+	  
+	  function MouseDownR(e) {
+		  e = e || window.event;
+		  e.preventDefault();
+	  
+		  x = e.clientX;
+	  
+		  const styles = window.getComputedStyle(elmnt);
+		  w = parseInt(styles.width, 10);
+	  
+		  document.onmouseup = closeDragElement;
+		  document.onmousemove = elementDragR;
+	  };
+	  
+	  function elementDragR(e) {
+		  e = e || window.event;
+		  e.preventDefault();
+	  
+		  const dx = e.clientX - x;
+	  
+		  elmnt.style.width = `${w + dx}px`;
+		  RepaintCaption();
+	  };
+  
+	  //---------------------- LEFT HANDLER ----------------------
+	  LResize.onmousedown = MouseDownL;
+  
+	  function MouseDownL(e) {
+		  e = e || window.event;
+		  e.preventDefault();
+	  
+		  x = e.clientX;
+		  pos3 = e.clientX;
+	  
+		  const styles = window.getComputedStyle(elmnt);
+		  w = parseInt(styles.width, 10);
+  
+		  document.onmouseup = closeDragElement;
+		  document.onmousemove = elementDragL;
+	  };
+	  
+	  function elementDragL(e) {
+		  e = e || window.event;
+		  e.preventDefault();
+		  
+		  const dx = e.clientX - x;
+  
+		  pos1 = pos3 - e.clientX;
+		  pos3 = e.clientX;
+  
+		  elmnt.style.width = `${w - dx}px`;
+		  elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+		  RepaintCaption();
+	  };
+  
+	  function closeDragElement() {
+		  document.onmouseup = null;
+		  document.onmousemove = null;
+	  };
+  
+	  //---------------------- BOTTOM HANDLER ----------------------
+	  BResize.onmousedown = MouseDownB;
+	  
+	  function MouseDownB(e) {
+		  e = e || window.event;
+		  e.preventDefault();
+	  
+		  y = e.clientY;
+	  
+		  const styles = window.getComputedStyle(elmnt);
+		  h = parseInt(styles.height, 10);
+	  
+		  document.onmouseup = closeDragElement;
+		  document.onmousemove = elementDragB;
+	  };
+	  
+	  function elementDragB(e) {
+		  e = e || window.event;
+		  e.preventDefault();
+	  
+		  const dy = e.clientY - y;
+  
+		  elmnt.style.height = `${h + dy}px`;
+		  RepaintCaption();
+	  };
+  
+	  //---------------------- TOP HANDLER ----------------------
+	  TResize.onmousedown = MouseDownT;
+  
+	  function MouseDownT(e) {
+		  e = e || window.event;
+		  e.preventDefault();
+	  
+		  y = e.clientY;
+		  pos4 = e.clientY;
+	  
+		  const styles = window.getComputedStyle(elmnt);
+		  h = parseInt(styles.height, 10);
+	  
+		  document.onmouseup = closeDragElement;
+		  document.onmousemove = elementDragT;
+	  };
+	  
+	  function elementDragT(e) {
+		  e = e || window.event;
+		  e.preventDefault();
+		  
+		  const dy = e.clientY - y;
+  
+		  pos2 = pos4 - e.clientY;
+		  pos4 = e.clientY;
+  
+		  elmnt.style.height = `${h - dy}px`;
+		  elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+		  RepaintCaption();
+	  };
+  
+	  function closeDragElement() {
+		  document.onmouseup = null;
+		  document.onmousemove = null;
+		  //RepaintCaption();
+	  };
+  
+  }
+  
+  function CaptionMouseIn(){
+	CaptionDiv.style.backgroundColor = rgba2hex(CaptionDiv.style.backgroundColor).substr(0,7) + "FF";
+  }
 
-	//---------------------- BOTTOM HANDLER ----------------------
-	BResize.onmousedown = MouseDownB;
-	
-	function MouseDownB(e) {
-		e = e || window.event;
-		e.preventDefault();
-	
-		y = e.clientY;
-	
-		const styles = window.getComputedStyle(elmnt);
-		h = parseInt(styles.height, 10);
-	
-	    document.onmouseup = closeDragElement;
-	    document.onmousemove = elementDragB;
-	};
-	
-	function elementDragB(e) {
-		e = e || window.event;
-		e.preventDefault();
-	
-		const dy = e.clientY - y;
+  function CaptionMouseOut(){
+	CaptionDiv.style.backgroundColor = CaptionColour;
+  }
 
-		elmnt.style.height = `${h + dy}px`;
-		RepaintCaption();
-	};
+  function RepaintCaption() {
+	  CaptionCanvas.width = CaptionCanvas.clientWidth;
+	  CaptionCanvas.height = CaptionCanvas.clientHeight;
+	  ctx.textAlign = "center";
+	  ctx.font = CaptionFontSize + "px Arial";
+  
+	  const Textmetric  = ctx.measureText(CaptionText);
+	  const textheight = Math.abs(Textmetric.actualBoundingBoxAscent) + Math.abs(Textmetric.actualBoundingBoxDescent);
+  
+	  var TextFragment = CaptionText.split(" ");
+	  var TextContainer = [];
+	  for (var StringContainer = "", i = 0; i < TextFragment.length;i++){
+		  if (StringContainer == ""){
+			  StringContainer = TextFragment[i];
+		  } else {
+			  StringContainer += " " + TextFragment[i];
+		  }
+  
+		  if (ctx.measureText(StringContainer).width + 10 > CaptionCanvas.width){
+			  if (StringContainer.lastIndexOf(" ") == -1){
+				  TextContainer.push(StringContainer);
+				  StringContainer = "";
+			  } else {
+				  TextContainer.push(StringContainer.substr(0, StringContainer.lastIndexOf(" ")));
+				  StringContainer = StringContainer.substr(StringContainer.lastIndexOf(" ") + 1);
+			  }
+		  }
+  
+		  if (i == TextFragment.length - 1){
+			  TextContainer.push(StringContainer);
+			  const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
+  
+			  for (let j = 0; j < TextContainer.length; j++) {
+				  ctx.fillStyle = "red";
+				  ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
+				  ctx.strokeStyle = "white";
+				  ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
+			  }
+		  }
+	  }
+  }
 
-	//---------------------- TOP HANDLER ----------------------
-	TResize.onmousedown = MouseDownT;
-
-	function MouseDownT(e) {
-		e = e || window.event;
-		e.preventDefault();
-	
-		y = e.clientY;
-		pos4 = e.clientY;
-	
-		const styles = window.getComputedStyle(elmnt);
-		h = parseInt(styles.height, 10);
-	
-	    document.onmouseup = closeDragElement;
-	    document.onmousemove = elementDragT;
-	};
-	
-	function elementDragT(e) {
-		e = e || window.event;
-		e.preventDefault();
-		
-		const dy = e.clientY - y;
-
-		pos2 = pos4 - e.clientY;
-		pos4 = e.clientY;
-
-		elmnt.style.height = `${h - dy}px`;
-		elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-		RepaintCaption();
-	};
-
-	function closeDragElement() {
-		document.onmouseup = null;
-		document.onmousemove = null;
-		//RepaintCaption();
-	};
-
-}
-
-function RepaintCaption() {
+  function RepaintResizeRelocateCaption(VidElement){
 	CaptionCanvas.width = CaptionCanvas.clientWidth;
-	CaptionCanvas.height = CaptionCanvas.clientHeight;
 	ctx.textAlign = "center";
-	ctx.font = "30px Arial";
-
+	ctx.font = CaptionFontSize + "px Arial";
 	const Textmetric  = ctx.measureText(CaptionText);
 	const textheight = Math.abs(Textmetric.actualBoundingBoxAscent) + Math.abs(Textmetric.actualBoundingBoxDescent);
 
@@ -1059,6 +1284,18 @@ function RepaintCaption() {
 			TextContainer.push(StringContainer);
 			const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
 
+			if (VidElement) {
+				DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
+				CaptionDiv.style.top = (VidElement.getBoundingClientRect().bottom + DocTopOffset - (VidElement.getBoundingClientRect().bottom - VidElement.getBoundingClientRect().top)*0.1 - textheight*TextContainer.length - 30) + "px";
+			} else {
+				CaptionDiv.style.top = (CaptionDiv.getBoundingClientRect().bottom - textheight*TextContainer.length - 30) + "px";
+			}
+
+			CaptionDiv.style.height = (textheight*TextContainer.length + 30) + "px";
+			CaptionCanvas.height = CaptionCanvas.clientHeight;
+
+			ctx.textAlign = "center";
+			ctx.font = CaptionFontSize + "px Arial";
 			for (let j = 0; j < TextContainer.length; j++) {
 				ctx.fillStyle = "red";
 				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
@@ -1067,7 +1304,9 @@ function RepaintCaption() {
 			}
 		}
 	}
-}
+  }
+//====================================== GRAND CANVAS CONTROLLER ======================================
+
 //========================================= MChad Controller =========================================
 
 
