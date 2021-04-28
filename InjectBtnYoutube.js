@@ -680,10 +680,9 @@ function TGDecoding(input) {
 var ExtContainer = document.createElement('div');
 ExtContainer.style.background = '';
 ExtContainer.id = "Extcontainer";
-ExtContainer.style.borderColor = 'black';
-ExtContainer.style.borderWidth = '5px'
+ExtContainer.style.border = "1px solid black"; 
 ExtContainer.style.width = '100%';
-ExtContainer.style.backgroundColor = "grey";
+ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
@@ -860,73 +859,70 @@ COCloseBtn.style.float = "right";
 var CODefaultBtn = btn.cloneNode(false);
 CODefaultBtn.onclick = CODefaultBtnClick;
 CODefaultBtn.textContent = "Reset";
-CODefaultBtn.style.float = "Left";
+CODefaultBtn.style.float = "left";
 
 //	COLOUR PICKER FORM
 var COColourForm = document.createElement('div');
-COColourForm.style.float = "left";
-COColourForm.style.backgroundColor = "gray";
+COColourForm.style.height = "100%";
+COColourForm.style.display = "inline-block";
+COColourForm.style.margin = "2px";
 
 var COColourInput = document.createElement('input');
 COColourInput.type = "color";
-COColourInput.style.left = "50%";
+COColourInput.style.position = "relative";
+COColourInput.style.left = "25%";
 COColourInput.onchange = COColourInputChange;
 COColourForm.appendChild(COColourInput);
 COColourForm.appendChild(document.createElement('br'));
 
 var COColourText = document.createElement('span');
 COColourText.textContent = "Background Colour";
-COColourText.style.textAlign = "center";
 COColourText.style.fontSize = '15px';
-COColourText.style.width = '100%';
 COColourText.style.background = 'white';
 COColourForm.appendChild(COColourText);
 
 //	OPACITY PICKER FORM
 var COOpacityForm = document.createElement('div');
-COOpacityForm.style.marginLeft = "10 px"
-COOpacityForm.style.float = "left";
-COOpacityForm.style.backgroundColor = "gray";
+COOpacityForm.style.display = "inline-block";
+COOpacityForm.style.margin = "2px";
 
 var COOpacityInput = document.createElement('input');
 COOpacityInput.type = "range";
+COOpacityInput.style.marginRight = '5px';
+COOpacityInput.style.marginLeft = '5px';
 COOpacityInput.min = 1;
 COOpacityInput.max = 255;
 COOpacityInput.oninput = COOpacityInputChange;
 COOpacityForm.appendChild(COOpacityInput);
 COOpacityForm.appendChild(document.createElement('br'));
 
-var COOpacityText = document.createElement('span');
+var COOpacityText = document.createElement('p');
 COOpacityText.textContent = "Opacity (%)";
 COOpacityText.style.textAlign = "center";
-COOpacityText.style.width = '100%';
 COOpacityText.style.fontSize = '15px';
 COOpacityText.style.background = 'white';
 COOpacityForm.appendChild(COOpacityText);
 
 //	FONT SIZE PICKER FORM
 var COFontSizeForm = document.createElement('div');
-COFontSizeForm.style.marginLeft = "10 px"
-COFontSizeForm.style.float = "left";
-COFontSizeForm.style.backgroundColor = "gray";
+COFontSizeForm.style.display = "inline-block";
+COFontSizeForm.style.margin = "2px";
 
 var COFontSizeInput = document.createElement('input');
 COFontSizeInput.type = "number";
+COFontSizeInput.style.width = "50px";
 COFontSizeInput.min = 1;
 COFontSizeInput.max = 1000;
 COFontSizeInput.oninput = COFontSizeInputChange;
 COFontSizeForm.appendChild(COFontSizeInput);
 COFontSizeForm.appendChild(document.createElement('br'));
 
-var COFontSizeText = document.createElement('span');
+var COFontSizeText = document.createElement('p');
 COFontSizeText.textContent = "Font Size";
 COFontSizeText.style.textAlign = "center";
-COFontSizeText.style.width = '100%';
 COFontSizeText.style.fontSize = '15px';
 COFontSizeText.style.background = 'white';
 COFontSizeForm.appendChild(COFontSizeText);
-
-//	FONT FAMILY PICKER FORM
 
 function COFontSizeInputChange() {
 	CaptionFontSize = COFontSizeInput.value;
@@ -935,7 +931,14 @@ function COFontSizeInputChange() {
 
 function CODefaultBtnClick() {
 	CaptionColour = "#00000064";
+	CaptionFontSize = 30;
 	CaptionDiv.style.backgroundColor = CaptionColour;
+	RepaintResizeRelocateCaption(null);
+
+	COColourInput.value = CaptionColour.substring(0, 7);
+	COOpacityInput.value = parseInt(CaptionColour.substring(7,9), 16);
+	COOpacityText.textContent = "Opacity (" + (COOpacityInput.value/255*100).toString().substring(0, 3) + "%)";
+	COFontSizeInput.value = CaptionFontSize;
 }
 
 function COOpacityInputChange() {
@@ -959,6 +962,7 @@ function SummonCaptionOption(){
 	ExtContainer.appendChild(COOpacityForm);
 	ExtContainer.appendChild(COFontSizeForm);
 	ExtContainer.appendChild(COCloseBtn);
+	
 	COColourInput.value = CaptionColour.substring(0, 7);
 	COOpacityInput.value = parseInt(CaptionColour.substring(7,9), 16);
 	COOpacityText.textContent = "Opacity (" + (COOpacityInput.value/255*100).toString().substring(0, 3) + "%)";
