@@ -678,7 +678,6 @@ function TGDecoding(input) {
 
 //--------------------------------------- START MENU CONTROLLER ---------------------------------------
 var ExtContainer = document.createElement('div');
-ExtContainer.style.background = '';
 ExtContainer.id = "Extcontainer";
 ExtContainer.style.border = "1px solid black"; 
 ExtContainer.style.width = '100%';
@@ -713,6 +712,25 @@ function LoadButtons() {
 	ExtContainer.appendChild(btn);
 	ExtContainer.appendChild(spn);
 	ExtContainer.appendChild(SMLoadHereBtn);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'https://repo.mchatx.org/MSyncVersion/', true);
+	xhr.onload = function () {
+		try {
+			var JSONtemp = JSON.parse(xhr.response);	
+		} catch (error) {
+			spn.textContent = "ERROR FETCHING DATA";
+			return;
+		}
+		
+		spn.textContent = "Version " + CurrentVersion;
+
+		if (JSONtemp["Ver"] != CurrentVersion){
+			spn.textContent = spn.textContent + " (NEWER VERSION AVAILABLE " + JSONtemp["Ver"] + ")";
+		}
+	};
+
+	xhr.send();
 }
 
 function StartHereClick(){
@@ -792,24 +810,35 @@ MMCaptionOptionBtn.onclick = MMCaptionOptionOpen;
 MMCaptionOptionBtn.textContent = "Caption Option";
 MMCaptionOptionBtn.style.float = "right";
 
-var MMBrowseBtn = btn.cloneNode(false);
-MMBrowseBtn.textContent = "Browse";
+var MMRoomBtn = btn.cloneNode(false);
+MMRoomBtn.textContent = "Room";
+MMRoomBtn.onclick = RoomBtnClick;
+
+var MMArchiveBtn = btn.cloneNode(false);
+MMArchiveBtn.textContent = "Archive";
 
 var NoticeSpn = document.createElement('span');
 NoticeSpn.textContent = "Starting";
 NoticeSpn.style.fontSize = '15px';
 NoticeSpn.style.background = 'white';
 
+function RoomBtnClick(){
+	RemoveMainMenu();
+	SummonRoomMenu();
+}
+
 function RemoveMainMenu(){
 	MMCloseBtn.remove();
 	NoticeSpn.remove();
-	MMBrowseBtn.remove();
+	MMRoomBtn.remove();
+	MMArchiveBtn.remove();
 	MMReloadCaptionBtn.remove();
 	MMCaptionOptionBtn.remove();
 }
 
 function SummonMainMenu(){
-	ExtContainer.appendChild(MMBrowseBtn);
+	ExtContainer.appendChild(MMRoomBtn);
+	ExtContainer.appendChild(MMArchiveBtn);
 	ExtContainer.appendChild(NoticeSpn);
 	ExtContainer.appendChild(MMCloseBtn);
 	ExtContainer.appendChild(MMReloadCaptionBtn);
@@ -847,6 +876,55 @@ function MMCloseBtnClick(){
 	RemoveMainMenu();
 }
 //======================================= MAIN MENU CONTROLLER =======================================
+
+
+
+//------------------------------------------ ROOM CONTROLLER ------------------------------------------
+var RoomContainer = ExtContainer.cloneNode(false);
+var RoomText = document.createElement('p');
+RoomText.textContent = "TEST";
+RoomText.style.textAlign = "center";
+RoomText.style.fontSize = '15px';
+RoomText.style.background = 'white';
+RoomContainer.appendChild(RoomText);
+
+var RoomBackBtn = btn.cloneNode(false);
+RoomBackBtn.style.float = "right";
+RoomBackBtn.textContent = "Back";
+RoomBackBtn.onclick = RoomBackBtnClick;
+
+var RoomSearchBtn = btn.cloneNode(false);
+RoomSearchBtn.textContent = "Search";
+
+function SummonRoomMenu(){
+	ExtContainer.parentNode.insertBefore(RoomContainer, ExtContainer.nextSibling);
+	ExtContainer.appendChild(RoomBackBtn);
+	ExtContainer.appendChild(RoomSearchBtn);
+}
+
+function RemoveRoomMenu(){
+	RoomBackBtn.remove();
+	RoomSearchBtn.remove();
+	RoomContainer.remove();
+}
+
+function RoomBackBtnClick() {
+	SummonMainMenu();
+	RemoveRoomMenu();
+}
+
+function PassPrompt() {
+	/*
+	var Pass = prompt("Please enter your name:", "Harry Potter");
+	if (person == null || person == "") {
+	  console.log("CANCELLED");
+	} else {
+	  console.log("")
+	}
+	document.getElementById("demo").innerHTML = txt;
+	*/
+  }
+//========================================== ROOM CONTROLLER ==========================================
 
 
 
@@ -1040,9 +1118,11 @@ CaptionCanvas.style.height = "100%";
 var ctx = CaptionCanvas.getContext("2d");
 InnerCaptionDiv.appendChild(CaptionCanvas)
 
-var CaptionText = "Lorem ipsum dolor sit amet, autem iudico laboramus duo ne, ius debet definitiones at. Ex paulo munere quaerendum per. Te iusto definitionem eos, disputando disputationi sed ad.";
+var CaptionText = "Caption Box.";
 var CaptionColour = "#00000064";
 var CaptionFontSize = 30;
+var CaptionCC = "#000000";
+var CaptionOC = "#FFFFFF";
 
 const rgba2hex = (rgba) => `#${rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/).slice(1).map((n, i) => (i === 3 ? Math.round(parseFloat(n) * 255) : parseFloat(n)).toString(16).padStart(2, '0').replace('NaN', '')).join('')}`
 
@@ -1247,11 +1327,13 @@ function dragElement(elmnt) {
 		  if (i == TextFragment.length - 1){
 			  TextContainer.push(StringContainer);
 			  const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
-  
+			  ctx.textAlign = "center";
+			  ctx.font = CaptionFontSize + "px Arial";
+
 			  for (let j = 0; j < TextContainer.length; j++) {
-				  ctx.fillStyle = "red";
+				  ctx.fillStyle = CaptionCC;
 				  ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
-				  ctx.strokeStyle = "white";
+				  ctx.strokeStyle = CaptionOC;
 				  ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
 			  }
 		  }
@@ -1297,13 +1379,13 @@ function dragElement(elmnt) {
 
 			CaptionDiv.style.height = (textheight*TextContainer.length + 30) + "px";
 			CaptionCanvas.height = CaptionCanvas.clientHeight;
-
 			ctx.textAlign = "center";
 			ctx.font = CaptionFontSize + "px Arial";
+
 			for (let j = 0; j < TextContainer.length; j++) {
-				ctx.fillStyle = "red";
+				ctx.fillStyle = CaptionCC;
 				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
-				ctx.strokeStyle = "white";
+				ctx.strokeStyle = CaptionOC;
 				ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
 			}
 		}
@@ -1322,6 +1404,7 @@ var sendBtn;
 var ChatText;
 var ListenerTarget;
 var ChatInputPanel;
+var CurrentVersion = "2.0.0";
 
 var UID = "";
 var mode = 0;
