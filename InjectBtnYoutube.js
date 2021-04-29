@@ -763,32 +763,6 @@ function StartHereClick(){
 	if (ws != undefined){
 		ws.close();
 	}
-
-	NoticeSpn.textContent = "SENDING REQUEST";
-	/*
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', 'https://repo.mchatx.org/FetchRaw/', true);
-	xhr.setRequestHeader('Content-type', 'application/json');
-	xhr.onload = function () {
-		try {
-			var JSONtemp = JSON.parse(xhr.response);	
-		} catch (error) {
-			NoticeSpn.textContent = "ERROR FETCHING DATA";
-			return;
-		}
-		
-		if (!JSONtemp["BToken"]){
-			return;
-		}
-
-		console.log(TGDecoding(JSONtemp["BToken"]));
-	};
-
-	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
-		Act: 'ArchiveList',
-		Link: "YT_" + UID.split(" ")[1]
-	})).replace(/\\/gi, "\\\\") + '" }');
-	*/
 }
 //======================================= START MENU CONTROLLER =======================================
 
@@ -816,15 +790,22 @@ MMRoomBtn.onclick = RoomBtnClick;
 
 var MMArchiveBtn = btn.cloneNode(false);
 MMArchiveBtn.textContent = "Archive";
+MMArchiveBtn.onclick = MMArchiveBtnClick;
 
 var NoticeSpn = document.createElement('span');
-NoticeSpn.textContent = "Starting";
 NoticeSpn.style.fontSize = '15px';
 NoticeSpn.style.background = 'white';
+
+function MMArchiveBtnClick(){
+	RemoveMainMenu();
+	SummonArchiveMenu();
+	ARSearchLinkBtnClick();
+}
 
 function RoomBtnClick(){
 	RemoveMainMenu();
 	SummonRoomMenu();
+	RoomSearchLinkBtnClick();
 }
 
 function RemoveMainMenu(){
@@ -872,6 +853,8 @@ function MMCloseBtnClick(){
 	spn.textContent = "";
 	ExtContainer.appendChild(SMLoadHereBtn);
 	CaptionDiv.remove();
+	StopListening();
+	StopArchive();
 
 	RemoveMainMenu();
 }
@@ -880,31 +863,198 @@ function MMCloseBtnClick(){
 
 
 //------------------------------------------ ROOM CONTROLLER ------------------------------------------
+var RoomES;
+
+//~~~~~~~~~~~~~~~~~~~~~	ROOM CONTAINER AND CARD TEMPLATES ~~~~~~~~~~~~~~~~~~~~~
 var RoomContainer = ExtContainer.cloneNode(false);
-var RoomText = document.createElement('p');
-RoomText.textContent = "TEST";
-RoomText.style.textAlign = "center";
-RoomText.style.fontSize = '15px';
-RoomText.style.background = 'white';
-RoomContainer.appendChild(RoomText);
+RoomContainer.id = "RoomContainer";
+
+var RoomCardTemplate = document.createElement('div');
+RoomCardTemplate.style.border = "1px dashed black"; 
+RoomCardTemplate.style.width = "100%";
+RoomCardTemplate.style.display = "flex";
+RoomCardTemplate.style.flexDirection = "row";
+
+var RoomCardText = document.createElement('span');
+RoomCardText.style.alignSelf = "center";
+RoomCardText.style.textAlign = "center";
+RoomCardText.style.fontSize = '15px';
+RoomCardText.style.background = 'white';
+
+var RoomCardOpenBtn = btn.cloneNode(false);
+RoomCardOpenBtn.textContent = "Listen";
+RoomCardOpenBtn.style.alignSelf = "center";
+
+var RoomCardLockspan = document.createElement('span');
+RoomCardLockspan.style.alignSelf = "center";
+RoomCardLockspan.style.fontSize = "28px";
+RoomCardLockspan.style.fontWeight = "bold";
+
+function AddRoomCard(RoomName, Locked, Link, Tags){
+	var RName = RoomCardText.cloneNode(true);
+	RName.style.width = "25%";
+	RName.textContent = RoomName;
+
+	var RLink = RoomCardText.cloneNode(true);
+	RLink.style.width = "35%";
+	if (!Link){		
+		RLink.style.color = "#aaa";
+		RLink.textContent = "No link provided";
+	} else if (Link == ""){
+		RLink.style.color = "#aaa";
+		RLink.textContent = "No link provided";
+	} else {
+		RLink.textContent = Link;
+	}
+
+	var RTags = RoomCardText.cloneNode(true);
+	RTags.style.width = "30%";
+	if (!Tags){
+		RTags.style.color = "#aaa";
+		RTags.textContent = "No tags provided";
+	} else if (Tags == ""){
+		RTags.style.color = "#aaa";
+		RTags.textContent = "No tags provided";
+	} else {
+		RTags.textContent = Tags;
+	}
+
+	var OpenBtn = RoomCardOpenBtn.cloneNode(true);
+	OpenBtn.onclick = function() {
+		if (Locked) {
+			SummonModal(RoomName, true);
+		} else {
+			StartListening(RoomName, null);
+		}
+	}
+
+	var Lockspan = RoomCardLockspan.cloneNode(true);
+	if (Locked){
+		Lockspan.textContent = "🔒";
+	} else {
+		Lockspan.textContent = "🔓";
+	}
+
+	var RCPanel = RoomCardTemplate.cloneNode(true);
+	RCPanel.appendChild(OpenBtn);
+	RCPanel.appendChild(RName);
+	RCPanel.appendChild(RLink)
+	RCPanel.appendChild(RTags)
+	RCPanel.appendChild(Lockspan);
+	
+	RoomContainer.appendChild(RCPanel);
+}
+
+function StopListening(){
+	if (RoomES){
+		RoomES.close();
+	}
+}
+
+function StartListening(RoomName, Password){
+	StopListening();
+	StopArchive();
+
+	var BToken = "";
+	if (!Password){
+		BToken = TGEncoding(JSON.stringify({
+			Act: 'Listen',
+			Room: RoomName
+		})).replace(/ /gi, "%20");
+	} else {
+		BToken = TGEncoding(JSON.stringify({
+			Act: 'Listen',
+			Room: RoomName,
+			Pass: Password
+		})).replace(/ /gi, "%20");
+	}
+
+	RoomES = new EventSource('https://repo.mchatx.org/FetchRaw/?BToken=' + BToken);
+
+	RoomES.onmessage = function (e) {
+		if (e.data == '{ "flag":"Connect", "content":"CONNECTED TO SECURE SERVER"}'){
+		} else if (e.data != '{}'){
+			var DecodedString = TGDecoding(e.data);
+			if (DecodedString == '{ "flag":"Timeout", "content":"Translator side time out" }'){
+				StopListening();
+			} else {
+				var dt = JSON.parse(DecodedString);
+				if (dt["flag"] == "insert"){
+					CaptionText = dt["content"]["Stext"];
+					if (!dt["content"]["CC"]){
+						CaptionCC = "#FFFFFF";
+					} else {
+						CaptionCC = "#" + dt["content"]["CC"];
+					}
+					if (!dt["content"]["OC"]){
+						CaptionOC = "#000000";
+					} else {
+						CaptionOC = "#" + dt["content"]["OC"];
+					}
+					RepaintResizeRelocateCaption(null);
+				}
+			}
+		}
+	}
+
+	RoomES.onerror = function() {
+		CaptionText = "CONNECTION ERROR";
+		CaptionOC = "#000000";
+		CaptionCC = "#FFFFFF";
+		MMReloadCaption();
+		StopListening();
+	  };
+
+  	RoomES.onopen = function() {
+		CaptionText = "Connected to server";
+		CaptionOC = "#000000";
+		CaptionCC = "#FFFFFF";
+		MMReloadCaption();
+	};
+
+
+	ResetRoomContainer();
+	RemoveRoomMenu();
+	SummonMainMenu();
+}
+
+//~~~~~~~~~~~~~~~~~~~~~ BUTTONS ~~~~~~~~~~~~~~~~~~~~~
+var RoomBrowseAll = btn.cloneNode(false);
+RoomBrowseAll.onclick = RoomBrowseAllBtnClick;
+RoomBrowseAll.textContent = "Browse All";
+
+var RoomSearchBtn = btn.cloneNode(false);
+RoomSearchBtn.textContent = "Search By Name";
+RoomSearchBtn.onclick = RoomSearchBtnClick;
+
+var RoomNameInput = document.createElement('input');
+RoomNameInput.type = "text";
+RoomNameInput.placeholder = "Room name here..."
+
+var RoomSearchLinkBtn = btn.cloneNode(false);
+RoomSearchLinkBtn.textContent = "Search By Link";
+RoomSearchLinkBtn.onclick = RoomSearchLinkBtnClick;
 
 var RoomBackBtn = btn.cloneNode(false);
 RoomBackBtn.style.float = "right";
 RoomBackBtn.textContent = "Back";
 RoomBackBtn.onclick = RoomBackBtnClick;
 
-var RoomSearchBtn = btn.cloneNode(false);
-RoomSearchBtn.textContent = "Search";
-
 function SummonRoomMenu(){
 	ExtContainer.parentNode.insertBefore(RoomContainer, ExtContainer.nextSibling);
 	ExtContainer.appendChild(RoomBackBtn);
+	ExtContainer.appendChild(RoomBrowseAll);
 	ExtContainer.appendChild(RoomSearchBtn);
+	ExtContainer.appendChild(RoomNameInput);
+	ExtContainer.appendChild(RoomSearchLinkBtn);
 }
 
 function RemoveRoomMenu(){
 	RoomBackBtn.remove();
 	RoomSearchBtn.remove();
+	RoomNameInput.remove();
+	RoomSearchLinkBtn.remove();
+	RoomBrowseAll.remove();
 	RoomContainer.remove();
 }
 
@@ -913,18 +1063,485 @@ function RoomBackBtnClick() {
 	RemoveRoomMenu();
 }
 
-function PassPrompt() {
-	/*
-	var Pass = prompt("Please enter your name:", "Harry Potter");
-	if (person == null || person == "") {
-	  console.log("CANCELLED");
-	} else {
-	  console.log("")
+function ResetRoomContainer(){
+	while (RoomContainer.lastChild){
+		RoomContainer.removeChild(RoomContainer.lastChild);
 	}
-	document.getElementById("demo").innerHTML = txt;
-	*/
-  }
+}
+
+function RoomSearchLinkBtnClick(){
+	ResetRoomContainer();
+	var RCT = RoomCardText.cloneNode(true);
+	RCT.style.width = "100%";
+	var RCPanel = RoomCardTemplate.cloneNode(true);
+	RCT.textContent = "QUERYING DATA";
+	RCPanel.appendChild(RCT);
+	RoomContainer.appendChild(RCPanel);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'https://repo.mchatx.org/Room/?link=YT_' + UID.split(" ")[1], true);
+	xhr.onload = function () {
+		ResetRoomContainer();
+		try {
+
+			if(xhr.response == "[]"){
+				var RCT = RoomCardText.cloneNode(true);
+				RCT.style.width = "100%";
+				var RCPanel = RoomCardTemplate.cloneNode(true);
+			
+				RCT.textContent = "FOUND ZERO HIT";
+				RCPanel.appendChild(RCT);
+				
+				RoomContainer.appendChild(RCPanel);
+			} else {
+				JSON.parse(xhr.response).map( e => {
+					AddRoomCard(e["Nick"], e["EntryPass"], e["StreamLink"], e["Tags"]);
+				})
+			}
+		} catch (error) {
+			var RCT = RoomCardText.cloneNode(true);
+			RCT.style.width = "100%";
+			var RCPanel = RoomCardTemplate.cloneNode(true);
+		
+			RCT.textContent = "FAIL FETCHING DATA";
+			RCPanel.appendChild(RCT);
+			
+			RoomContainer.appendChild(RCPanel);
+		} 
+	};
+	xhr.send(null);
+
+	RoomNameInput.value = "";
+}
+
+function RoomBrowseAllBtnClick(){
+	ResetRoomContainer();
+
+	var RCT = RoomCardText.cloneNode(true);
+	RCT.style.width = "100%";
+	var RCPanel = RoomCardTemplate.cloneNode(true);
+	RCT.textContent = "QUERYING DATA";
+	RCPanel.appendChild(RCT);
+	RoomContainer.appendChild(RCPanel);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'https://repo.mchatx.org/Room/', true);
+	xhr.onload = function () {
+		ResetRoomContainer();
+		try {
+			JSON.parse(xhr.response).map( e => {
+				AddRoomCard(e["Nick"], e["EntryPass"], e["StreamLink"], e["Tags"]);
+			})
+		} catch (error) {
+			var RCT = RoomCardText.cloneNode(true);
+			RCT.style.width = "100%";
+			var RCPanel = RoomCardTemplate.cloneNode(true);
+		
+			RCT.textContent = "FAIL FETCHING DATA";
+			RCPanel.appendChild(RCT);
+			
+			RoomContainer.appendChild(RCPanel);
+		} 
+	};
+	xhr.send(null);
+
+	RoomNameInput.value = "";
+}
+
+function RoomSearchBtnClick() {
+	ResetRoomContainer();
+	var RCT = RoomCardText.cloneNode(true);
+	RCT.style.width = "100%";
+	var RCPanel = RoomCardTemplate.cloneNode(true);
+	RCT.textContent = "QUERYING DATA";
+	RCPanel.appendChild(RCT);
+	RoomContainer.appendChild(RCPanel);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'https://repo.mchatx.org/Room/?room=' + RoomNameInput.value, true);
+	xhr.onload = function () {
+		ResetRoomContainer();
+		try {
+
+			if(xhr.response == "[]"){
+				var RCT = RoomCardText.cloneNode(true);
+				RCT.style.width = "100%";
+				var RCPanel = RoomCardTemplate.cloneNode(true);
+			
+				RCT.textContent = "FOUND ZERO HIT";
+				RCPanel.appendChild(RCT);
+				
+				RoomContainer.appendChild(RCPanel);
+			} else {
+				JSON.parse(xhr.response).map( e => {
+					AddRoomCard(e["Nick"], e["EntryPass"], e["StreamLink"], e["Tags"]);
+				})
+			}
+		} catch (error) {
+			var RCT = RoomCardText.cloneNode(true);
+			RCT.style.width = "100%";
+			var RCPanel = RoomCardTemplate.cloneNode(true);
+		
+			RCT.textContent = "FAIL FETCHING DATA";
+			RCPanel.appendChild(RCT);
+			
+			RoomContainer.appendChild(RCPanel);
+		} 
+	};
+	xhr.send(null);
+
+	RoomNameInput.value = "";
+}
 //========================================== ROOM CONTROLLER ==========================================
+
+
+
+//---------------------------------------- ARCHIVE CONTROLLER ----------------------------------------
+var ArchiveEntries = {};
+//~~~~~~~~~~~~~~~~~~~~~	ARCHIVE CONTAINER AND CARD TEMPLATES ~~~~~~~~~~~~~~~~~~~~~
+var ARContainer = ExtContainer.cloneNode(false);
+ARContainer.id = "ARContainer";
+
+var ARCardTemplate = document.createElement('div');
+ARCardTemplate.style.border = "1px dashed black"; 
+ARCardTemplate.style.width = "100%";
+ARCardTemplate.style.display = "flex";
+ARCardTemplate.style.flexDirection = "row";
+
+var ARCardText = document.createElement('span');
+ARCardText.style.alignSelf = "center";
+ARCardText.style.textAlign = "center";
+ARCardText.style.fontSize = '15px';
+ARCardText.style.background = 'white';
+
+var ARCardOpenBtn = btn.cloneNode(false);
+ARCardOpenBtn.textContent = "Load";
+ARCardOpenBtn.style.alignSelf = "center";
+
+var ARCardLockspan = document.createElement('span');
+ARCardLockspan.style.alignSelf = "center";
+ARCardLockspan.style.fontSize = "28px";
+ARCardLockspan.style.fontWeight = "bold";
+
+function AddARCard(Nick, Link, Locked, StreamLink, Tags){
+	var RName = ARCardText.cloneNode(true);
+	RName.style.width = "35%";
+	RName.textContent = Nick;
+
+	var RLink = ARCardText.cloneNode(true);
+	RLink.style.width = "35%";
+	if (!StreamLink){		
+		RLink.style.color = "#aaa";
+		RLink.textContent = "No link provided";
+	} else if (Link == ""){
+		RLink.style.color = "#aaa";
+		RLink.textContent = "No link provided";
+	} else {
+		RLink.textContent = StreamLink;
+	}
+
+	var RTags = ARCardText.cloneNode(true);
+	RTags.style.width = "20%";
+	if (!Tags){
+		RTags.style.color = "#aaa";
+		RTags.textContent = "No tags provided";
+	} else if (Tags == ""){
+		RTags.style.color = "#aaa";
+		RTags.textContent = "No tags provided";
+	} else {
+		RTags.textContent = Tags;
+	}
+
+	var OpenBtn = ARCardOpenBtn.cloneNode(true);
+	OpenBtn.onclick = function() {
+		if (Locked) {
+			SummonModal(Link, false);
+		} else {
+			ArchiveGet(Link, null);
+		}
+	}
+
+	var Lockspan = ARCardLockspan.cloneNode(true);
+	if (Locked){
+		Lockspan.textContent = "🔒";
+	} else {
+		Lockspan.textContent = "🔓";
+	}
+
+	var RCPanel = ARCardTemplate.cloneNode(true);
+	RCPanel.appendChild(OpenBtn);
+	RCPanel.appendChild(RName);
+	RCPanel.appendChild(RLink)
+	RCPanel.appendChild(RTags)
+	RCPanel.appendChild(Lockspan);
+	
+	ARContainer.appendChild(RCPanel);
+}
+
+function StopArchive(){
+	for (var Entry in ArchiveEntries) {
+		delete ArchiveEntries[Entry];
+	}
+}
+
+function ArchiveGet(Link, Password){
+	StopListening();
+	StopArchive();
+
+	var BToken = "";
+	if (!Password){
+		BToken = TGEncoding(JSON.stringify({
+			Act: 'GetArchive',
+			ARLink: Link
+		})).replace(/\\/gi, "\\\\");
+	} else {
+		BToken = TGEncoding(JSON.stringify({
+			Act: 'GetArchive',
+			ARLink: Link,
+			Pass: Password
+		})).replace(/\\/gi, "\\\\");
+	}
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/FetchRaw/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		try {
+			var JSONtemp = JSON.parse(xhr.response);	
+		} catch (error) {
+			CaptionText = "FAILED FETCHING DATA";
+			CaptionOC = "#000000";
+			CaptionCC = "#FFFFFF";
+			MMReloadCaption();
+			return;
+		}
+		
+		if (!JSONtemp["BToken"]){
+			return;
+		}
+
+		ArchiveEntries = JSON.parse(TGDecoding(JSONtemp["BToken"]));
+
+		var startime = 0;
+		for (var index = 0; index < ArchiveEntries.length; index++){
+			if (index == 0)	{
+				startime = ArchiveEntries[index]["Stime"];
+			}
+			ArchiveEntries[index]["Stime"] = ArchiveEntries[index]["Stime"] - startime;
+		}
+	};
+
+	xhr.send('{ "BToken":"' + BToken + '" }');
+
+	ResetArchiveContainer();
+	RemoveArchiveMenu();
+	SummonMainMenu();
+}
+
+//~~~~~~~~~~~~~~~~~~~~~ BUTTONS ~~~~~~~~~~~~~~~~~~~~~
+var ARBrowseAll = btn.cloneNode(false);
+ARBrowseAll.onclick = ARBrowseAllBtnClick;
+ARBrowseAll.textContent = "Browse All";
+
+var ARSearchBtn = btn.cloneNode(false);
+ARSearchBtn.textContent = "Search By Title";
+ARSearchBtn.onclick = ARSearchBtnClick;
+
+var ARNameInput = document.createElement('input');
+ARNameInput.type = "text";
+ARNameInput.placeholder = "Archive title here..."
+
+var ARSearchLinkBtn = btn.cloneNode(false);
+ARSearchLinkBtn.textContent = "Search By Link";
+ARSearchLinkBtn.onclick = ARSearchLinkBtnClick;
+
+var ARBackBtn = btn.cloneNode(false);
+ARBackBtn.style.float = "right";
+ARBackBtn.textContent = "Back";
+ARBackBtn.onclick = ARBackBtnClick;
+
+function SummonArchiveMenu(){
+	ExtContainer.parentNode.insertBefore(ARContainer, ExtContainer.nextSibling);
+	ExtContainer.appendChild(ARBackBtn);
+	ExtContainer.appendChild(ARBrowseAll);
+	ExtContainer.appendChild(ARSearchBtn);
+	ExtContainer.appendChild(ARNameInput);
+	ExtContainer.appendChild(ARSearchLinkBtn);
+}
+
+function RemoveArchiveMenu(){
+	ARBackBtn.remove();
+	ARSearchBtn.remove();
+	ARNameInput.remove();
+	ARSearchLinkBtn.remove();
+	ARBrowseAll.remove();
+	ARContainer.remove();
+}
+
+function ARBackBtnClick() {
+	SummonMainMenu();
+	RemoveArchiveMenu();
+}
+
+function ResetArchiveContainer(){
+	while (ARContainer.lastChild){
+		ARContainer.removeChild(ARContainer.lastChild);
+	}
+}
+
+function ARSearchLinkBtnClick(){
+	ResetArchiveContainer();
+	var RCT = ARCardText.cloneNode(true);
+	RCT.style.width = "100%";
+	var RCPanel = ARCardTemplate.cloneNode(true);
+	RCT.textContent = "QUERYING DATA";
+	RCPanel.appendChild(RCT);
+	ARContainer.appendChild(RCPanel);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/FetchRaw/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		ResetArchiveContainer();
+		try {
+			var JSONtemp = JSON.parse(xhr.response);	
+		} catch (error) {
+			return;
+		}
+		
+		if (!JSONtemp["BToken"]){
+			return;
+		}
+
+		var DecodeString = TGDecoding(JSONtemp["BToken"]);
+
+		if (DecodeString == "[]"){
+			var RCT = ARCardText.cloneNode(true);
+			RCT.style.width = "100%";
+			var RCPanel = ARCardTemplate.cloneNode(true);
+		
+			RCT.textContent = "FOUND ZERO HIT";
+			RCPanel.appendChild(RCT);
+			
+			ARContainer.appendChild(RCPanel);
+			return;
+		} else {
+			JSON.parse(DecodeString).map(e => {
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"]);
+			});
+		}
+	};
+
+	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
+		Act: 'ArchiveList',
+		Link:  'YT_' + UID.split(" ")[1]
+	})).replace(/\\/gi, "\\\\") + '" }');
+
+	ARNameInput.value = "";
+}
+
+function ARBrowseAllBtnClick(){
+	ResetArchiveContainer();
+
+	var RCT = ARCardText.cloneNode(true);
+	RCT.style.width = "100%";
+	var RCPanel = ARCardTemplate.cloneNode(true);
+	RCT.textContent = "QUERYING DATA";
+	RCPanel.appendChild(RCT);
+	ARContainer.appendChild(RCPanel);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/FetchRaw/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		ResetArchiveContainer();
+		try {
+			var JSONtemp = JSON.parse(xhr.response);	
+		} catch (error) {
+			return;
+		}
+		
+		if (!JSONtemp["BToken"]){
+			return;
+		}
+
+		var DecodeString = TGDecoding(JSONtemp["BToken"]);
+
+		if (DecodeString == "[]"){
+			var RCT = ARCardText.cloneNode(true);
+			RCT.style.width = "100%";
+			var RCPanel = ARCardTemplate.cloneNode(true);
+		
+			RCT.textContent = "FOUND ZERO HIT";
+			RCPanel.appendChild(RCT);
+			
+			ARContainer.appendChild(RCPanel);
+			return;
+		} else {
+			JSON.parse(DecodeString).map(e => {
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"]);
+			});
+		}
+	};
+
+	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
+		Act: 'ArchiveList'
+	})).replace(/\\/gi, "\\\\") + '" }');
+
+	ARNameInput.value = "";
+}
+
+function ARSearchBtnClick() {
+	ResetArchiveContainer();
+	var RCT = ARCardText.cloneNode(true);
+	RCT.style.width = "100%";
+	var RCPanel = ARCardTemplate.cloneNode(true);
+	RCT.textContent = "QUERYING DATA";
+	RCPanel.appendChild(RCT);
+	ARContainer.appendChild(RCPanel);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/FetchRaw/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		ResetArchiveContainer();
+		try {
+			var JSONtemp = JSON.parse(xhr.response);	
+		} catch (error) {
+			return;
+		}
+		
+		if (!JSONtemp["BToken"]){
+			return;
+		}
+
+		var DecodeString = TGDecoding(JSONtemp["BToken"]);
+
+		if (DecodeString == "[]"){
+			var RCT = ARCardText.cloneNode(true);
+			RCT.style.width = "100%";
+			var RCPanel = ARCardTemplate.cloneNode(true);
+		
+			RCT.textContent = "FOUND ZERO HIT";
+			RCPanel.appendChild(RCT);
+			
+			ARContainer.appendChild(RCPanel);
+			return;
+		} else {
+			JSON.parse(DecodeString).map(e => {
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"]);
+			});
+		}
+	};
+
+	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
+		Act: 'ArchiveList',
+		Nick: ARNameInput.value
+	})).replace(/\\/gi, "\\\\") + '" }');
+
+	ARNameInput.value = "";
+}
+//======================================== ARCHIVE CONTROLLER ========================================
 
 
 
@@ -1011,6 +1628,8 @@ function CODefaultBtnClick() {
 	CaptionColour = "#00000064";
 	CaptionFontSize = 30;
 	CaptionDiv.style.backgroundColor = CaptionColour;
+	CaptionOC = "#000000";
+	CaptionCC = "#FFFFFF";
 	RepaintResizeRelocateCaption(null);
 
 	COColourInput.value = CaptionColour.substring(0, 7);
@@ -1057,6 +1676,92 @@ function COCloseBtnClick() {
 	SummonMainMenu();
 }
 //===================================== CAPTION OPTION CONTROLLER =====================================
+
+
+
+//---------------------------------------- PASS MODAL CONTROLLER ----------------------------------------
+var ModalScreen = document.createElement('div');
+ModalScreen.style.position = "fixed";
+ModalScreen.style.zIndex = 1;
+ModalScreen.style.left = 0;
+ModalScreen.style.top = 0;
+ModalScreen.style.width = "100%";
+ModalScreen.style.height = "100%";
+ModalScreen.style.overflow = "auto";
+ModalScreen.style.backgroundColor = "rgba(0,0,0,0.4)";
+ModalScreen.style.display = "block"
+
+var ModalContent = document.createElement('div');
+ModalContent.style.backgroundColor = "#fefefe";
+ModalContent.style.margin = "15% auto";
+ModalContent.style.padding = "20px";
+ModalContent.style.border = "1px solid #888";
+ModalContent.style.width = "250px";
+ModalScreen.appendChild(ModalContent);
+
+var ModalCloseBtn = document.createElement('span');
+ModalCloseBtn.textContent = "X";
+ModalCloseBtn.style.color = "#aaa";
+ModalCloseBtn.style.float = "right";
+ModalCloseBtn.style.fontSize = "28px";
+ModalCloseBtn.style.fontWeight = "bold";
+ModalCloseBtn.style.cursor = "pointer";
+ModalCloseBtn.onclick = CloseModalBtnClick;
+
+var ModalText = document.createElement('p');
+ModalText.textContent = "Password :";
+ModalText.style.marginTop = "15px";
+ModalText.style.marginBottom = "15px";
+ModalText.style.fontSize = "17px";
+ModalText.style.fontWeight = "bold";
+
+var ModalInput = document.createElement('input');
+ModalInput.type = "password";
+
+var ModalOk = btn.cloneNode(false);
+ModalOk.style.marginTop = "15px";
+ModalOk.textContent = "Submit";
+ModalOk.style.position = "relative";
+ModalOk.style.left = "80px";
+
+ModalContent.appendChild(ModalCloseBtn);
+ModalContent.appendChild(ModalText);
+ModalContent.appendChild(ModalInput);
+ModalContent.appendChild(ModalOk);
+
+function SummonModal(RoomName, RoomQuery) {
+	ExtContainer.appendChild(ModalScreen);
+	ModalInput.value = "";
+	window.onclick = function(event) {
+		if (event.target == ModalScreen) {
+			ModalScreen.remove();
+			window.onclick = null;
+		}
+	}
+
+	if (RoomQuery){
+		ModalOk.onclick = async function () {
+			ModalScreen.remove();
+			window.onclick = null;
+			const msgUint8 = new TextEncoder().encode(ModalInput.value);
+			const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+			const hashArray = Array.from(new Uint8Array(hashBuffer));
+			const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+			StartListening(RoomName, hashHex);
+		};
+	} else {
+		ModalOk.onclick = async function () {
+			ModalScreen.remove();
+			window.onclick = null;
+			ArchiveGet(RoomName, ModalInput.value);
+		};
+	}
+}
+
+function CloseModalBtnClick(){
+	ModalScreen.remove();
+}
+//======================================== PASS MODAL CONTROLLER ========================================
 
 
 
@@ -1121,8 +1826,8 @@ InnerCaptionDiv.appendChild(CaptionCanvas)
 var CaptionText = "Caption Box.";
 var CaptionColour = "#00000064";
 var CaptionFontSize = 30;
-var CaptionCC = "#000000";
-var CaptionOC = "#FFFFFF";
+var CaptionOC = "#000000";
+var CaptionCC = "#FFFFFF";
 
 const rgba2hex = (rgba) => `#${rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/).slice(1).map((n, i) => (i === 3 ? Math.round(parseFloat(n) * 255) : parseFloat(n)).toString(16).padStart(2, '0').replace('NaN', '')).join('')}`
 
@@ -1429,6 +2134,14 @@ async function WaitUntilLoad(){
 			if (document.getElementById("Extcontainer") != null){
 				var Extcontainer = document.getElementById("Extcontainer");
 				Extcontainer.parentNode.removeChild(Extcontainer);
+			}
+			if (document.getElementById("RoomContainer") != null){
+				var Roomcontainer = document.getElementById("RoomContainer");
+				Roomcontainer.parentNode.removeChild(Roomcontainer);
+			}
+			if (document.getElementById("ARContainer") != null){
+				var ARcontainer = document.getElementById("ARContainer");
+				ARcontainer.parentNode.removeChild(ARcontainer);
 			}
 			LoadButtons();
 			break;
