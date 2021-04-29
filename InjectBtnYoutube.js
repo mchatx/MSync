@@ -831,6 +831,7 @@ function SummonMainMenu(){
 	ExtContainer.appendChild(MMCloseBtn);
 	ExtContainer.appendChild(MMReloadCaptionBtn);
 	ExtContainer.appendChild(MMCaptionOptionBtn);
+	CaptionText = "Caption Box.";
 }
 
 function MMCaptionOptionOpen(){
@@ -1208,6 +1209,7 @@ var ArchiveEntries = {};
 var TimerHandleID;
 var TimeNow = 0;
 var CurrentEntryIndex = 0;
+var TimeShift = 0;
 
 //~~~~~~~~~~~~~~~~~~~~~	ARCHIVE CONTAINER AND CARD TEMPLATES ~~~~~~~~~~~~~~~~~~~~~
 var ARContainer = ExtContainer.cloneNode(false);
@@ -1344,15 +1346,14 @@ function ArchiveGet(Link, Password){
 			
 			if (index == ArchiveEntries.length - 1){
 				LatchCaptionArchive();
+				ResetArchiveContainer();
+				RemoveArchiveMenu();
+				SummonCaptionOption();
 			}
 		}
 	};
 
 	xhr.send('{ "BToken":"' + BToken + '" }');
-
-	ResetArchiveContainer();
-	RemoveArchiveMenu();
-	SummonMainMenu();
 }
 
 function StopLatchCaptionArchive(){
@@ -1392,8 +1393,14 @@ function LatchCaptionArchive(){
 
 			TimeNow = MainVid.currentTime*1000;
 			CurrentEntryIndex = 0;
+			TimeShift = 0;
 			if (!MainVid.paused){
 				SeekIndexStart();
+			} else {
+				CaptionText = "ARCHIVE LOADED";
+				CaptionOC = "#000000";
+				CaptionCC = "#FFFFFF";
+				MMReloadCaption();
 			}
 			break;
 		}
@@ -1407,7 +1414,7 @@ function SeekIndexStart(){
 	}
 
 	for (CurrentEntryIndex = 0; CurrentEntryIndex < ArchiveEntries.length; CurrentEntryIndex++){
-		if (ArchiveEntries[CurrentEntryIndex]["Stime"] > TimeNow){
+		if (ArchiveEntries[CurrentEntryIndex]["Stime"] > TimeNow + TimeShift){
 			CurrentEntryIndex--;
 			CallPainterEntry(ArchiveEntries[CurrentEntryIndex]);
 			TimerHandleID = setInterval(TimerRun, 250);
@@ -1418,11 +1425,15 @@ function SeekIndexStart(){
 
 function TimerRun(){
 	TimeNow += 250;
-	if (CurrentEntryIndex < ArchiveEntries.length){
-		if (ArchiveEntries[CurrentEntryIndex + 1]["Stime"] < TimeNow){
-			CurrentEntryIndex++;
-			CallPainterEntry(ArchiveEntries[CurrentEntryIndex]);
+	if (CurrentEntryIndex < ArchiveEntries.length - 1){
+		while ((ArchiveEntries[CurrentEntryIndex + 1]["Stime"] < TimeNow + TimeShift)){
+			if (CurrentEntryIndex > ArchiveEntries.length - 1){
+				break;
+			} else {
+				CurrentEntryIndex++;
+			}
 		}
+		CallPainterEntry(ArchiveEntries[CurrentEntryIndex]);
 	}
 }
 
@@ -1441,7 +1452,7 @@ function CallPainterEntry(dt){
 	RepaintResizeRelocateCaption(null);
 }
 
-//~~~~~~~~~~~~~~~~~~~~~ BUTTONS ~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BUTTONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 var ARBrowseAll = btn.cloneNode(false);
 ARBrowseAll.onclick = ARBrowseAllBtnClick;
 ARBrowseAll.textContent = "Browse All";
@@ -1722,6 +1733,64 @@ COFontSizeText.style.fontSize = '15px';
 COFontSizeText.style.background = 'white';
 COFontSizeForm.appendChild(COFontSizeText);
 
+//	FONT TYPE PICKER FORM
+var COTypeForm = document.createElement('div');
+COTypeForm.style.display = "inline-block";
+COTypeForm.style.margin = "2px";
+
+var COTypeSelect = document.createElement('select');
+COTypeSelect.style.width = "120px";
+COTypeSelect.add(document.createElement("option"));
+COTypeSelect.options[0].value = "Helvetica";
+COTypeSelect.options[0].text = "Helvetica";
+COTypeSelect.add(document.createElement("option"));
+COTypeSelect.options[1].value = "sans-serif";
+COTypeSelect.options[1].text = "Sans-Serif";
+COTypeSelect.add(document.createElement("option"));
+COTypeSelect.options[2].value = "Courier New";
+COTypeSelect.options[2].text = "Courier New";
+COTypeSelect.onchange = COTypeSelectChange;
+COTypeForm.appendChild(COTypeSelect);
+COTypeForm.appendChild(document.createElement('br'));
+
+var COTypeText = document.createElement('p');
+COTypeText.textContent = "Font Type";
+COTypeText.style.textAlign = "center";
+COTypeText.style.fontSize = '15px';
+COTypeText.style.background = 'white';
+COTypeForm.appendChild(COTypeText);
+
+//	DELAY PICKER FORM
+var CODelayForm = document.createElement('div');
+CODelayForm.style.display = "inline-block";
+CODelayForm.style.margin = "2px";
+
+var CODelayInput = document.createElement('input');
+CODelayInput.type = "number";
+CODelayInput.style.width = "75px";
+CODelayInput.style.position = "relative";
+CODelayInput.style.left = "22%";
+CODelayInput.oninput = CODelayInputChange;
+CODelayForm.appendChild(CODelayInput);
+CODelayForm.appendChild(document.createElement('br'));
+
+var CODelayText = document.createElement('p');
+CODelayText.textContent = "Time Shift (in second)";
+CODelayText.style.textAlign = "center";
+CODelayText.style.fontSize = '15px';
+CODelayText.style.background = 'white';
+CODelayForm.appendChild(CODelayText);
+
+function COTypeSelectChange() {
+	CaptionFont = COTypeSelect.value;
+	RepaintResizeRelocateCaption();
+}
+
+function CODelayInputChange() {
+	TimeShift = CODelayInput.value*1000;
+	CurrentEntryIndex = 0;
+}
+
 function COFontSizeInputChange() {
 	CaptionFontSize = COFontSizeInput.value;
 	RepaintResizeRelocateCaption(null)
@@ -1733,6 +1802,7 @@ function CODefaultBtnClick() {
 	CaptionDiv.style.backgroundColor = CaptionColour;
 	CaptionOC = "#000000";
 	CaptionCC = "#FFFFFF";
+	CaptionFont = "sans-serif";
 	RepaintResizeRelocateCaption(null);
 
 	COColourInput.value = CaptionColour.substring(0, 7);
@@ -1762,11 +1832,15 @@ function SummonCaptionOption(){
 	ExtContainer.appendChild(COOpacityForm);
 	ExtContainer.appendChild(COFontSizeForm);
 	ExtContainer.appendChild(COCloseBtn);
+	ExtContainer.appendChild(COTypeForm);
+	ExtContainer.appendChild(CODelayForm);
 	
 	COColourInput.value = CaptionColour.substring(0, 7);
 	COOpacityInput.value = parseInt(CaptionColour.substring(7,9), 16);
 	COOpacityText.textContent = "Opacity (" + (COOpacityInput.value/255*100).toString().substring(0, 3) + "%)";
 	COFontSizeInput.value = CaptionFontSize;
+	COTypeSelect.value = CaptionFont;
+	CODelayInput.value = TimeShift/1000;
 }
 
 function COCloseBtnClick() {
@@ -1775,6 +1849,8 @@ function COCloseBtnClick() {
 	COOpacityForm.remove();
 	COFontSizeForm.remove();
 	CODefaultBtn.remove();
+	CODelayForm.remove();
+	COTypeForm.remove();
 
 	SummonMainMenu();
 }
@@ -1931,6 +2007,7 @@ var CaptionColour = "#00000064";
 var CaptionFontSize = 30;
 var CaptionOC = "#000000";
 var CaptionCC = "#FFFFFF";
+var CaptionFont = "sans-serif";
 
 const rgba2hex = (rgba) => `#${rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/).slice(1).map((n, i) => (i === 3 ? Math.round(parseFloat(n) * 255) : parseFloat(n)).toString(16).padStart(2, '0').replace('NaN', '')).join('')}`
 
@@ -2105,53 +2182,55 @@ function dragElement(elmnt) {
   }
 
   function RepaintCaption() {
-	  CaptionCanvas.width = CaptionCanvas.clientWidth;
-	  CaptionCanvas.height = CaptionCanvas.clientHeight;
-	  ctx.textAlign = "center";
-	  ctx.font = CaptionFontSize + "px Arial";
+	var FullFontCaption = "bold " + CaptionFontSize + "px " + CaptionFont;
+	CaptionCanvas.width = CaptionCanvas.clientWidth;
+	CaptionCanvas.height = CaptionCanvas.clientHeight;
+	ctx.textAlign = "center";
+	ctx.font = FullFontCaption;
   
-	  const Textmetric  = ctx.measureText(CaptionText);
-	  const textheight = Math.abs(Textmetric.actualBoundingBoxAscent) + Math.abs(Textmetric.actualBoundingBoxDescent);
+	const Textmetric  = ctx.measureText(CaptionText);
+	const textheight = Math.abs(Textmetric.actualBoundingBoxAscent) + Math.abs(Textmetric.actualBoundingBoxDescent);
   
-	  var TextFragment = CaptionText.split(" ");
-	  var TextContainer = [];
-	  for (var StringContainer = "", i = 0; i < TextFragment.length;i++){
-		  if (StringContainer == ""){
-			  StringContainer = TextFragment[i];
-		  } else {
-			  StringContainer += " " + TextFragment[i];
-		  }
+	var TextFragment = CaptionText.split(" ");
+	var TextContainer = [];
+	for (var StringContainer = "", i = 0; i < TextFragment.length;i++){
+		if (StringContainer == ""){
+			StringContainer = TextFragment[i];
+		} else {
+			StringContainer += " " + TextFragment[i];
+		}
   
-		  if (ctx.measureText(StringContainer).width + 10 > CaptionCanvas.width){
-			  if (StringContainer.lastIndexOf(" ") == -1){
-				  TextContainer.push(StringContainer);
-				  StringContainer = "";
-			  } else {
-				  TextContainer.push(StringContainer.substr(0, StringContainer.lastIndexOf(" ")));
-				  StringContainer = StringContainer.substr(StringContainer.lastIndexOf(" ") + 1);
-			  }
-		  }
+		if (ctx.measureText(StringContainer).width + 10 > CaptionCanvas.width){
+			if (StringContainer.lastIndexOf(" ") == -1){
+				TextContainer.push(StringContainer);
+				StringContainer = "";
+			} else {
+				TextContainer.push(StringContainer.substr(0, StringContainer.lastIndexOf(" ")));
+				StringContainer = StringContainer.substr(StringContainer.lastIndexOf(" ") + 1);
+			}
+		}
   
-		  if (i == TextFragment.length - 1){
-			  TextContainer.push(StringContainer);
-			  const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
-			  ctx.textAlign = "center";
-			  ctx.font = CaptionFontSize + "px Arial";
+		if (i == TextFragment.length - 1){
+			TextContainer.push(StringContainer);
+			const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
+			ctx.textAlign = "center";
+			ctx.font = FullFontCaption;
 
-			  for (let j = 0; j < TextContainer.length; j++) {
-				  ctx.fillStyle = CaptionCC;
-				  ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
-				  ctx.strokeStyle = CaptionOC;
-				  ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
-			  }
-		  }
-	  }
+			for (let j = 0; j < TextContainer.length; j++) {
+				ctx.fillStyle = CaptionCC;
+				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
+				ctx.strokeStyle = CaptionOC;
+				ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
+			}
+		}
+	}
   }
 
   function RepaintResizeRelocateCaption(VidElement){
+	var FullFontCaption = "bold " + CaptionFontSize + "px " + CaptionFont;
 	CaptionCanvas.width = CaptionCanvas.clientWidth;
 	ctx.textAlign = "center";
-	ctx.font = CaptionFontSize + "px Arial";
+	ctx.font = FullFontCaption;
 	const Textmetric  = ctx.measureText(CaptionText);
 	const textheight = Math.abs(Textmetric.actualBoundingBoxAscent) + Math.abs(Textmetric.actualBoundingBoxDescent);
 
@@ -2182,18 +2261,19 @@ function dragElement(elmnt) {
 				DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
 				CaptionDiv.style.top = (VidElement.getBoundingClientRect().bottom + DocTopOffset - (VidElement.getBoundingClientRect().bottom - VidElement.getBoundingClientRect().top)*0.1 - textheight*TextContainer.length - 30) + "px";
 			} else {
-				CaptionDiv.style.top = (CaptionDiv.getBoundingClientRect().bottom - textheight*TextContainer.length - 30) + "px";
+				DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
+				CaptionDiv.style.top = (CaptionDiv.getBoundingClientRect().bottom + DocTopOffset - textheight*TextContainer.length - 30) + "px";
 			}
 
 			CaptionDiv.style.height = (textheight*TextContainer.length + 30) + "px";
 			CaptionCanvas.height = CaptionCanvas.clientHeight;
 			ctx.textAlign = "center";
-			ctx.font = CaptionFontSize + "px Arial";
+			ctx.font = FullFontCaption;
+			ctx.fillStyle = CaptionCC;
+			ctx.strokeStyle = CaptionOC;
 
 			for (let j = 0; j < TextContainer.length; j++) {
-				ctx.fillStyle = CaptionCC;
 				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
-				ctx.strokeStyle = CaptionOC;
 				ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
 			}
 		}
@@ -2244,6 +2324,10 @@ async function WaitUntilLoad(){
 			if (document.getElementById("ARContainer") != null){
 				var ARcontainer = document.getElementById("ARContainer");
 				ARcontainer.parentNode.removeChild(ARcontainer);
+			}
+			if (document.getElementById("TShiftContainer") != null){
+				var TScontainer = document.getElementById("TShiftContainer");
+				TScontainer.parentNode.removeChild(TScontainer);
 			}
 			LoadButtons();
 			break;
