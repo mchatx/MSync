@@ -1,8 +1,16 @@
+//-------------------------------------------  HEAD VARIABLES  -------------------------------------------
+const VideoElementID = "video-stream html5-main-video";
+const ExtContainerParentID = "ytd-video-primary-info-renderer";
+var UID = "Youtube " + document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
+//===========================================  HEAD VARIABLES  ===========================================
+
+
+
 //--------------------------------------------   ARCHIVE CONTROL   ------------------------------------------------
 function LatchToVideo() {
 	VidSeek = document.getElementsByTagName('video');
     for (let i = 0; i < VidSeek.length; i++){
-        if (VidSeek[i].className == "video-stream html5-main-video"){
+        if (VidSeek[i].className == VideoElementID){
 			MainVid = VidSeek[i];
 			if (mode == 6){
 				SendSeekPrecise(MainVid.currentTime);
@@ -236,7 +244,7 @@ function ChatListener(){
 
 	VidSeek = document.getElementsByTagName('video');
     for (let i = 0; i < VidSeek.length; i++){
-        if (VidSeek[i].className == "video-stream html5-main-video"){
+        if (VidSeek[i].className == VideoElementID){
 			MainVid = VidSeek[i];
             break;
         }
@@ -706,8 +714,7 @@ SMLoadHereBtn.textContent = "Open Here";
 SMLoadHereBtn.style.float = "right";
 
 function LoadButtons() {
-	UID = "Youtube " + document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
-	var target = document.getElementsByTagName("ytd-video-primary-info-renderer");
+	var target = document.getElementsByTagName(ExtContainerParentID);
 	target[0].prepend(ExtContainer);
 	ExtContainer.appendChild(btn);
 	ExtContainer.appendChild(spn);
@@ -738,7 +745,7 @@ function StartHereClick(){
 
 	VidEle = document.getElementsByTagName('video');
     for (let i = 0; i < VidEle.length; i++){
-        if (VidEle[i].className == "video-stream html5-main-video"){
+        if (VidEle[i].className == VideoElementID){
 			DocLeftOffset = window.pageXOffset || document.documentElement.scrollLeft,
 			DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
 
@@ -834,7 +841,7 @@ function MMCaptionOptionOpen(){
 function MMReloadCaption(){
 	VidEle = document.getElementsByTagName('video');
     for (let i = 0; i < VidEle.length; i++){
-        if (VidEle[i].className == "video-stream html5-main-video"){
+        if (VidEle[i].className == VideoElementID){
 			DocLeftOffset = window.pageXOffset || document.documentElement.scrollLeft,
 			DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
 
@@ -1198,6 +1205,10 @@ function RoomSearchBtnClick() {
 
 //---------------------------------------- ARCHIVE CONTROLLER ----------------------------------------
 var ArchiveEntries = {};
+var TimerHandleID;
+var TimeNow = 0;
+var CurrentEntryIndex = 0;
+
 //~~~~~~~~~~~~~~~~~~~~~	ARCHIVE CONTAINER AND CARD TEMPLATES ~~~~~~~~~~~~~~~~~~~~~
 var ARContainer = ExtContainer.cloneNode(false);
 ARContainer.id = "ARContainer";
@@ -1282,6 +1293,7 @@ function StopArchive(){
 	for (var Entry in ArchiveEntries) {
 		delete ArchiveEntries[Entry];
 	}
+	StopLatchCaptionArchive();
 }
 
 function ArchiveGet(Link, Password){
@@ -1328,6 +1340,11 @@ function ArchiveGet(Link, Password){
 				startime = ArchiveEntries[index]["Stime"];
 			}
 			ArchiveEntries[index]["Stime"] = ArchiveEntries[index]["Stime"] - startime;
+			//console.log(JSON.stringify(ArchiveEntries[index]));
+			
+			if (index == ArchiveEntries.length - 1){
+				LatchCaptionArchive();
+			}
 		}
 	};
 
@@ -1336,6 +1353,92 @@ function ArchiveGet(Link, Password){
 	ResetArchiveContainer();
 	RemoveArchiveMenu();
 	SummonMainMenu();
+}
+
+function StopLatchCaptionArchive(){
+	if (MainVid) {
+		MainVid.onseeked = null;
+		MainVid.onpause = null;
+		MainVid.onplay = null;
+	}
+	if (TimerHandleID){
+		clearInterval(TimerHandleID);
+		TimerHandleID = null;
+	}
+}
+
+function LatchCaptionArchive(){
+	VidSeek = document.getElementsByTagName('video');
+	for (let i = 0; i < VidSeek.length; i++){
+		if (VidSeek[i].className == VideoElementID){
+			MainVid = VidSeek[i];
+
+			MainVid.onseeked = function() {
+				TimeNow = MainVid.currentTime*1000;
+				SeekIndexStart();
+			};
+
+			MainVid.onpause = function() {
+				if (TimerHandleID){
+					clearInterval(TimerHandleID);
+					TimerHandleID = null;
+				}
+			};
+
+			MainVid.onplay = function() {
+				TimeNow = MainVid.currentTime*1000;
+				SeekIndexStart();
+			};
+
+			TimeNow = MainVid.currentTime*1000;
+			CurrentEntryIndex = 0;
+			if (!MainVid.paused){
+				SeekIndexStart();
+			}
+			break;
+		}
+	}
+}
+
+function SeekIndexStart(){
+	if (TimerHandleID){
+		clearInterval(TimerHandleID);
+		TimerHandleID = null;
+	}
+
+	for (CurrentEntryIndex = 0; CurrentEntryIndex < ArchiveEntries.length; CurrentEntryIndex++){
+		if (ArchiveEntries[CurrentEntryIndex]["Stime"] > TimeNow){
+			CurrentEntryIndex--;
+			CallPainterEntry(ArchiveEntries[CurrentEntryIndex]);
+			TimerHandleID = setInterval(TimerRun, 250);
+			break;
+		}
+	}
+}
+
+function TimerRun(){
+	TimeNow += 250;
+	if (CurrentEntryIndex < ArchiveEntries.length){
+		if (ArchiveEntries[CurrentEntryIndex + 1]["Stime"] < TimeNow){
+			CurrentEntryIndex++;
+			CallPainterEntry(ArchiveEntries[CurrentEntryIndex]);
+		}
+	}
+}
+
+function CallPainterEntry(dt){
+	CaptionText = dt["Stext"];
+	if (!dt["CC"]){
+		CaptionCC = "#FFFFFF";
+	} else {
+		CaptionCC = "#" + dt["CC"];
+	}
+	if (!dt["OC"]){
+		CaptionOC = "#000000";
+	} else {
+		CaptionOC = "#" + dt["OC"];
+	}
+	RepaintResizeRelocateCaption(null);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~ BUTTONS ~~~~~~~~~~~~~~~~~~~~~
@@ -2111,7 +2214,6 @@ var ListenerTarget;
 var ChatInputPanel;
 var CurrentVersion = "2.0.0";
 
-var UID = "";
 var mode = 0;
 /*
 	0 : NOT SYNCED
@@ -2129,7 +2231,7 @@ async function WaitUntilLoad(){
 		if (i == 30){
 			return;
 		}
-		var target = document.getElementsByTagName("ytd-video-primary-info-renderer");
+		var target = document.getElementsByTagName(ExtContainerParentID);
 		if (target.length != 0){
 			if (document.getElementById("Extcontainer") != null){
 				var Extcontainer = document.getElementById("Extcontainer");
