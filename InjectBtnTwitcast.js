@@ -1,7 +1,11 @@
 //-------------------------------------------  HEAD VARIABLES  -------------------------------------------
 const VideoElementID = "player_html5_api";
 const ExtContainerParentID = "tw-player-page__component tw-player-page__player-header";
-var UID = "Twitcast " + document.location.toString().substring(document.location.toString().indexOf("/movie/") + 7);
+var UID = document.location.toString().substring(document.location.toString().indexOf("/movie/") + 7);
+if (UID.indexOf("?") != -1){
+	UID = UID.substring(0, UID.indexOf("?"));
+}
+UID = "Twitcast " + UID;
 var HeadUID = 'TC_';
 //===========================================  HEAD VARIABLES  ===========================================
 

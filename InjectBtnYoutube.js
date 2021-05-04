@@ -1,7 +1,11 @@
 //-------------------------------------------  HEAD VARIABLES  -------------------------------------------
 const VideoElementID = "video-stream html5-main-video";
 const ExtContainerParentID = "ytd-video-primary-info-renderer";
-var UID = "Youtube " + document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
+var UID = document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
+if (UID.indexOf("?") != -1){
+	UID = UID.substring(0, UID.indexOf("?"));
+}
+UID = "Youtube " + UID;
 var HeadUID = 'YT_';
 //===========================================  HEAD VARIABLES  ===========================================
 
