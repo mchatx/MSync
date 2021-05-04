@@ -2,6 +2,7 @@
 const VideoElementID = "video-stream html5-main-video";
 const ExtContainerParentID = "ytd-video-primary-info-renderer";
 var UID = "Youtube " + document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
+var HeadUID = 'YT_';
 //===========================================  HEAD VARIABLES  ===========================================
 
 
@@ -692,7 +693,6 @@ function inheritCheck(){
 	CODefaultBtn.style.color = "inherit";
 	COModeChangeBtn.style.color = "inherit";
 	COColourForm.style.color = "inherit";
-	COColourInput.style.color = "inherit";
 	COColourText.style.color = "inherit";
 	COOpacityForm.style.color = "inherit";
 	COOpacityInput.style.color = "inherit";
@@ -756,7 +756,6 @@ function inheritCheck(){
 	CODefaultBtn.style.backgroundColor = "inherit";
 	COModeChangeBtn.style.backgroundColor = "inherit";
 	COColourForm.style.backgroundColor = "inherit";
-	COColourInput.style.backgroundColor = "inherit";
 	COColourText.style.backgroundColor = "inherit";
 	COOpacityForm.style.backgroundColor = "inherit";
 	COOpacityInput.style.backgroundColor = "inherit";
@@ -884,8 +883,7 @@ SMLoadHereBtn.onclick = StartHereClick;
 SMLoadHereBtn.textContent = "Open Here";
 SMLoadHereBtn.style.float = "right";
 
-function LoadButtons() {
-	var target = document.getElementsByTagName(ExtContainerParentID);
+function LoadButtons(ContainerTarget) {
 	inheritCheck();
 
 	var dt = localStorage.getItem("MChatOption");
@@ -895,7 +893,6 @@ function LoadButtons() {
 		CaptionFontSize = dt["CFSize"];
 		CaptionFont = dt["CFStyle"];
 		ConStyleBlack = dt["ControlColour"];
-		RepaintController();
 	}
 	 
 	if (!CaptionColour){
@@ -911,13 +908,14 @@ function LoadButtons() {
 		ConStyleBlack = false;
 	}
 	
+	RepaintController();
 	if (ConStyleBlack){
 		COModeChangeBtn.textContent = "Light Mode";
 	} else {
 		COModeChangeBtn.textContent = "Dark Mode";
 	}
 
-	target[0].prepend(ExtContainer);
+	ContainerTarget.prepend(ExtContainer);
 	ExtContainer.appendChild(btn);
 	ExtContainer.appendChild(spn);
 	ExtContainer.appendChild(SMLoadHereBtn);
@@ -1763,7 +1761,7 @@ function ARSearchLinkBtnClick(){
 
 	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
 		Act: 'ArchiveList',
-		Link:  'YT_' + UID.split(" ")[1]
+		Link:  HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 
 	ARNameInput.value = "";
@@ -2135,7 +2133,7 @@ function CheckRequest() {
 	xhr.send('{ "BToken":"' +  TGEncoding(JSON.stringify({
 		Act: "Check",
 		Nick: SesAcc,
-		Link: 'YT_' + UID.split(" ")[1]
+		Link: HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 }
 
@@ -2159,7 +2157,7 @@ function AddRequest() {
 		Act: "Add",
 		Nick: SesAcc,
 		Token: SesTkn,
-		Link: 'YT_' + UID.split(" ")[1]
+		Link: HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 }
 
@@ -2183,7 +2181,7 @@ function DeleteRequest() {
 		Act: "Delete",
 		Nick: SesAcc,
 		Token: SesTkn,
-		Link: 'YT_' + UID.split(" ")[1]
+		Link: HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 }
 
@@ -2219,7 +2217,7 @@ function CheckArchiveRequest(){
 
 	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
 		Act: 'ArchiveList',
-		Link:  'YT_' + UID.split(" ")[1]
+		Link:  HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 }
 //========================================== REQUEST HANDLER ==========================================
@@ -3017,7 +3015,11 @@ async function WaitUntilLoad(){
 				var AccContainer = document.getElementById("AccStatContainer");
 				AccContainer.parentNode.removeChild(AccContainer);
 			}
-			LoadButtons();
+			if (document.getElementById("MCHAT_CAPTION") != null){
+				var CaptionContainer = document.getElementById("MCHAT_CAPTION");
+				CaptionContainer.parentNode.removeChild(CaptionContainer);
+			}
+			LoadButtons(target[0]);
 			break;
 		} else {
 			console.log("Not loaded yet");
