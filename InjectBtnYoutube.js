@@ -683,6 +683,171 @@ function TGDecoding(input) {
 
 
 //----------------------------------------- MChad Controller -----------------------------------------
+var ConStyleBlack = true;
+
+function inheritCheck(){
+	RequestBtn.style.color = "inherit";
+	StarRate.style.color = "inherit";
+	COCloseBtn.style.color = "inherit";
+	CODefaultBtn.style.color = "inherit";
+	COModeChangeBtn.style.color = "inherit";
+	COColourForm.style.color = "inherit";
+	COColourInput.style.color = "inherit";
+	COColourText.style.color = "inherit";
+	COOpacityForm.style.color = "inherit";
+	COOpacityInput.style.color = "inherit";
+	COOpacityText.style.color = "inherit";
+	COFontSizeForm.style.color = "inherit";
+	COFontSizeText.style.color = "inherit";
+	COFontSizeInput.style.color = "inherit";
+	COTypeForm.style.color = "inherit";
+	COTypeSelect.style.color = "inherit";
+	COTypeText.style.color = "inherit";
+	CODelayForm.style.color = "inherit";
+	CODelayInput.style.color = "inherit";
+	CODelayText.style.color = "inherit";
+	AccModalTextNick.style.color = "inherit";
+	AccModalTextTitle.style.color = "inherit";
+	AccModalCloseBtn.style.color = "inherit";
+	AccModalInputNick.style.color = "inherit";
+	AccModalTextPass.style.color = "inherit";
+	AccModalInputPass.style.color = "inherit";
+	AccModalOk.style.color = "inherit";
+	StatText.style.color = "inherit";
+	AccLoginBtn.style.color = "inherit";
+	ModalCloseBtn.style.color = "inherit";
+	ModalText.style.color = "inherit";
+	ModalInput.style.color = "inherit";
+	ModalOk.style.color = "inherit";
+	ARCardTemplate.style.color = "inherit";
+	ARCardText.style.color = "inherit";
+	ARCardOpenBtn.style.color = "inherit";
+	ARCardLockspan.style.color = "inherit";
+	ARBrowseAll.style.color = "inherit";
+	ARSearchBtn.style.color = "inherit";
+	ARNameInput.style.color = "inherit";
+	ARSearchLinkBtn.style.color = "inherit";
+	ARBackBtn.style.color = "inherit";
+	RoomCardTemplate.style.color = "inherit";
+	RoomCardText.style.color = "inherit";
+	RoomCardOpenBtn.style.color = "inherit";
+	RoomCardLockspan.style.color = "inherit";
+	RoomBrowseAll.style.color = "inherit";
+	RoomSearchBtn.style.color = "inherit";
+	RoomNameInput.style.color = "inherit";
+	RoomSearchLinkBtn.style.color = "inherit";
+	RoomBackBtn.style.color = "inherit";
+	MMCloseBtn.style.color = "inherit";
+	MMReloadCaptionBtn.style.color = "inherit";
+	MMCaptionOptionBtn.style.color = "inherit";
+	MMRoomBtn.style.color = "inherit";
+	MMArchiveBtn.style.color = "inherit";
+	NoticeSpn.style.color = "inherit";
+	btn.style.color = "inherit";
+	spn.style.color = "inherit";
+	SMLoadHereBtn.style.color = "inherit";
+
+	RequestBtn.style.backgroundColor = "inherit";
+	StarRate.style.backgroundColor = "inherit";
+	COCloseBtn.style.backgroundColor = "inherit";
+	CODefaultBtn.style.backgroundColor = "inherit";
+	COModeChangeBtn.style.backgroundColor = "inherit";
+	COColourForm.style.backgroundColor = "inherit";
+	COColourInput.style.backgroundColor = "inherit";
+	COColourText.style.backgroundColor = "inherit";
+	COOpacityForm.style.backgroundColor = "inherit";
+	COOpacityInput.style.backgroundColor = "inherit";
+	COOpacityText.style.backgroundColor = "inherit";
+	COFontSizeForm.style.backgroundColor = "inherit";
+	COFontSizeText.style.backgroundColor = "inherit";
+	COFontSizeInput.style.backgroundColor = "inherit";
+	COTypeForm.style.backgroundColor = "inherit";
+	COTypeSelect.style.backgroundColor = "inherit";
+	COTypeText.style.backgroundColor = "inherit";
+	CODelayForm.style.backgroundColor = "inherit";
+	CODelayInput.style.backgroundColor = "inherit";
+	CODelayText.style.backgroundColor = "inherit";
+	AccModalTextNick.style.backgroundColor = "inherit";
+	AccModalTextTitle.style.backgroundColor = "inherit";
+	AccModalCloseBtn.style.backgroundColor = "inherit";
+	AccModalInputNick.style.backgroundColor = "inherit";
+	AccModalTextPass.style.backgroundColor = "inherit";
+	AccModalInputPass.style.backgroundColor = "inherit";
+	AccModalOk.style.backgroundColor = "inherit";
+	StatText.style.backgroundColor = "inherit";
+	AccLoginBtn.style.backgroundColor = "inherit";
+	ModalCloseBtn.style.backgroundColor = "inherit";
+	ModalText.style.backgroundColor = "inherit";
+	ModalInput.style.backgroundColor = "inherit";
+	ModalOk.style.backgroundColor = "inherit";
+	ARCardTemplate.style.backgroundColor = "inherit";
+	ARCardText.style.backgroundColor = "inherit";
+	ARCardOpenBtn.style.backgroundColor = "inherit";
+	ARCardLockspan.style.backgroundColor = "inherit";
+	ARBrowseAll.style.backgroundColor = "inherit";
+	ARSearchBtn.style.backgroundColor = "inherit";
+	ARNameInput.style.backgroundColor = "inherit";
+	ARSearchLinkBtn.style.backgroundColor = "inherit";
+	ARBackBtn.style.backgroundColor = "inherit";
+	RoomCardTemplate.style.backgroundColor = "inherit";
+	RoomCardText.style.backgroundColor = "inherit";
+	RoomCardOpenBtn.style.backgroundColor = "inherit";
+	RoomCardLockspan.style.backgroundColor = "inherit";
+	RoomBrowseAll.style.backgroundColor = "inherit";
+	RoomSearchBtn.style.backgroundColor = "inherit";
+	RoomNameInput.style.backgroundColor = "inherit";
+	RoomSearchLinkBtn.style.backgroundColor = "inherit";
+	RoomBackBtn.style.backgroundColor = "inherit";
+	MMCloseBtn.style.backgroundColor = "inherit";
+	MMReloadCaptionBtn.style.backgroundColor = "inherit";
+	MMCaptionOptionBtn.style.backgroundColor = "inherit";
+	MMRoomBtn.style.backgroundColor = "inherit";
+	MMArchiveBtn.style.backgroundColor = "inherit";
+	NoticeSpn.style.backgroundColor = "inherit";
+	btn.style.backgroundColor = "inherit";
+	spn.style.backgroundColor = "inherit";
+	SMLoadHereBtn.style.backgroundColor = "inherit";	
+}
+
+function RepaintController(){
+	if (ConStyleBlack){
+		var MatteBlack = "#141414";
+		var PastelWhite = "#FEFEFE";
+
+		ExtContainer.style.color = PastelWhite;
+		RoomContainer.style.color = PastelWhite;
+		ARContainer.style.color = PastelWhite;
+		ModalContent.style.color = PastelWhite;
+		AccModalContent.style.color = PastelWhite;
+		AccStatContainer.style.color = PastelWhite;
+
+		ExtContainer.style.backgroundColor = MatteBlack;
+		RoomContainer.style.backgroundColor = MatteBlack;
+		ARContainer.style.backgroundColor = MatteBlack;
+		ModalContent.style.backgroundColor = MatteBlack;
+		AccModalContent.style.backgroundColor = MatteBlack;
+		AccStatContainer.style.backgroundColor = MatteBlack;
+	} else {
+		var Black = "#000000";
+		var PastelWhite = "#FEFEFE";
+
+		ExtContainer.style.color = Black;
+		RoomContainer.style.color = Black;
+		ARContainer.style.color = Black;
+		ModalContent.style.color = Black;
+		AccModalContent.style.color = Black;
+		AccStatContainer.style.color = Black;
+
+		ExtContainer.style.backgroundColor = PastelWhite;
+		RoomContainer.style.backgroundColor = PastelWhite;
+		ARContainer.style.backgroundColor = PastelWhite;
+		ModalContent.style.backgroundColor = PastelWhite;
+		AccModalContent.style.backgroundColor = PastelWhite;
+		AccStatContainer.style.backgroundColor = PastelWhite;
+	}
+}
+
+
 
 //--------------------------------------- START MENU CONTROLLER ---------------------------------------
 var ExtContainer = document.createElement('div');
@@ -715,6 +880,37 @@ SMLoadHereBtn.style.float = "right";
 
 function LoadButtons() {
 	var target = document.getElementsByTagName(ExtContainerParentID);
+	inheritCheck();
+
+	var dt = localStorage.getItem("MChatOption");
+	if (dt){
+		dt = JSON.parse(dt);
+		CaptionColour = dt["BColour"];
+		CaptionFontSize = dt["CFSize"];
+		CaptionFont = dt["CFStyle"];
+		ConStyleBlack = dt["ControlColour"];
+		RepaintController();
+	}
+	 
+	if (!CaptionColour){
+		CaptionColour = "#00000064";
+	}
+	if (!CaptionFontSize){
+		CaptionFontSize = 30;
+	}
+	if (!CaptionFont){
+		CaptionFont = "sans-serif";
+	}
+	if (ConStyleBlack == undefined){
+		ConStyleBlack = false;
+	}
+	
+	if (ConStyleBlack){
+		COModeChangeBtn.textContent = "Light Mode";
+	} else {
+		COModeChangeBtn.textContent = "Dark Mode";
+	}
+
 	target[0].prepend(ExtContainer);
 	ExtContainer.appendChild(btn);
 	ExtContainer.appendChild(spn);
@@ -788,7 +984,7 @@ MMReloadCaptionBtn.style.float = "right";
 
 var MMCaptionOptionBtn = btn.cloneNode(false);
 MMCaptionOptionBtn.onclick = MMCaptionOptionOpen;
-MMCaptionOptionBtn.textContent = "Caption Option";
+MMCaptionOptionBtn.textContent = "Option";
 MMCaptionOptionBtn.style.float = "right";
 
 var MMRoomBtn = btn.cloneNode(false);
@@ -1302,6 +1498,8 @@ function StopArchive(){
 	for (var Entry in ArchiveEntries) {
 		delete ArchiveEntries[Entry];
 	}
+	StarRate.remove();
+	ArchiveID = "";
 	StopLatchCaptionArchive();
 }
 
@@ -1310,6 +1508,7 @@ function ArchiveGet(Link, Password, ARID){
 	StopArchive();
 
 	ArchiveID = ARID;
+	CheckRating();
 
 	var BToken = "";
 	if (!Password){
@@ -1669,16 +1868,20 @@ function ARSearchBtnClick() {
 
 
 
-//------------------------------------- CAPTION OPTION CONTROLLER -------------------------------------
+//------------------------------------- OPTION CONTROLLER -------------------------------------
 var COCloseBtn = btn.cloneNode(false);
 COCloseBtn.onclick = COCloseBtnClick;
-COCloseBtn.textContent = "Back";
+COCloseBtn.textContent = "Save";
 COCloseBtn.style.float = "right";
 
 var CODefaultBtn = btn.cloneNode(false);
 CODefaultBtn.onclick = CODefaultBtnClick;
 CODefaultBtn.textContent = "Reset";
 CODefaultBtn.style.float = "left";
+
+var COModeChangeBtn = btn.cloneNode(false);
+COModeChangeBtn.onclick = COModeChangeBtnClick;
+COModeChangeBtn.style.float = "right";
 
 //	COLOUR PICKER FORM
 var COColourForm = document.createElement('div');
@@ -1791,6 +1994,16 @@ CODelayText.style.fontSize = '15px';
 CODelayText.style.background = 'white';
 CODelayForm.appendChild(CODelayText);
 
+function COModeChangeBtnClick() {
+	ConStyleBlack = !ConStyleBlack;
+	if (ConStyleBlack){
+		COModeChangeBtn.textContent = "Light Mode";
+	} else {
+		COModeChangeBtn.textContent = "Dark Mode";
+	}
+	RepaintController();
+}
+
 function COTypeSelectChange() {
 	CaptionFont = COTypeSelect.value;
 	RepaintResizeRelocateCaption();
@@ -1844,6 +2057,7 @@ function SummonCaptionOption(){
 	ExtContainer.appendChild(COCloseBtn);
 	ExtContainer.appendChild(COTypeForm);
 	ExtContainer.appendChild(CODelayForm);
+	ExtContainer.appendChild(COModeChangeBtn);
 	
 	COColourInput.value = CaptionColour.substring(0, 7);
 	COOpacityInput.value = parseInt(CaptionColour.substring(7,9), 16);
@@ -1861,10 +2075,18 @@ function COCloseBtnClick() {
 	CODefaultBtn.remove();
 	CODelayForm.remove();
 	COTypeForm.remove();
+	COModeChangeBtn.remove();
+
+	localStorage.setItem("MChatOption", JSON.stringify({
+		BColour: CaptionColour,
+		CFSize: CaptionFontSize,
+		CFStyle: CaptionFont,
+		ControlColour: ConStyleBlack
+	}));
 
 	SummonMainMenu();
 }
-//===================================== CAPTION OPTION CONTROLLER =====================================
+//===================================== OPTION CONTROLLER =====================================
 
 
 
@@ -1898,6 +2120,9 @@ function CheckRequest() {
 		if (xhr.response == "True"){
 			RequestBtn.textContent = "Cancel Request";
 			RequestBtn.onclick = RequestBtnRemClick;
+		} else if (xhr.response == "False") {
+			RequestBtn.textContent = "Request Translation";
+			RequestBtn.onclick = RequestBtnAddClick;
 		}
 	};
 
@@ -1975,10 +2200,11 @@ function CheckArchiveRequest(){
 
 		if (DecodeString == "[]"){
 			StatText.parentNode.prepend(RequestBtn);
-			RequestBtn.textContent = "Request Translation";
-			RequestBtn.onclick = RequestBtnAddClick;
 			if (localStorage.getItem("MChatToken")){
 				CheckRequest();
+			} else {
+				RequestBtn.textContent = "Request Translation";
+				RequestBtn.onclick = RequestBtnAddClick;
 			}
 		} else {
 			RequestBtn.remove();
@@ -1991,6 +2217,108 @@ function CheckArchiveRequest(){
 	})).replace(/\\/gi, "\\\\") + '" }');
 }
 //========================================== REQUEST HANDLER ==========================================
+
+
+
+//------------------------------------------ RATING HANDLER ------------------------------------------
+var StarRate = document.createElement('span');
+StarRate.style.fontSize = "30px";
+StarRate.style.fontWeight = "bold";
+StarRate.style.alignSelf = "center";
+StarRate.style.margin = "5px";
+StarRate.style.cursor = "pointer";
+
+function RatingAddBtnClick(){
+	if (Logged){
+		UpRating();
+	} else {
+		SummonAccModal(SesAcc);
+	}
+}
+
+function RatingRemBtnClick(){
+	if (Logged){
+		RemoveRating();
+	} else {
+		SummonAccModal(SesAcc);
+	}
+}
+
+function UpRating(){
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/Rating/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		if (xhr.status == 400){
+			if (xhr.response == "ERROR : INVALID TOKEN"){
+				SummonAccModal(SesAcc);
+			}
+		} else {
+			StarRate.textContent = "★";
+			StarRate.onclick = RatingRemBtnClick;
+		}
+	};
+
+	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
+		Act: "Add",
+		Nick: SesAcc,
+		Token: SesTkn,
+		ARID: ArchiveID
+	})).replace(/\\/gi, "\\\\") + '" }');
+}
+
+function RemoveRating(){
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/Rating/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		if (xhr.status == 400){
+			if (xhr.response == "ERROR : INVALID TOKEN"){
+				SummonAccModal(SesAcc);
+			}
+		} else {
+			StarRate.textContent = "☆";
+			StarRate.onclick = RatingAddBtnClick;
+		}
+	};
+
+	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
+		Act: "Delete",
+		Nick: SesAcc,
+		Token: SesTkn,
+		ARID: ArchiveID
+	})).replace(/\\/gi, "\\\\") + '" }');
+}
+
+function CheckRating(){
+	StarRate.remove();
+	if (!localStorage.getItem("MChatToken")){
+		StarRate.textContent = "☆";
+		StarRate.onclick = RatingAddBtnClick;
+		AccLoginBtn.parentNode.insertBefore(StarRate, AccLoginBtn);
+	} else {
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', 'https://repo.mchatx.org/Rating/', true);
+		xhr.setRequestHeader('Content-type', 'application/json');
+		xhr.onload = function () {
+			if (xhr.response == "True"){
+				StarRate.textContent = "★";
+				StarRate.onclick = RatingRemBtnClick;
+			} else {
+				StarRate.textContent = "☆";
+				StarRate.onclick = RatingAddBtnClick;
+			}
+			AccLoginBtn.parentNode.insertBefore(StarRate, AccLoginBtn);
+		};
+	
+		xhr.send('{ "BToken":"' +  TGEncoding(JSON.stringify({
+			Act: "Check",
+			Nick: SesAcc,
+			ARID: ArchiveID
+		})).replace(/\\/gi, "\\\\") + '" }');
+	}
+}
+//========================================== RATING HANDLER ==========================================
 
 
 
@@ -2088,6 +2416,11 @@ AccModalContent.style.border = "1px solid #888";
 AccModalContent.style.width = "200px";
 AccModalScreen.appendChild(AccModalContent);
 
+var AccModalTextTitle = document.createElement('p');
+AccModalTextTitle.textContent = "Login";
+AccModalTextTitle.style.fontSize = "34px";
+AccModalTextTitle.style.fontWeight = "bold";
+
 var AccModalCloseBtn = document.createElement('span');
 AccModalCloseBtn.textContent = "X";
 AccModalCloseBtn.style.color = "#aaa";
@@ -2121,6 +2454,7 @@ AccModalOk.textContent = "Submit";
 AccModalOk.onclick = AccModalOkClick;
 
 AccModalContent.appendChild(AccModalCloseBtn);
+AccModalContent.appendChild(AccModalTextTitle);
 AccModalContent.appendChild(AccModalTextNick);
 AccModalContent.appendChild(AccModalInputNick);
 AccModalContent.appendChild(AccModalTextPass);
@@ -2160,6 +2494,12 @@ function AccModalOkClick(){
 			Token: SesTkn
 		})));
 		AccLoginBtn.textContent = "Logout (" + SesAcc + ")";
+
+		CheckRequest();
+		
+		if ((ArchiveID) && (ArchiveID != "")){
+			CheckRating();
+		}
 	};
 
 	xhr.send(JSON.stringify({
