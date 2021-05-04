@@ -746,6 +746,9 @@ function inheritCheck(){
 	btn.style.color = "inherit";
 	spn.style.color = "inherit";
 	SMLoadHereBtn.style.color = "inherit";
+	AccModalLinkSignUp.style.color = "inherit";
+	AccModalDivPS.style.color = "inherit";
+	AccModalLinkRestartPass.style.color = "inherit";
 
 	RequestBtn.style.backgroundColor = "inherit";
 	StarRate.style.backgroundColor = "inherit";
@@ -807,6 +810,9 @@ function inheritCheck(){
 	btn.style.backgroundColor = "inherit";
 	spn.style.backgroundColor = "inherit";
 	SMLoadHereBtn.style.backgroundColor = "inherit";	
+	AccModalLinkSignUp.style.backgroundColor = "inherit";
+	AccModalDivPS.style.backgroundColor = "inherit";
+	AccModalLinkRestartPass.style.backgroundColor = "inherit";
 }
 
 function RepaintController(){
@@ -2453,6 +2459,24 @@ AccModalOk.style.marginTop = "15px";
 AccModalOk.textContent = "Submit";
 AccModalOk.onclick = AccModalOkClick;
 
+var AccModalLinkSignUp = document.createElement('a');
+AccModalLinkSignUp.style.fontSize = "10px";
+AccModalLinkSignUp.textContent = "Sign up";
+AccModalLinkSignUp.href = "https://mchatx.org/signup";
+AccModalLinkSignUp.target = "_blank";
+AccModalLinkSignUp.style.float = "right";
+
+var AccModalLinkRestartPass = document.createElement('a');
+AccModalLinkRestartPass.style.fontSize = "10px";
+AccModalLinkRestartPass.textContent = "Restart Pass";
+AccModalLinkRestartPass.href = "https://mchatx.org/restart-pass";
+AccModalLinkRestartPass.target = "_blank";
+
+var AccModalDivPS = document.createElement('div');
+AccModalDivPS.style.width = "100%";
+AccModalDivPS.appendChild(AccModalLinkRestartPass);
+AccModalDivPS.appendChild(AccModalLinkSignUp);
+
 AccModalContent.appendChild(AccModalCloseBtn);
 AccModalContent.appendChild(AccModalTextTitle);
 AccModalContent.appendChild(AccModalTextNick);
@@ -2460,6 +2484,7 @@ AccModalContent.appendChild(AccModalInputNick);
 AccModalContent.appendChild(AccModalTextPass);
 AccModalContent.appendChild(AccModalInputPass);
 AccModalContent.appendChild(AccModalOk);
+AccModalContent.appendChild(AccModalDivPS);
 
 function SummonAccModal(Nick) {
 	ExtContainer.appendChild(AccModalScreen);
