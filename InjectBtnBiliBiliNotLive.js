@@ -2434,7 +2434,7 @@ function SummonAccModal(Nick) {
 			if (VideoWrap.length != 0){
 				VideoWrap[0].style.zIndex = "auto";
 			}
-	
+			
 			window.onclick = null;
 		}
 	}
