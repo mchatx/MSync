@@ -803,6 +803,10 @@ var NoticeSpn = document.createElement('span');
 NoticeSpn.style.fontSize = '15px';
 NoticeSpn.style.background = 'white';
 
+function MMAccBtnClick() {
+	SummonAccModal("");
+}
+
 function MMArchiveBtnClick(){
 	RemoveMainMenu();
 	SummonArchiveMenu();
@@ -822,6 +826,7 @@ function RemoveMainMenu(){
 	MMArchiveBtn.remove();
 	MMReloadCaptionBtn.remove();
 	MMCaptionOptionBtn.remove();
+	AccStatContainer.remove();
 }
 
 function SummonMainMenu(){
@@ -831,6 +836,7 @@ function SummonMainMenu(){
 	ExtContainer.appendChild(MMCloseBtn);
 	ExtContainer.appendChild(MMReloadCaptionBtn);
 	ExtContainer.appendChild(MMCaptionOptionBtn);
+	SummonStatAccContainer();
 	CaptionText = "Caption Box.";
 }
 
@@ -930,7 +936,7 @@ function AddRoomCard(RoomName, Locked, Link, Tags){
 	var OpenBtn = RoomCardOpenBtn.cloneNode(true);
 	OpenBtn.onclick = function() {
 		if (Locked) {
-			SummonModal(RoomName, true);
+			SummonModal(RoomName, true, null);
 		} else {
 			StartListening(RoomName, null);
 		}
@@ -956,12 +962,16 @@ function AddRoomCard(RoomName, Locked, Link, Tags){
 function StopListening(){
 	if (RoomES){
 		RoomES.close();
+		StatText.textContent = "Stop listening";
 	}
 }
 
 function StartListening(RoomName, Password){
 	StopListening();
 	StopArchive();
+	ResetRoomContainer();
+	RemoveRoomMenu();
+	SummonMainMenu();
 
 	var BToken = "";
 	if (!Password){
@@ -977,6 +987,7 @@ function StartListening(RoomName, Password){
 		})).replace(/ /gi, "%20");
 	}
 
+	StatText.textContent = "Listening to " + RoomName;
 	RoomES = new EventSource('https://repo.mchatx.org/FetchRaw/?BToken=' + BToken);
 
 	RoomES.onmessage = function (e) {
@@ -1019,11 +1030,6 @@ function StartListening(RoomName, Password){
 		CaptionCC = "#FFFFFF";
 		MMReloadCaption();
 	};
-
-
-	ResetRoomContainer();
-	RemoveRoomMenu();
-	SummonMainMenu();
 }
 
 //~~~~~~~~~~~~~~~~~~~~~ BUTTONS ~~~~~~~~~~~~~~~~~~~~~
@@ -1210,6 +1216,7 @@ var TimerHandleID;
 var TimeNow = 0;
 var CurrentEntryIndex = 0;
 var TimeShift = 0;
+var ArchiveID = "";
 
 //~~~~~~~~~~~~~~~~~~~~~	ARCHIVE CONTAINER AND CARD TEMPLATES ~~~~~~~~~~~~~~~~~~~~~
 var ARContainer = ExtContainer.cloneNode(false);
@@ -1236,7 +1243,7 @@ ARCardLockspan.style.alignSelf = "center";
 ARCardLockspan.style.fontSize = "28px";
 ARCardLockspan.style.fontWeight = "bold";
 
-function AddARCard(Nick, Link, Locked, StreamLink, Tags){
+function AddARCard(Nick, Link, Locked, StreamLink, Tags, ARID){
 	var RName = ARCardText.cloneNode(true);
 	RName.style.width = "35%";
 	RName.textContent = Nick;
@@ -1268,9 +1275,9 @@ function AddARCard(Nick, Link, Locked, StreamLink, Tags){
 	var OpenBtn = ARCardOpenBtn.cloneNode(true);
 	OpenBtn.onclick = function() {
 		if (Locked) {
-			SummonModal(Link, false);
+			SummonModal(Link, false, ARID);
 		} else {
-			ArchiveGet(Link, null);
+			ArchiveGet(Link, null, ARID);
 		}
 	}
 
@@ -1298,9 +1305,11 @@ function StopArchive(){
 	StopLatchCaptionArchive();
 }
 
-function ArchiveGet(Link, Password){
+function ArchiveGet(Link, Password, ARID){
 	StopListening();
 	StopArchive();
+
+	ArchiveID = ARID;
 
 	var BToken = "";
 	if (!Password){
@@ -1397,6 +1406,7 @@ function LatchCaptionArchive(){
 			if (!MainVid.paused){
 				SeekIndexStart();
 			} else {
+				StatText.textContent = "Archive loaded";
 				CaptionText = "ARCHIVE LOADED";
 				CaptionOC = "#000000";
 				CaptionCC = "#FFFFFF";
@@ -1541,7 +1551,7 @@ function ARSearchLinkBtnClick(){
 			return;
 		} else {
 			JSON.parse(DecodeString).map(e => {
-				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"]);
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"]);
 			});
 		}
 	};
@@ -1593,7 +1603,7 @@ function ARBrowseAllBtnClick(){
 			return;
 		} else {
 			JSON.parse(DecodeString).map(e => {
-				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"]);
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"]);
 			});
 		}
 	};
@@ -1643,7 +1653,7 @@ function ARSearchBtnClick() {
 			return;
 		} else {
 			JSON.parse(DecodeString).map(e => {
-				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"]);
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"]);
 			});
 		}
 	};
@@ -1858,6 +1868,311 @@ function COCloseBtnClick() {
 
 
 
+//------------------------------------------ REQUEST HANDLER ------------------------------------------
+var RequestBtn = btn.cloneNode('false');
+RequestBtn.textContent = "Request";
+RequestBtn.style.fontSize = "12px";
+RequestBtn.style.padding = "1px";
+
+function RequestBtnAddClick(){
+	if (Logged){
+		AddRequest();
+	} else {
+		SummonAccModal(SesAcc);
+	}
+}
+
+function RequestBtnRemClick(){
+	if (Logged){
+		DeleteRequest();
+	} else {
+		SummonAccModal(SesAcc);
+	}
+}
+
+function CheckRequest() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/Request/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		if (xhr.response == "True"){
+			RequestBtn.textContent = "Cancel Request";
+			RequestBtn.onclick = RequestBtnRemClick;
+		}
+	};
+
+	xhr.send('{ "BToken":"' +  TGEncoding(JSON.stringify({
+		Act: "Check",
+		Nick: SesAcc,
+		Link: 'YT_' + UID.split(" ")[1]
+	})).replace(/\\/gi, "\\\\") + '" }');
+}
+
+function AddRequest() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/Request/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		if (xhr.status == 400){
+			if (xhr.response == "ERROR : INVALID TOKEN"){
+				SummonAccModal(SesAcc);
+			}
+		} else {
+			StatText.textContent = "Request sent";
+			RequestBtn.textContent = "Cancel Request";
+			RequestBtn.onclick = RequestBtnRemClick;
+		}
+	};
+
+	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
+		Act: "Add",
+		Nick: SesAcc,
+		Token: SesTkn,
+		Link: 'YT_' + UID.split(" ")[1]
+	})).replace(/\\/gi, "\\\\") + '" }');
+}
+
+function DeleteRequest() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/Request/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		if (xhr.status == 400){
+			if (xhr.response == "ERROR : INVALID TOKEN"){
+				SummonAccModal(SesAcc);
+			}
+		} else {
+			StatText.textContent = "Request cancelled";
+			RequestBtn.textContent = "Request Translation";
+			RequestBtn.onclick = RequestBtnAddClick;
+		}
+	};
+
+	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
+		Act: "Delete",
+		Nick: SesAcc,
+		Token: SesTkn,
+		Link: 'YT_' + UID.split(" ")[1]
+	})).replace(/\\/gi, "\\\\") + '" }');
+}
+
+function CheckArchiveRequest(){
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/FetchRaw/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		try {
+			var JSONtemp = JSON.parse(xhr.response);	
+		} catch (error) {
+			return;
+		}
+		
+		if (!JSONtemp["BToken"]){
+			return;
+		}
+
+		var DecodeString = TGDecoding(JSONtemp["BToken"]);
+
+		if (DecodeString == "[]"){
+			StatText.parentNode.prepend(RequestBtn);
+			RequestBtn.textContent = "Request Translation";
+			RequestBtn.onclick = RequestBtnAddClick;
+			if (localStorage.getItem("MChatToken")){
+				CheckRequest();
+			}
+		} else {
+			RequestBtn.remove();
+		}
+	};
+
+	xhr.send('{ "BToken":"' + TGEncoding(JSON.stringify({
+		Act: 'ArchiveList',
+		Link:  'YT_' + UID.split(" ")[1]
+	})).replace(/\\/gi, "\\\\") + '" }');
+}
+//========================================== REQUEST HANDLER ==========================================
+
+
+
+//----------------------------------------- ACCOUNT CONTROLLER -----------------------------------------
+var Logged = false;
+var SesAcc = "";
+var SesTkn = "";
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~ CONTAINER ~~~~~~~~~~~~~~~~~~~~~~~~
+var AccStatContainer = ExtContainer.cloneNode(false)
+AccStatContainer.id = "AccStatContainer";
+AccStatContainer.style.display = "flex";
+
+var StatText = document.createElement("span");
+StatText.textContent = "RUNNING";
+StatText.style.width = "100%";
+StatText.style.fontSize = "15px";
+StatText.style.alignSelf = "center";
+StatText.style.margin = "5px";
+StatText.style.marginLeft = "15px";
+
+var AccLoginBtn = document.createElement("span");
+AccLoginBtn.textContent = "Login";
+AccLoginBtn.style.color = "blue";
+AccLoginBtn.style.fontSize = "15px";
+AccLoginBtn.style.alignSelf = "center";
+AccLoginBtn.style.margin = "5px";
+AccLoginBtn.style.marginRight = "15px";
+AccLoginBtn.style.cursor = "pointer";
+AccLoginBtn.style.textAlign = "center";
+AccLoginBtn.onclick = AccLoginBtnClick;
+
+AccStatContainer.appendChild(StatText);
+AccStatContainer.appendChild(AccLoginBtn);
+
+function SummonStatAccContainer() {
+	ExtContainer.parentNode.insertBefore(AccStatContainer, ExtContainer);
+	CheckArchiveRequest();
+	CheckPersistentLogin();
+}
+
+function AccLoginBtnClick(){
+	if (Logged){
+		SesAcc = "";
+		SesTkn = "";
+		Logged = false;
+		localStorage.removeItem("MChatToken");
+		AccLoginBtn.textContent = "Login";
+	} else {
+		SummonAccModal(SesAcc);
+	}
+}
+
+function CheckPersistentLogin(){
+    if (localStorage.getItem("MChatToken")) {
+		TokenData = JSON.parse(TGDecoding(localStorage.getItem("MChatToken")));
+		SesAcc = TokenData["Room"];
+		SesTkn = TokenData["Token"];
+		Logged = true;
+		AccLoginBtn.textContent = "Logout (" + SesAcc + ")";
+		StatText.textContent = "Logged in";
+
+		try {
+		} catch (error) {
+		  localStorage.removeItem("MChatToken");
+		  SesAcc = "";
+		  SesTkn = "";
+		  AccLoginBtn.textContent = "Login";
+		}
+	} else {
+		StatText.textContent = "";
+	}
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~ MODAL HEAD ~~~~~~~~~~~~~~~~~~~~~~~~
+var AccModalScreen = document.createElement('div');
+AccModalScreen.style.position = "fixed";
+AccModalScreen.style.zIndex = 1;
+AccModalScreen.style.left = 0;
+AccModalScreen.style.top = 0;
+AccModalScreen.style.width = "100%";
+AccModalScreen.style.height = "100%";
+AccModalScreen.style.overflow = "auto";
+AccModalScreen.style.backgroundColor = "rgba(0,0,0,0.4)";
+AccModalScreen.style.display = "block"
+
+var AccModalContent = document.createElement('div');
+AccModalContent.style.display = "flex";
+AccModalContent.style.alignItems = "center";
+AccModalContent.style.justifyContent = "center";
+AccModalContent.style.flexDirection = "column";
+AccModalContent.style.backgroundColor = "#fefefe";
+AccModalContent.style.margin = "15% auto";
+AccModalContent.style.padding = "20px";
+AccModalContent.style.border = "1px solid #888";
+AccModalContent.style.width = "200px";
+AccModalScreen.appendChild(AccModalContent);
+
+var AccModalCloseBtn = document.createElement('span');
+AccModalCloseBtn.textContent = "X";
+AccModalCloseBtn.style.color = "#aaa";
+AccModalCloseBtn.style.alignSelf = "end";
+AccModalCloseBtn.style.fontSize = "28px";
+AccModalCloseBtn.style.fontWeight = "bold";
+AccModalCloseBtn.style.cursor = "pointer";
+AccModalCloseBtn.onclick = AccCloseModalBtnClick;
+
+var AccModalTextNick = document.createElement('p');
+AccModalTextNick.textContent = "Nick :";
+AccModalTextNick.style.marginTop = "15px";
+AccModalTextNick.style.marginBottom = "15px";
+AccModalTextNick.style.fontSize = "17px";
+AccModalTextNick.style.fontWeight = "bold";
+
+var AccModalInputNick = document.createElement('input');
+AccModalInputNick.type = "text";
+AccModalInputNick.style.width = "80%";
+
+var AccModalTextPass = AccModalTextNick.cloneNode(false);
+AccModalTextPass.textContent = "Password :";
+
+var AccModalInputPass = document.createElement('input');
+AccModalInputPass.type = "password";
+AccModalInputPass.style.width = "80%";
+
+var AccModalOk = btn.cloneNode(false);
+AccModalOk.style.marginTop = "15px";
+AccModalOk.textContent = "Submit";
+AccModalOk.onclick = AccModalOkClick;
+
+AccModalContent.appendChild(AccModalCloseBtn);
+AccModalContent.appendChild(AccModalTextNick);
+AccModalContent.appendChild(AccModalInputNick);
+AccModalContent.appendChild(AccModalTextPass);
+AccModalContent.appendChild(AccModalInputPass);
+AccModalContent.appendChild(AccModalOk);
+
+function SummonAccModal(Nick) {
+	ExtContainer.appendChild(AccModalScreen);
+	AccModalInputPass.value = "";
+	AccModalInputNick.value = Nick;
+	window.onclick = function(event) {
+		if (event.target == AccModalScreen) {
+			AccModalScreen.remove();
+			window.onclick = null;
+		}
+	}
+}
+
+function AccCloseModalBtnClick(){
+	AccModalScreen.remove();
+}
+
+function AccModalOkClick(){
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://repo.mchatx.org/Login/', true);
+	xhr.setRequestHeader('Content-type', 'application/json');
+	xhr.onload = function () {
+		if (xhr.status == 400){
+			return;
+		}
+
+		Logged = true;
+		SesAcc = AccModalInputNick.value;
+		SesTkn = JSON.parse(xhr.response)[0]["Token"];
+		localStorage.setItem("MChatToken", TGEncoding(JSON.stringify({
+			Room: AccModalInputNick.value,
+			Token: SesTkn
+		})));
+		AccLoginBtn.textContent = "Logout (" + SesAcc + ")";
+	};
+
+	xhr.send(JSON.stringify({
+		Room: AccModalInputNick.value, 
+		Pass: AccModalInputPass.value
+	}));
+
+	AccModalScreen.remove();
+}
+//========================================= ACCOUNT CONTROLLER =========================================
+
+
+
 //---------------------------------------- PASS MODAL CONTROLLER ----------------------------------------
 var ModalScreen = document.createElement('div');
 ModalScreen.style.position = "fixed";
@@ -1875,13 +2190,17 @@ ModalContent.style.backgroundColor = "#fefefe";
 ModalContent.style.margin = "15% auto";
 ModalContent.style.padding = "20px";
 ModalContent.style.border = "1px solid #888";
-ModalContent.style.width = "250px";
+ModalContent.style.width = "200px";
+ModalContent.style.display = "flex";
+ModalContent.style.alignItems = "center";
+ModalContent.style.justifyContent = "center";
+ModalContent.style.flexDirection = "column";
 ModalScreen.appendChild(ModalContent);
 
 var ModalCloseBtn = document.createElement('span');
 ModalCloseBtn.textContent = "X";
 ModalCloseBtn.style.color = "#aaa";
-ModalCloseBtn.style.float = "right";
+ModalCloseBtn.style.alignSelf = "end";
 ModalCloseBtn.style.fontSize = "28px";
 ModalCloseBtn.style.fontWeight = "bold";
 ModalCloseBtn.style.cursor = "pointer";
@@ -1896,19 +2215,19 @@ ModalText.style.fontWeight = "bold";
 
 var ModalInput = document.createElement('input');
 ModalInput.type = "password";
+ModalInput.style.width = "80%";
 
 var ModalOk = btn.cloneNode(false);
 ModalOk.style.marginTop = "15px";
 ModalOk.textContent = "Submit";
-ModalOk.style.position = "relative";
-ModalOk.style.left = "80px";
 
 ModalContent.appendChild(ModalCloseBtn);
 ModalContent.appendChild(ModalText);
 ModalContent.appendChild(ModalInput);
+ModalContent.appendChild(document.createElement('br'));
 ModalContent.appendChild(ModalOk);
 
-function SummonModal(RoomName, RoomQuery) {
+function SummonModal(RoomName, RoomQuery, ARID) {
 	ExtContainer.appendChild(ModalScreen);
 	ModalInput.value = "";
 	window.onclick = function(event) {
@@ -1932,7 +2251,7 @@ function SummonModal(RoomName, RoomQuery) {
 		ModalOk.onclick = async function () {
 			ModalScreen.remove();
 			window.onclick = null;
-			ArchiveGet(RoomName, ModalInput.value);
+			ArchiveGet(RoomName, ModalInput.value, ARID);
 		};
 	}
 }
@@ -2328,6 +2647,10 @@ async function WaitUntilLoad(){
 			if (document.getElementById("TShiftContainer") != null){
 				var TScontainer = document.getElementById("TShiftContainer");
 				TScontainer.parentNode.removeChild(TScontainer);
+			}
+			if (document.getElementById("AccStatContainer") != null){
+				var AccContainer = document.getElementById("AccStatContainer");
+				AccContainer.parentNode.removeChild(AccContainer);
 			}
 			LoadButtons();
 			break;
