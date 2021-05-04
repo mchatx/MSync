@@ -2632,6 +2632,7 @@ CaptionDiv.style.position = 'absolute';
 CaptionDiv.style.width = '200px';
 CaptionDiv.style.height = '50px';
 CaptionDiv.id = "MCHAT_CAPTION";
+CaptionDiv.style.zIndex = 1;
 
 var RResize = document.createElement('div');
 RResize.style.position = 'absolute';
