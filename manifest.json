@@ -37,7 +37,7 @@
     },
     {
       "run_at": "document_end",
-      "matches": ["*://live2.nicovideo.jp/watch/*"],
+      "matches": ["*://live2.nicovideo.jp/watch/*", "*://live.nicovideo.jp/watch/*"],
       "js": ["InjectBtnNNDLive.js"]
     },
     {

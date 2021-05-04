@@ -2356,7 +2356,7 @@ function AccLoginBtnClick(){
 		SesTkn = "";
 		Logged = false;
 		localStorage.removeItem("MChatToken");
-		AccLoginBtn.textContent = "Login";
+		AccLoginBtn.textContent = "Logged out";
 	} else {
 		SummonAccModal(SesAcc);
 	}
