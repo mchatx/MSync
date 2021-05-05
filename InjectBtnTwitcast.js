@@ -929,9 +929,6 @@ function StartHereClick(){
 	VidEle = document.getElementsByTagName('video');
     for (let i = 0; i < VidEle.length; i++){
         if (VidEle[i].id == VideoElementID){
-			DocLeftOffset = window.pageXOffset || document.documentElement.scrollLeft,
-			DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
-
 			CaptionDiv.style.backgroundColor = CaptionColour;
 			VidEle[i].parentNode.appendChild(CaptionDiv);
 
@@ -1033,12 +1030,9 @@ function MMReloadCaption(){
 	VidEle = document.getElementsByTagName('video');
     for (let i = 0; i < VidEle.length; i++){
         if (VidEle[i].id == VideoElementID){
-			DocLeftOffset = window.pageXOffset || document.documentElement.scrollLeft,
-			DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
-
 			CaptionDiv.style.backgroundColor = CaptionColour;
-			CaptionDiv.style.width = (VidEle[0].getBoundingClientRect().right - VidEle[0].getBoundingClientRect().left)*0.8 + "px";
-			CaptionDiv.style.left = (VidEle[0].getBoundingClientRect().right - VidEle[0].getBoundingClientRect().left)*0.1 + "px";
+			CaptionDiv.style.width = (VidEle[i].getBoundingClientRect().right - VidEle[i].getBoundingClientRect().left)*0.8 + "px";
+			CaptionDiv.style.left = (VidEle[i].getBoundingClientRect().right - VidEle[i].getBoundingClientRect().left)*0.1 + "px";
 			RepaintResizeRelocateCaption(VidEle[i]);
 			break;
         }

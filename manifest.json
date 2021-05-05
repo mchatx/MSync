@@ -47,14 +47,20 @@
     },
     {
       "run_at": "document_end",
-      "matches": ["*://twitcasting.tv/*"],
+      "matches": ["*://twitcasting.tv/*/movie*", "*://*.twitcasting.tv/*/movie*"],
       "js": ["InjectBtnTwitcast.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["*://twitcasting.tv/*", "*://*.twitcasting.tv/*"],
+      "js": ["InjectBtnTwitcastLive.js"]
     }    
   ],
   
   "permissions": [
     "*://www.youtube.com/*",
     "*://twitcasting.tv/*",
+    "*://*.twitcasting.tv/*",
     "*://www.twitch.tv/videos/*",
     "*://www.twitch.tv/*",
     "*://live.bilibili.com/*",
