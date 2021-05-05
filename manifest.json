@@ -17,8 +17,13 @@
     },
     {
       "run_at": "document_end",
-      "matches": ["*://www.twitch.tv/*"],
+      "matches": ["*://www.twitch.tv/videos/*"],
       "js": ["InjectBtnTwitch.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["*://www.twitch.tv/*"],
+      "js": ["InjectBtnTwitchLive.js"]
     },
     {
       "run_at": "document_end",
@@ -50,6 +55,7 @@
   "permissions": [
     "*://www.youtube.com/*",
     "*://twitcasting.tv/*",
+    "*://www.twitch.tv/videos/*",
     "*://www.twitch.tv/*",
     "*://live.bilibili.com/*",
     "*://www.bilibili.com/video/*",
