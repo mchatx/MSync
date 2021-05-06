@@ -2125,7 +2125,7 @@ function AddRequest() {
 	var TitleName = "";
 	if (TitleEle != undefined){
 		TitleName = TitleEle.textContent;
-		TitleName = TitleName.substring(0, TitleName.lastIndexOf("#"));
+		TitleName = TitleName.substring(0, TitleName.lastIndexOf("#")).trim();
 	}
 	
 	var xhr = new XMLHttpRequest();
