@@ -1448,12 +1448,11 @@ ARCardOpenBtn.style.alignSelf = "center";
 
 var ARCardLockspan = document.createElement('span');
 ARCardLockspan.style.alignSelf = "center";
-ARCardLockspan.style.fontSize = "28px";
 ARCardLockspan.style.fontWeight = "bold";
 
-function AddARCard(Nick, Link, Locked, StreamLink, Tags, ARID){
+function AddARCard(Nick, Link, Locked, StreamLink, Tags, ARID, Star){
 	var RName = ARCardText.cloneNode(true);
-	RName.style.width = "35%";
+	RName.style.width = "30%";
 	RName.textContent = Nick;
 
 	var RLink = ARCardText.cloneNode(true);
@@ -1480,6 +1479,14 @@ function AddARCard(Nick, Link, Locked, StreamLink, Tags, ARID){
 		RTags.textContent = Tags;
 	}
 
+	var RStars = ARCardText.cloneNode(true);
+	RStars.style.width = "5%";
+	if (!Star){
+		RStars.textContent = "0★";
+	} else {
+		RStars.textContent = Star + "★";
+	}
+
 	var OpenBtn = ARCardOpenBtn.cloneNode(true);
 	OpenBtn.onclick = function() {
 		if (Locked) {
@@ -1502,6 +1509,7 @@ function AddARCard(Nick, Link, Locked, StreamLink, Tags, ARID){
 	RCPanel.appendChild(RLink)
 	RCPanel.appendChild(RTags)
 	RCPanel.appendChild(Lockspan);
+	RCPanel.appendChild(RStars)
 	
 	ARContainer.appendChild(RCPanel);
 }
@@ -1762,7 +1770,7 @@ function ARSearchLinkBtnClick(){
 			return;
 		} else {
 			JSON.parse(DecodeString).map(e => {
-				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"]);
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"], e["Star"]);
 			});
 		}
 	};
@@ -1814,7 +1822,7 @@ function ARBrowseAllBtnClick(){
 			return;
 		} else {
 			JSON.parse(DecodeString).map(e => {
-				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"]);
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"], e["Star"]);
 			});
 		}
 	};
@@ -1864,7 +1872,7 @@ function ARSearchBtnClick() {
 			return;
 		} else {
 			JSON.parse(DecodeString).map(e => {
-				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"]);
+				AddARCard(e["Nick"], e["Link"], e["Pass"], e["StreamLink"], e["Tags"], e["_id"], e["Star"]);
 			});
 		}
 	};
@@ -2385,7 +2393,8 @@ function AccLoginBtnClick(){
 		SesTkn = "";
 		Logged = false;
 		localStorage.removeItem("MChatToken");
-		AccLoginBtn.textContent = "Logged out";
+		AccLoginBtn.textContent = "Login";
+		StatText.textContent = "Logged Out";
 	} else {
 		SummonAccModal(SesAcc);
 	}
