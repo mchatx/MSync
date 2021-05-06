@@ -1448,6 +1448,7 @@ ARCardOpenBtn.style.alignSelf = "center";
 
 var ARCardLockspan = document.createElement('span');
 ARCardLockspan.style.alignSelf = "center";
+ARCardLockspan.style.fontSize = "28px";
 ARCardLockspan.style.fontWeight = "bold";
 
 function AddARCard(Nick, Link, Locked, StreamLink, Tags, ARID, Star){
@@ -1481,6 +1482,7 @@ function AddARCard(Nick, Link, Locked, StreamLink, Tags, ARID, Star){
 
 	var RStars = ARCardText.cloneNode(true);
 	RStars.style.width = "5%";
+	RStars.style.fontSize = "15px";
 	if (!Star){
 		RStars.textContent = "0★";
 	} else {
