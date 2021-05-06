@@ -1,6 +1,7 @@
 //-------------------------------------------  HEAD VARIABLES  -------------------------------------------
 const VideoElementID = "player_html5_api";
 const ExtContainerParentID = "tw-player-page__component tw-player-page__player-header";
+const TitleCSSSelector = "#movie_title_content";
 var UID = document.location.toString().substring(document.location.toString().indexOf("/movie/") + 7);
 var UIDName = document.location.toString().substring(0, document.location.toString().indexOf("/movie/"));
 UIDName = UIDName.substring(UIDName.lastIndexOf("/") + 1);
@@ -2120,6 +2121,13 @@ function CheckRequest() {
 }
 
 function AddRequest() {
+	TitleEle = document.querySelector(TitleCSSSelector);
+	var TitleName = "";
+	if (TitleEle != undefined){
+		TitleName = TitleEle.textContent;
+		TitleName = TitleName.substring(0, TitleName.lastIndexOf("#"));
+	}
+	
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', 'https://repo.mchatx.org/Request/', true);
 	xhr.setRequestHeader('Content-type', 'application/json');
@@ -2139,6 +2147,7 @@ function AddRequest() {
 		Act: "Add",
 		Nick: SesAcc,
 		Token: SesTkn,
+		Title: TitleName,
 		Link: HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 }

@@ -33,12 +33,12 @@
     {
       "run_at": "document_end",
       "matches": ["*://www.bilibili.com/video/*"],
-      "js": ["InjectBtnBiliBiliNotLive.js"]
+      "js": ["InjectBtnBiliBili.js"]
     },
     {
       "run_at": "document_end",
       "matches": ["*://www.nicovideo.jp/watch/*"],
-      "js": ["InjectBtnNNDNotLive.js"]
+      "js": ["InjectBtnNND.js"]
     },
     {
       "run_at": "document_end",

@@ -1,5 +1,6 @@
 //-------------------------------------------  HEAD VARIABLES  -------------------------------------------
 const ExtContainerParentID = "tw-border-t";
+const TitleCSSSelector = "h2.tw-ellipsis";
 var UID = document.location.toString().substring(document.location.toString().lastIndexOf("/") + 1);
 if (UID.indexOf("?") != -1){
 	UID.substring(0, UID.indexOf("?"));
@@ -2190,6 +2191,12 @@ function CheckRequest() {
 }
 
 function AddRequest() {
+	TitleEle = document.querySelector(TitleCSSSelector);
+	var TitleName = "";
+	if (TitleEle != undefined){
+		TitleName = TitleEle.textContent.split("•")[0];
+	}
+
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', 'https://repo.mchatx.org/Request/', true);
 	xhr.setRequestHeader('Content-type', 'application/json');
@@ -2209,6 +2216,7 @@ function AddRequest() {
 		Act: "Add",
 		Nick: SesAcc,
 		Token: SesTkn,
+		Title: TitleName,
 		Link: HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 }
