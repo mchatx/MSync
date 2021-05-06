@@ -5,6 +5,9 @@ var UID = document.location.toString().substring(document.location.toString().in
 if (UID.indexOf("?") != -1){
 	UID = UID.substring(0, UID.indexOf("?"));
 }
+if (UID.indexOf("&") != -1){
+	UID = UID.substring(0, UID.indexOf("&"));
+}
 UID = "Youtube " + UID;
 var HeadUID = 'YT_';
 //===========================================  HEAD VARIABLES  ===========================================
