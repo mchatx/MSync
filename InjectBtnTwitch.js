@@ -2194,7 +2194,7 @@ function AddRequest() {
 	TitleEle = document.querySelector(TitleCSSSelector);
 	var TitleName = "";
 	if (TitleEle != undefined){
-		TitleName = TitleEle.textContent.split("•")[0];
+		TitleName = TitleEle.textContent.substr(0, TitleEle.textContent.lastIndexOf("•"));
 	}
 
 	var xhr = new XMLHttpRequest();
