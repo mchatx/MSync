@@ -2162,6 +2162,8 @@ function AddRequest() {
 		TitleName = TitleEle.textContent;
 	}
 
+	console.log(TitleName);
+
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', 'https://repo.mchatx.org/Request/', true);
 	xhr.setRequestHeader('Content-type', 'application/json');
@@ -2181,7 +2183,7 @@ function AddRequest() {
 		Act: "Add",
 		Nick: SesAcc,
 		Token: SesTkn,
-		Title: TitleName,
+		//Title: TitleName,
 		Link: HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 }

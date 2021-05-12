@@ -2225,7 +2225,7 @@ function AddRequest() {
 		Act: "Add",
 		Nick: SesAcc,
 		Token: SesTkn,
-		Title: TitleName,
+		//Title: TitleName,
 		Link: HeadUID + UID.split(" ")[1]
 	})).replace(/\\/gi, "\\\\") + '" }');
 }
