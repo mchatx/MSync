@@ -17,8 +17,18 @@
     },
     {
       "run_at": "document_end",
+      "matches": ["*://www.youtube.com/live_chat*"],
+      "js": ["InjectBtnYoutubeLC.js"]
+    },
+    {
+      "run_at": "document_end",
       "matches": ["*://www.twitch.tv/videos/*"],
       "js": ["InjectBtnTwitch.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["*://www.twitch.tv/popout/*/chat*"],
+      "js": ["InjectBtnTwitchLC.js"]
     },
     {
       "run_at": "document_end",
