@@ -331,6 +331,8 @@ var ChatInputPanel;
 
 var mode = 0;
 
+var CurrentVersion = "3.1.3";
+
 var ChatElementTarget = "chat-messages";
 /*
 	0 : NOT SYNCED
@@ -348,6 +350,25 @@ function LoadButtons() {
 	target.prepend(ExtContainer);
 	ExtContainer.appendChild(btn);
 	ExtContainer.appendChild(spn);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'https://repo.mchatx.org/MSyncVersion/', true);
+	xhr.onload = function () {
+		try {
+			var JSONtemp = JSON.parse(xhr.response);	
+		} catch (error) {
+			spn.textContent = "ERROR FETCHING DATA";
+			return;
+		}
+		
+		spn.textContent = "Version " + CurrentVersion;
+
+		if (JSONtemp["Ver"] != CurrentVersion){
+			spn.textContent = spn.textContent + " (NEWER VERSION AVAILABLE " + JSONtemp["Ver"] + ")";
+		}
+	};
+
+	xhr.send();
 }
 
 async function WaitUntilLoad(){
