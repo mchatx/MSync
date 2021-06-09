@@ -272,6 +272,7 @@ function MsgNexus(StringData) {
 						break;
 					case ("KEYWORD"):
 						KeyWordList = ParsedData[2].split("\":\"")[1].replace("\"}","");
+						KeyWordList = KeyWordList.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");
 						break;						
 				}
 				spn.textContent = "Synced Filter"
@@ -331,7 +332,7 @@ var ChatInputPanel;
 
 var mode = 0;
 
-var CurrentVersion = "3.1.3";
+var CurrentVersion = "3.1.4";
 
 var ChatElementTarget = "chat-messages";
 /*
