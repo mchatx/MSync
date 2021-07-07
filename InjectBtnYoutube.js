@@ -189,9 +189,23 @@ const callback = function(mutationsList, observer) {
 				} 
 				
 				if ((TagList.length == 0) && (KeyWordList.length == 0)){
-					ws.send(JSON.stringify(data));
+					if (StandAlone){
+						CaptionText = data.Stext.substr(data.Stext.indexOf("]") + 2);
+						CaptionCC = "#FFFFFF";
+						CaptionOC = "#000000";
+						RepaintResizeRelocateCaption(null);
+					} else {
+						ws.send(JSON.stringify(data));
+					}					
 				} else if ((FilterMessageTag(element.innerText.split("\n")[0])) || FilterMessageKeyword(element.innerText.split("\n")[1])) {
-					ws.send(JSON.stringify(data));
+					if (StandAlone){
+						CaptionText = data.Stext.substr(data.Stext.indexOf("]") + 2);
+						CaptionCC = "#FFFFFF";
+						CaptionOC = "#000000";
+						RepaintResizeRelocateCaption(null);
+					} else {
+						ws.send(JSON.stringify(data));
+					}					
 				}
 
 				//console.log(JSON.stringify(data))
@@ -219,34 +233,63 @@ const ChatBoxObserver = new MutationObserver(ChatboxCheck);
 
 function ChatListener(){
 	var iframeChat = document.getElementsByTagName("iframe");
-	if (iframeChat.length == 0) {
-		ws.close();
-		mode = 0;
-		spn.textContent = "Can't find Chat Box";
-	} else {
-		for (let i = 0; i < iframeChat.length; i++){
-			if (iframeChat[i].id == "chatframe"){
-				if (iframeChat[i].getAttribute("src").indexOf("about:blank") != -1){
-					ws.close();
-					spn.textContent = "Chatbox needs to be open";
-				} else {
-					var target = iframeChat[i].contentDocument.getElementsByClassName("style-scope yt-live-chat-item-list-renderer");
-					for (let j = 0; j < target.length; j++){
-						if (target[j].id == "items"){
-								ListenerTarget = target[j];
-								ChatItemObserver.observe(ListenerTarget, config);
-								ChatBoxObserver.observe(iframeChat[i].parentNode, config2);
-							break;
-						} else if (j == target.length - 1){
-							ws.close();
-							spn.textContent = "Can't find Chat Box";
+	if (StandAlone){
+		if (iframeChat.length == 0) {
+			spn.textContent = "Can't find Chat Box";
+		} else {
+			for (let i = 0; i < iframeChat.length; i++){
+				if (iframeChat[i].id == "chatframe"){
+					if (iframeChat[i].getAttribute("src").indexOf("about:blank") != -1){
+						spn.textContent = "Chatbox needs to be open";
+					} else {
+						var target = iframeChat[i].contentDocument.getElementsByClassName("style-scope yt-live-chat-item-list-renderer");
+						for (let j = 0; j < target.length; j++){
+							if (target[j].id == "items"){
+									ListenerTarget = target[j];
+									ChatItemObserver.observe(ListenerTarget, config);
+									ChatBoxObserver.observe(iframeChat[i].parentNode, config2);
+								break;
+							} else if (j == target.length - 1){
+								spn.textContent = "Can't find Chat Box";
+							}
 						}
 					}
+					break;
+				} else if (i == iframeChat.length - 1){
+					spn.textContent = "Can't find Chat Box";
 				}
-				break;
-			} else if (i == iframeChat.length - 1){
-				ws.close();
-				spn.textContent = "Can't find Chat Box";
+			}
+		}
+	} else {
+		if (iframeChat.length == 0) {
+			ws.close();
+			mode = 0;
+			spn.textContent = "Can't find Chat Box";
+		} else {
+			for (let i = 0; i < iframeChat.length; i++){
+				if (iframeChat[i].id == "chatframe"){
+					if (iframeChat[i].getAttribute("src").indexOf("about:blank") != -1){
+						ws.close();
+						spn.textContent = "Chatbox needs to be open";
+					} else {
+						var target = iframeChat[i].contentDocument.getElementsByClassName("style-scope yt-live-chat-item-list-renderer");
+						for (let j = 0; j < target.length; j++){
+							if (target[j].id == "items"){
+									ListenerTarget = target[j];
+									ChatItemObserver.observe(ListenerTarget, config);
+									ChatBoxObserver.observe(iframeChat[i].parentNode, config2);
+								break;
+							} else if (j == target.length - 1){
+								ws.close();
+								spn.textContent = "Can't find Chat Box";
+							}
+						}
+					}
+					break;
+				} else if (i == iframeChat.length - 1){
+					ws.close();
+					spn.textContent = "Can't find Chat Box";
+				}
 			}
 		}
 	}
@@ -377,7 +420,7 @@ function OpenSync() {
 					spn.textContent = "Disconnected";
 					break;
 			}
-			btn.textContent = "Sync MChat";
+			btn.textContent = "Sync MChat Dekstop Client";
 			mode = 0;
         };
 		
@@ -751,6 +794,7 @@ function inheritCheck(){
 	MMCaptionOptionBtn.style.color = "inherit";
 	MMRoomBtn.style.color = "inherit";
 	MMArchiveBtn.style.color = "inherit";
+	MMFilterBtn.style.color = "inherit";
 	NoticeSpn.style.color = "inherit";
 	btn.style.color = "inherit";
 	spn.style.color = "inherit";
@@ -814,6 +858,7 @@ function inheritCheck(){
 	MMCaptionOptionBtn.style.backgroundColor = "inherit";
 	MMRoomBtn.style.backgroundColor = "inherit";
 	MMArchiveBtn.style.backgroundColor = "inherit";
+	MMFilterBtn.style.backgroundColor = "inherit";
 	NoticeSpn.style.backgroundColor = "inherit";
 	btn.style.backgroundColor = "inherit";
 	spn.style.backgroundColor = "inherit";
@@ -834,6 +879,7 @@ function RepaintController(){
 		ModalContent.style.color = PastelWhite;
 		AccModalContent.style.color = PastelWhite;
 		AccStatContainer.style.color = PastelWhite;
+		ModalContentFilter.style.color = PastelWhite;
 
 		ExtContainer.style.backgroundColor = MatteBlack;
 		RoomContainer.style.backgroundColor = MatteBlack;
@@ -841,6 +887,7 @@ function RepaintController(){
 		ModalContent.style.backgroundColor = MatteBlack;
 		AccModalContent.style.backgroundColor = MatteBlack;
 		AccStatContainer.style.backgroundColor = MatteBlack;
+		ModalContentFilter.style.backgroundColor = MatteBlack;
 	} else {
 		var Black = "#000000";
 		var PastelWhite = "#FEFEFE";
@@ -851,6 +898,7 @@ function RepaintController(){
 		ModalContent.style.color = Black;
 		AccModalContent.style.color = Black;
 		AccStatContainer.style.color = Black;
+		ModalContentFilter.style.color = Black;
 
 		ExtContainer.style.backgroundColor = PastelWhite;
 		RoomContainer.style.backgroundColor = PastelWhite;
@@ -858,6 +906,7 @@ function RepaintController(){
 		ModalContent.style.backgroundColor = PastelWhite;
 		AccModalContent.style.backgroundColor = PastelWhite;
 		AccStatContainer.style.backgroundColor = PastelWhite;
+		ModalContentFilter.style.backgroundColor = PastelWhite;
 	}
 }
 
@@ -872,7 +921,7 @@ ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChat"
+btn.textContent = "Sync MChat Dekstop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';
@@ -889,7 +938,7 @@ spn.style.background = 'white';
 
 var SMLoadHereBtn = btn.cloneNode(false);
 SMLoadHereBtn.onclick = StartHereClick;
-SMLoadHereBtn.textContent = "Open Here";
+SMLoadHereBtn.textContent = "Stand-Alone mode";
 SMLoadHereBtn.style.float = "right";
 
 function LoadButtons(ContainerTarget) {
@@ -950,6 +999,7 @@ function LoadButtons(ContainerTarget) {
 }
 
 function StartHereClick(){
+	StandAlone = true;
 	SummonMainMenu();
 
 	VidEle = document.getElementsByTagName('video');
@@ -1000,6 +1050,11 @@ MMCaptionOptionBtn.onclick = MMCaptionOptionOpen;
 MMCaptionOptionBtn.textContent = "Option";
 MMCaptionOptionBtn.style.float = "right";
 
+var MMFilterBtn = btn.cloneNode(false);
+MMFilterBtn.textContent = "Chat Filter Mode";
+MMFilterBtn.onclick = MMFilterBtnClick;
+MMFilterBtn.style.float = "right";
+
 var MMRoomBtn = btn.cloneNode(false);
 MMRoomBtn.textContent = "Room";
 MMRoomBtn.onclick = RoomBtnClick;
@@ -1014,6 +1069,10 @@ NoticeSpn.style.background = 'white';
 
 function MMAccBtnClick() {
 	SummonAccModal("");
+}
+
+function MMFilterBtnClick() {
+	SummonModalFilter();
 }
 
 function MMArchiveBtnClick(){
@@ -1033,6 +1092,7 @@ function RemoveMainMenu(){
 	NoticeSpn.remove();
 	MMRoomBtn.remove();
 	MMArchiveBtn.remove();
+	MMFilterBtn.remove();
 	MMReloadCaptionBtn.remove();
 	MMCaptionOptionBtn.remove();
 	AccStatContainer.remove();
@@ -1045,6 +1105,7 @@ function SummonMainMenu(){
 	ExtContainer.appendChild(MMCloseBtn);
 	ExtContainer.appendChild(MMReloadCaptionBtn);
 	ExtContainer.appendChild(MMCaptionOptionBtn);
+	ExtContainer.appendChild(MMFilterBtn);
 	SummonStatAccContainer();
 	CaptionText = "Caption Box.";
 }
@@ -1076,6 +1137,8 @@ function MMCloseBtnClick(){
 	spn.textContent = "";
 	ExtContainer.appendChild(SMLoadHereBtn);
 	CaptionDiv.remove();
+	StandAlone = false;
+
 	StopListening();
 	StopArchive();
 
@@ -2565,96 +2628,6 @@ function AccModalOkClick(){
 
 
 
-//---------------------------------------- PASS MODAL CONTROLLER ----------------------------------------
-var ModalScreen = document.createElement('div');
-ModalScreen.style.position = "fixed";
-ModalScreen.style.zIndex = 1;
-ModalScreen.style.left = 0;
-ModalScreen.style.top = 0;
-ModalScreen.style.width = "100%";
-ModalScreen.style.height = "100%";
-ModalScreen.style.overflow = "auto";
-ModalScreen.style.backgroundColor = "rgba(0,0,0,0.4)";
-ModalScreen.style.display = "block"
-
-var ModalContent = document.createElement('div');
-ModalContent.style.backgroundColor = "#fefefe";
-ModalContent.style.margin = "15% auto";
-ModalContent.style.padding = "20px";
-ModalContent.style.border = "1px solid #888";
-ModalContent.style.width = "200px";
-ModalContent.style.display = "flex";
-ModalContent.style.alignItems = "center";
-ModalContent.style.justifyContent = "center";
-ModalContent.style.flexDirection = "column";
-ModalScreen.appendChild(ModalContent);
-
-var ModalCloseBtn = document.createElement('span');
-ModalCloseBtn.textContent = "X";
-ModalCloseBtn.style.color = "#aaa";
-ModalCloseBtn.style.alignSelf = "end";
-ModalCloseBtn.style.fontSize = "28px";
-ModalCloseBtn.style.fontWeight = "bold";
-ModalCloseBtn.style.cursor = "pointer";
-ModalCloseBtn.onclick = CloseModalBtnClick;
-
-var ModalText = document.createElement('p');
-ModalText.textContent = "Password :";
-ModalText.style.marginTop = "15px";
-ModalText.style.marginBottom = "15px";
-ModalText.style.fontSize = "17px";
-ModalText.style.fontWeight = "bold";
-
-var ModalInput = document.createElement('input');
-ModalInput.type = "password";
-ModalInput.style.width = "80%";
-
-var ModalOk = btn.cloneNode(false);
-ModalOk.style.marginTop = "15px";
-ModalOk.textContent = "Submit";
-
-ModalContent.appendChild(ModalCloseBtn);
-ModalContent.appendChild(ModalText);
-ModalContent.appendChild(ModalInput);
-ModalContent.appendChild(document.createElement('br'));
-ModalContent.appendChild(ModalOk);
-
-function SummonModal(RoomName, RoomQuery, ARID) {
-	ExtContainer.appendChild(ModalScreen);
-	ModalInput.value = "";
-	window.onclick = function(event) {
-		if (event.target == ModalScreen) {
-			ModalScreen.remove();
-			window.onclick = null;
-		}
-	}
-
-	if (RoomQuery){
-		ModalOk.onclick = async function () {
-			ModalScreen.remove();
-			window.onclick = null;
-			const msgUint8 = new TextEncoder().encode(ModalInput.value);
-			const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-			const hashArray = Array.from(new Uint8Array(hashBuffer));
-			const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-			StartListening(RoomName, hashHex);
-		};
-	} else {
-		ModalOk.onclick = async function () {
-			ModalScreen.remove();
-			window.onclick = null;
-			ArchiveGet(RoomName, ModalInput.value, ARID);
-		};
-	}
-}
-
-function CloseModalBtnClick(){
-	ModalScreen.remove();
-}
-//======================================== PASS MODAL CONTROLLER ========================================
-
-
-
 //-------------------------------------- GRAND CANVAS CONTROLLER --------------------------------------
 var CaptionDiv = document.createElement('div')
 CaptionDiv.style.position = 'absolute';
@@ -2993,6 +2966,198 @@ function dragElement(elmnt) {
   }
 //====================================== GRAND CANVAS CONTROLLER ======================================
 
+
+
+//---------------------------------------- PASS MODAL CONTROLLER ----------------------------------------
+var ModalScreen = document.createElement('div');
+ModalScreen.style.position = "fixed";
+ModalScreen.style.zIndex = 1;
+ModalScreen.style.left = 0;
+ModalScreen.style.top = 0;
+ModalScreen.style.width = "100%";
+ModalScreen.style.height = "100%";
+ModalScreen.style.overflow = "auto";
+ModalScreen.style.backgroundColor = "rgba(0,0,0,0.4)";
+ModalScreen.style.display = "block"
+
+var ModalContent = document.createElement('div');
+ModalContent.style.backgroundColor = "#fefefe";
+ModalContent.style.margin = "15% auto";
+ModalContent.style.padding = "20px";
+ModalContent.style.border = "1px solid #888";
+ModalContent.style.width = "200px";
+ModalContent.style.display = "flex";
+ModalContent.style.alignItems = "center";
+ModalContent.style.justifyContent = "center";
+ModalContent.style.flexDirection = "column";
+ModalScreen.appendChild(ModalContent);
+
+var ModalCloseBtn = document.createElement('span');
+ModalCloseBtn.textContent = "X";
+ModalCloseBtn.style.color = "#aaa";
+ModalCloseBtn.style.alignSelf = "end";
+ModalCloseBtn.style.fontSize = "28px";
+ModalCloseBtn.style.fontWeight = "bold";
+ModalCloseBtn.style.cursor = "pointer";
+ModalCloseBtn.onclick = CloseModalBtnClick;
+
+var ModalText = document.createElement('p');
+ModalText.textContent = "Password :";
+ModalText.style.marginTop = "15px";
+ModalText.style.marginBottom = "15px";
+ModalText.style.fontSize = "17px";
+ModalText.style.fontWeight = "bold";
+
+var ModalInput = document.createElement('input');
+ModalInput.type = "password";
+ModalInput.style.width = "80%";
+
+var ModalOk = btn.cloneNode(false);
+ModalOk.style.marginTop = "15px";
+ModalOk.textContent = "Submit";
+
+ModalContent.appendChild(ModalCloseBtn);
+ModalContent.appendChild(ModalText);
+ModalContent.appendChild(ModalInput);
+ModalContent.appendChild(document.createElement('br'));
+ModalContent.appendChild(ModalOk);
+
+function SummonModal(RoomName, RoomQuery, ARID) {
+	ExtContainer.appendChild(ModalScreen);
+	ModalInput.value = "";
+	window.onclick = function(event) {
+		if (event.target == ModalScreen) {
+			ModalScreen.remove();
+			window.onclick = null;
+		}
+	}
+
+	if (RoomQuery){
+		ModalOk.onclick = async function () {
+			ModalScreen.remove();
+			window.onclick = null;
+			const msgUint8 = new TextEncoder().encode(ModalInput.value);
+			const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+			const hashArray = Array.from(new Uint8Array(hashBuffer));
+			const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+			StartListening(RoomName, hashHex);
+		};
+	} else {
+		ModalOk.onclick = async function () {
+			ModalScreen.remove();
+			window.onclick = null;
+			ArchiveGet(RoomName, ModalInput.value, ARID);
+		};
+	}
+}
+
+function CloseModalBtnClick(){
+	ModalScreen.remove();
+}
+//======================================== PASS MODAL CONTROLLER ========================================
+
+
+
+//---------------------------------------- FILTER MODAL CONTROLLER ----------------------------------------
+var ModalScreenFilter = document.createElement('div');
+ModalScreenFilter.style.position = "fixed";
+ModalScreenFilter.style.zIndex = 1;
+ModalScreenFilter.style.left = 0;
+ModalScreenFilter.style.top = 0;
+ModalScreenFilter.style.width = "100%";
+ModalScreenFilter.style.height = "100%";
+ModalScreenFilter.style.overflow = "auto";
+ModalScreenFilter.style.backgroundColor = "rgba(0,0,0,0.4)";
+ModalScreenFilter.style.display = "block"
+
+var ModalContentFilter = document.createElement('div');
+ModalContentFilter.style.backgroundColor = "#fefefe";
+ModalContentFilter.style.margin = "15% auto";
+ModalContentFilter.style.padding = "20px";
+ModalContentFilter.style.border = "1px solid #888";
+ModalContentFilter.style.width = "200px";
+ModalContentFilter.style.display = "flex";
+ModalContentFilter.style.alignItems = "center";
+ModalContentFilter.style.justifyContent = "center";
+ModalContentFilter.style.flexDirection = "column";
+ModalScreenFilter.appendChild(ModalContentFilter);
+
+var ModalFilterCloseBtn = document.createElement('span');
+ModalFilterCloseBtn.textContent = "X";
+ModalFilterCloseBtn.style.color = "#aaa";
+ModalFilterCloseBtn.style.alignSelf = "end";
+ModalFilterCloseBtn.style.fontSize = "28px";
+ModalFilterCloseBtn.style.fontWeight = "bold";
+ModalFilterCloseBtn.style.cursor = "pointer";
+ModalFilterCloseBtn.onclick = CloseModalFilterBtnClick;
+
+var ModalFilterText = document.createElement('p');
+ModalFilterText.textContent = "FILTER";
+ModalFilterText.style.marginTop = "15px";
+ModalFilterText.style.marginBottom = "15px";
+ModalFilterText.style.fontSize = "17px";
+ModalFilterText.style.fontWeight = "bold";
+
+var ModalFilterText1 = document.createElement('p');
+ModalFilterText1.textContent = "Keywords :";
+ModalFilterText1.style.fontSize = "17px";
+
+var ModalFilterInput1 = document.createElement('input');
+ModalFilterInput1.type = "text";
+ModalFilterInput1.placeholder = "[EN], [翻訳], ..."
+ModalFilterInput1.style.width = "80%";
+
+var ModalFilterText2 = document.createElement('p');
+ModalFilterText2.textContent = "Authors :";
+ModalFilterText2.style.fontSize = "17px";
+
+var ModalFilterInput2 = document.createElement('input');
+ModalFilterInput2.type = "text";
+ModalFilterInput2.placeholder = "XYZ, Gachapon ..."
+ModalFilterInput2.style.width = "80%";
+
+var ModalFilterOk = btn.cloneNode(false);
+ModalFilterOk.style.marginTop = "15px";
+ModalFilterOk.textContent = "Ok";
+ModalFilterOk.onclick = OkModalFilterBtnClick;
+
+ModalContentFilter.appendChild(ModalFilterCloseBtn);
+ModalContentFilter.appendChild(ModalFilterText);
+ModalContentFilter.appendChild(ModalFilterText1);
+ModalContentFilter.appendChild(ModalFilterInput1);
+ModalContentFilter.appendChild(ModalFilterText2);
+ModalContentFilter.appendChild(ModalFilterInput2);
+ModalContentFilter.appendChild(document.createElement('br'));
+ModalContentFilter.appendChild(ModalFilterOk);
+
+function SummonModalFilter() {
+	ExtContainer.appendChild(ModalScreenFilter);
+	ModalFilterInput1.value = KeyWordList.replaceAll("\\[", "[").replaceAll("\\]", "]").replaceAll("|", ", ");
+	ModalFilterInput2.value = TagList.replaceAll("\\[", "[").replaceAll("\\]", "]").replaceAll("|", ", ");
+	window.onclick = function(event) {
+		if (event.target == ModalScreenFilter) {
+			ModalScreenFilter.remove();
+			window.onclick = null;
+		}
+	}
+}
+
+function OkModalFilterBtnClick(){
+	KeyWordList = ModalFilterInput1.value.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");;
+	TagList = ModalFilterInput2.value.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");;
+	CaptionText = "NEW FILTER";
+	RepaintResizeRelocateCaption(null);
+	ChatListener();
+	ModalScreenFilter.remove();
+}
+
+function CloseModalFilterBtnClick(){
+	ModalScreenFilter.remove();
+}
+//======================================== FILTER MODAL CONTROLLER ========================================
+
+
+
 //========================================= MChad Controller =========================================
 
 
@@ -3004,7 +3169,8 @@ var sendBtn;
 var ChatText;
 var ListenerTarget;
 var ChatInputPanel;
-var CurrentVersion = "3.1.4";
+var CurrentVersion = "3.1.5";
+var StandAlone = false;
 
 var mode = 0;
 /*

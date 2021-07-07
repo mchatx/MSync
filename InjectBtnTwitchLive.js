@@ -1,5 +1,5 @@
 //-------------------------------------------  HEAD VARIABLES  -------------------------------------------
-const ExtContainerParentID = "tw-border-t";
+const ExtContainerParentID = "channel-info-content";
 var UID = document.location.toString().substring(document.location.toString().lastIndexOf("/") + 1);
 if (UID.indexOf("?") != -1){
 	UID.substring(0, UID.indexOf("?"));
@@ -414,7 +414,7 @@ function OpenSync() {
 					spn.textContent = "Disconnected";
 					break;	
 			}
-			btn.textContent = "Sync MChat";
+			btn.textContent = "Sync MChat Dekstop Client";
 			mode = 0;
         };
 		
@@ -924,7 +924,7 @@ ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChat"
+btn.textContent = "Sync MChat Dekstop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';
@@ -941,7 +941,7 @@ spn.style.background = 'white';
 
 var SMLoadHereBtn = btn.cloneNode(false);
 SMLoadHereBtn.onclick = StartHereClick;
-SMLoadHereBtn.textContent = "Open Here";
+SMLoadHereBtn.textContent = "Stand-Alone mode";
 SMLoadHereBtn.style.float = "right";
 
 function LoadButtons(ContainerTarget) {
@@ -3036,7 +3036,7 @@ var sendBtn;
 var ChatText;
 var ListenerTarget;
 var ChatInputPanel;
-var CurrentVersion = "3.1.4";
+var CurrentVersion = "3.1.5";
 
 var Live = false;
 var mode = 0;

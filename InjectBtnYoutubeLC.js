@@ -175,7 +175,7 @@ function OpenSync() {
 					spn.textContent = "Disconnected";
 					break;
 			}
-			btn.textContent = "Sync MChat";
+			btn.textContent = "Sync MChat Dekstop Client";
 			mode = 0;
         };
 		
@@ -309,7 +309,7 @@ function BtnNexus() {
 var ws;
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChat"
+btn.textContent = "Sync MChat Dekstop Client"
 btn.style.margin = "5px"
 btn.style.background = 'black';
 btn.style.color = 'white';
@@ -332,7 +332,7 @@ var ChatInputPanel;
 
 var mode = 0;
 
-var CurrentVersion = "3.1.4";
+var CurrentVersion = "3.1.5";
 
 var ChatElementTarget = "chat-messages";
 /*
