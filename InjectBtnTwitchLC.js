@@ -202,7 +202,7 @@ function OpenSync() {
         ws.onclose = function (event) {
 			switch (mode){
 				case 1:
-					spn.textContent = "Can't reach server";
+					spn.textContent = "Can't connect to MChad desktop app";
 					break;
 				case 3:
 					spn.textContent = "Disconnected";
@@ -215,12 +215,13 @@ function OpenSync() {
 					break;
 				case 5:
 					ChatItemObserver.disconnect();
+					FrontFilterBtn.remove();
 					break;
 				case 6:
 					spn.textContent = "Disconnected";
 					break;	
 			}
-			btn.textContent = "Sync MChat Dekstop Client";
+			btn.textContent = "Sync MChad Dekstop Client";
 			mode = 0;
         };
 		
@@ -303,6 +304,7 @@ function MsgNexus(StringData) {
 					mode = 5;
 					btn.textContent = "Synced - Listener (Click to Unsync)";
 					ChatListener();
+					document.getElementById("Extcontainer").appendChild(FrontFilterBtn);
 				}
 				break;
 			case ("\"Act\":\"MChad-FilterApp\""):
@@ -351,10 +353,120 @@ function BtnNexus() {
 
 
 
+//---------------------------------------- FILTER MODAL CONTROLLER ----------------------------------------
+var ModalScreenFilter = document.createElement('div');
+ModalScreenFilter.style.position = "fixed";
+ModalScreenFilter.style.zIndex = 1;
+ModalScreenFilter.style.left = 0;
+ModalScreenFilter.style.top = 0;
+ModalScreenFilter.style.width = "100%";
+ModalScreenFilter.style.height = "100%";
+ModalScreenFilter.style.overflow = "auto";
+ModalScreenFilter.style.backgroundColor = "rgba(0,0,0,0.4)";
+ModalScreenFilter.style.display = "block"
+
+var ModalContentFilter = document.createElement('div');
+ModalContentFilter.style.backgroundColor = "#fefefe";
+ModalContentFilter.style.margin = "15% auto";
+ModalContentFilter.style.padding = "20px";
+ModalContentFilter.style.border = "1px solid #888";
+ModalContentFilter.style.width = "200px";
+ModalContentFilter.style.display = "flex";
+ModalContentFilter.style.alignItems = "center";
+ModalContentFilter.style.justifyContent = "center";
+ModalContentFilter.style.flexDirection = "column";
+ModalScreenFilter.appendChild(ModalContentFilter);
+
+var ModalFilterCloseBtn = document.createElement('span');
+ModalFilterCloseBtn.textContent = "X";
+ModalFilterCloseBtn.style.color = "#aaa";
+ModalFilterCloseBtn.style.alignSelf = "end";
+ModalFilterCloseBtn.style.fontSize = "28px";
+ModalFilterCloseBtn.style.fontWeight = "bold";
+ModalFilterCloseBtn.style.cursor = "pointer";
+ModalFilterCloseBtn.onclick = CloseModalFilterBtnClick;
+
+var ModalFilterText = document.createElement('p');
+ModalFilterText.textContent = "FILTER";
+ModalFilterText.style.marginTop = "15px";
+ModalFilterText.style.marginBottom = "15px";
+ModalFilterText.style.fontSize = "17px";
+ModalFilterText.style.fontWeight = "bold";
+ModalFilterText.style.color = "black";
+
+var ModalFilterText1 = document.createElement('p');
+ModalFilterText1.textContent = "Keywords :";
+ModalFilterText1.style.color = "black";
+ModalFilterText1.style.fontSize = "17px";
+
+var ModalFilterInput1 = document.createElement('input');
+ModalFilterInput1.type = "text";
+ModalFilterInput1.placeholder = "[EN], [翻訳], ..."
+ModalFilterInput1.style.width = "80%";
+
+var ModalFilterText2 = document.createElement('p');
+ModalFilterText2.textContent = "Authors :";
+ModalFilterText2.style.color = "black";
+ModalFilterText2.style.fontSize = "17px";
+
+var ModalFilterInput2 = document.createElement('input');
+ModalFilterInput2.type = "text";
+ModalFilterInput2.placeholder = "XYZ, Gachapon ..."
+ModalFilterInput2.style.width = "80%";
+
+var ModalFilterOk = document.createElement('button');
+ModalFilterOk.style.margin = "5px"
+ModalFilterOk.style.background = 'black';
+ModalFilterOk.style.color = 'white';
+ModalFilterOk.style.fontSize = '15px';
+ModalFilterOk.style.cursor = 'pointer';
+ModalFilterOk.style.textAlign = 'center';
+ModalFilterOk.style.borderRadius = '15px';
+ModalFilterOk.style.padding = '8px';
+ModalFilterOk.style.marginTop = "15px";
+ModalFilterOk.textContent = "Ok";
+ModalFilterOk.onclick = OkModalFilterBtnClick;
+
+ModalContentFilter.appendChild(ModalFilterCloseBtn);
+ModalContentFilter.appendChild(ModalFilterText);
+ModalContentFilter.appendChild(ModalFilterText1);
+ModalContentFilter.appendChild(ModalFilterInput1);
+ModalContentFilter.appendChild(ModalFilterText2);
+ModalContentFilter.appendChild(ModalFilterInput2);
+ModalContentFilter.appendChild(document.createElement('br'));
+ModalContentFilter.appendChild(ModalFilterOk);
+
+function SummonModalFilter() {
+	document.getElementById("Extcontainer").appendChild(ModalScreenFilter);
+	ModalFilterInput1.value = KeyWordList.replaceAll("\\[", "[").replaceAll("\\]", "]").replaceAll("|", ", ");
+	ModalFilterInput2.value = TagList.replaceAll("\\[", "[").replaceAll("\\]", "]").replaceAll("|", ", ");
+	window.onclick = function(event) {
+		if (event.target == ModalScreenFilter) {
+			ModalScreenFilter.remove();
+			window.onclick = null;
+		}
+	}
+}
+
+function OkModalFilterBtnClick(){
+	KeyWordList = ModalFilterInput1.value.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");;
+	TagList = ModalFilterInput2.value.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");;
+	spn.textContent = "Saved new filter";
+
+	ModalScreenFilter.remove();
+}
+
+function CloseModalFilterBtnClick(){
+	ModalScreenFilter.remove();
+}
+//======================================== FILTER MODAL CONTROLLER ========================================
+
+
+
 var ws;
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChat Dekstop Client"
+btn.textContent = "Sync MChad Dekstop Client"
 btn.style.margin = "5px"
 btn.style.background = 'black';
 btn.style.color = 'white';
@@ -369,6 +481,16 @@ spn.textContent = "";
 spn.style.fontSize = '15px';
 spn.style.background = 'black';
 spn.style.color = 'white';
+
+var FrontFilterBtn = btn.cloneNode(false);
+FrontFilterBtn.id = "FrontFilterBtn";
+FrontFilterBtn.textContent = "Set Filter";
+FrontFilterBtn.onclick = MMFilterBtnClick;
+FrontFilterBtn.style.float = "left";
+
+function MMFilterBtnClick() {
+	SummonModalFilter();
+}
 
 var sendBtn; 
 var ChatText;

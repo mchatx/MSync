@@ -140,7 +140,7 @@ const callback = function(mutationsList, observer) {
 				
 				if ((TagList.length == 0) && (KeyWordList.length == 0)){
 					ws.send(JSON.stringify(data));
-				} else if ((FilterMessageTag(authorname)) || FilterMessageKeyword(element.innerText.split("\n")[1])) {
+				} else if ((FilterMessageTag(authorname)) || FilterMessageKeyword(data.Stext.substr(data.Stext.indexOf("]") + 2))) {
 					ws.send(JSON.stringify(data));
 				}
 
@@ -271,7 +271,7 @@ function OpenSync() {
         ws.onclose = function (event) {
 			switch (mode){
 				case 1:
-					spn.textContent = "Can't reach server";
+					spn.textContent = "Can't connect to MChad desktop app";
 					break;
 				case 3:
 					MainVid.onseeked = null;
@@ -295,7 +295,7 @@ function OpenSync() {
 					spn.textContent = "Disconnected";
 					break;
 			}
-			btn.textContent = "Sync MChat Dekstop Client";
+			btn.textContent = "Sync MChad Dekstop Client";
 			mode = 0;
         };
 		
@@ -791,7 +791,7 @@ ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChat Dekstop Client"
+btn.textContent = "Sync MChad Dekstop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';

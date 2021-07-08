@@ -164,50 +164,52 @@ const callback = function(mutationsList, observer) {
     for(const mutation of mutationsList) {
         if (mutation.type === 'childList') {
 			mutation.addedNodes.forEach(element => {
-				data = {                            
-					"Act": 'MChad-Entry',
-					"UID": UID,
-					"Tag": element.innerText.split("\n")[0],
-					"Stime": '',
-					"Stext": '',
-					"CC": '',
-					"OC": ''
-				};
-
-				data.Stime = TimespanStringify(MainVid.currentTime);
-				data.Stext = "[" + element.innerText.split("\n")[0] + "] " + element.innerText.split("\n")[1];
-				
-				if (element.getAttribute("author-type") != null) {
-					var tagscan = element.getAttribute("author-type").toLowerCase().match(/mod|moderator|owner/);
-					if (tagscan != null){
-						if (tagscan.length != 0){
-							data.Tag += "," + element.getAttribute("author-type");
-							ws.send(JSON.stringify(data));
-							return true;
+				if (element.innerText != ""){
+					data = {                            
+						"Act": 'MChad-Entry',
+						"UID": UID,
+						"Tag": element.innerText.split("\n")[0],
+						"Stime": '',
+						"Stext": '',
+						"CC": '',
+						"OC": ''
+					};
+	
+					data.Stime = TimespanStringify(MainVid.currentTime);
+					data.Stext = "[" + element.innerText.split("\n")[0] + "] " + element.innerText.split("\n")[1];
+	
+					if (element.getAttribute("author-type") != null) {
+						var tagscan = element.getAttribute("author-type").toLowerCase().match(/mod|moderator|owner/);
+						if (tagscan != null){
+							if (tagscan.length != 0){
+								data.Tag += "," + element.getAttribute("author-type");
+								ws.send(JSON.stringify(data));
+								return true;
+							}
 						}
 					}
-				} 
-				
-				if ((TagList.length == 0) && (KeyWordList.length == 0)){
-					if (StandAlone){
-						CaptionText = data.Stext.substr(data.Stext.indexOf("]") + 2);
-						CaptionCC = "#FFFFFF";
-						CaptionOC = "#000000";
-						RepaintResizeRelocateCaption(null);
-					} else {
-						ws.send(JSON.stringify(data));
-					}					
-				} else if ((FilterMessageTag(element.innerText.split("\n")[0])) || FilterMessageKeyword(element.innerText.split("\n")[1])) {
-					if (StandAlone){
-						CaptionText = data.Stext.substr(data.Stext.indexOf("]") + 2);
-						CaptionCC = "#FFFFFF";
-						CaptionOC = "#000000";
-						RepaintResizeRelocateCaption(null);
-					} else {
-						ws.send(JSON.stringify(data));
-					}					
+	
+					if ((TagList.length == 0) && (KeyWordList.length == 0)){
+						if (StandAlone){
+							CaptionText = data.Stext.substr(data.Stext.indexOf("]") + 2);
+							CaptionCC = "#FFFFFF";
+							CaptionOC = "#000000";
+							RepaintResizeRelocateCaption(null);
+						} else {
+							ws.send(JSON.stringify(data));
+						}					
+					} else if ((FilterMessageTag(data.Tag)) || FilterMessageKeyword(data.Stext.substr(data.Stext.indexOf("]") + 2))) {
+						if (StandAlone){
+							CaptionText = data.Stext.substr(data.Stext.indexOf("]") + 2);
+							CaptionCC = "#FFFFFF";
+							CaptionOC = "#000000";
+							RepaintResizeRelocateCaption(null);
+						} else {
+							ws.send(JSON.stringify(data));
+						}					
+					}
 				}
-
+				
 				//console.log(JSON.stringify(data))
 				// SEND THEM TO APP OR FILTER FIRST BEFORE SENDING
 			});
@@ -395,7 +397,7 @@ function OpenSync() {
         ws.onclose = function (event) {
 			switch (mode){
 				case 1:
-					spn.textContent = "Can't reach server";
+					spn.textContent = "Can't connect to MChad desktop app";
 					break;
 				case 3:
 					MainVid.onseeked = null;
@@ -412,6 +414,7 @@ function OpenSync() {
 				case 5:
 					ChatItemObserver.disconnect();
 					ChatBoxObserver.disconnect();
+					FrontFilterBtn.remove();
 					break;
 				case 6:
 					MainVid.onseeked = null;
@@ -420,7 +423,7 @@ function OpenSync() {
 					spn.textContent = "Disconnected";
 					break;
 			}
-			btn.textContent = "Sync MChat Dekstop Client";
+			btn.textContent = "Sync MChad Dekstop Client";
 			mode = 0;
         };
 		
@@ -524,6 +527,7 @@ function MsgNexus(StringData) {
 				if (mode < 3){
 					mode = 5;
 					btn.textContent = "Synced - Listener (Click to Unsync)";
+					ExtContainer.appendChild(FrontFilterBtn);
 					ChatListener();
 				}
 				break;
@@ -795,6 +799,7 @@ function inheritCheck(){
 	MMRoomBtn.style.color = "inherit";
 	MMArchiveBtn.style.color = "inherit";
 	MMFilterBtn.style.color = "inherit";
+	FrontFilterBtn.style.color = "inherit";
 	NoticeSpn.style.color = "inherit";
 	btn.style.color = "inherit";
 	spn.style.color = "inherit";
@@ -859,6 +864,7 @@ function inheritCheck(){
 	MMRoomBtn.style.backgroundColor = "inherit";
 	MMArchiveBtn.style.backgroundColor = "inherit";
 	MMFilterBtn.style.backgroundColor = "inherit";
+	FrontFilterBtn.style.backgroundColor = "inherit";
 	NoticeSpn.style.backgroundColor = "inherit";
 	btn.style.backgroundColor = "inherit";
 	spn.style.backgroundColor = "inherit";
@@ -921,7 +927,7 @@ ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChat Dekstop Client"
+btn.textContent = "Sync MChad Dekstop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';
@@ -930,6 +936,12 @@ btn.style.cursor = 'pointer';
 btn.style.textAlign = 'center';
 btn.style.borderRadius = '15px';
 btn.style.padding = '8px';
+
+var FrontFilterBtn = btn.cloneNode(false);
+FrontFilterBtn.id = "FrontFilterBtn";
+FrontFilterBtn.textContent = "Set Filter";
+FrontFilterBtn.onclick = MMFilterBtnClick;
+FrontFilterBtn.style.float = "left";
 
 var spn = document.createElement('span');
 spn.textContent = "";
@@ -1025,6 +1037,7 @@ function StartHereClick(){
 	resizeElement(CaptionDiv);
 	btn.remove();
 	spn.remove();
+	FrontFilterBtn.remove();
 	SMLoadHereBtn.remove();
 	if (ws != undefined){
 		ws.close();
@@ -1141,6 +1154,8 @@ function MMCloseBtnClick(){
 
 	StopListening();
 	StopArchive();
+	ChatItemObserver.disconnect();
+	ChatBoxObserver.disconnect();
 
 	RemoveMainMenu();
 }
@@ -1244,6 +1259,9 @@ function StartListening(RoomName, Password){
 	ResetRoomContainer();
 	RemoveRoomMenu();
 	SummonMainMenu();
+	ChatItemObserver.disconnect();
+	ChatBoxObserver.disconnect();
+
 
 	var BToken = "";
 	if (!Password){
@@ -1592,6 +1610,9 @@ function StopArchive(){
 function ArchiveGet(Link, Password, ARID){
 	StopListening();
 	StopArchive();
+	ChatItemObserver.disconnect();
+	ChatBoxObserver.disconnect();
+
 
 	ArchiveID = ARID;
 	CheckRating();
@@ -3145,9 +3166,16 @@ function SummonModalFilter() {
 function OkModalFilterBtnClick(){
 	KeyWordList = ModalFilterInput1.value.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");;
 	TagList = ModalFilterInput2.value.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");;
-	CaptionText = "NEW FILTER";
-	RepaintResizeRelocateCaption(null);
-	ChatListener();
+	if (StandAlone){
+		CaptionText = "Saved new filter";
+		RepaintResizeRelocateCaption(null);
+		StopListening();
+		StopArchive();
+		ChatListener();
+	} else {
+		spn.textContent = "Saved new filter"
+	}
+
 	ModalScreenFilter.remove();
 }
 

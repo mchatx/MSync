@@ -190,14 +190,28 @@ const callback = function(mutationsList, observer) {
 					"CC": '',
 					"OC": ''
 				};
-
+				
 				data.Stime = TimespanStringify(VidDur.textContent);
 				data.Stext = "[" + authorname + "] " + element.innerText.split("\n")[1];
 				
 				if ((TagList.length == 0) && (KeyWordList.length == 0)){
-					ws.send(JSON.stringify(data));
-				} else if ((FilterMessageTag(authorname)) || FilterMessageKeyword(element.innerText.split("\n")[1])) {
-					ws.send(JSON.stringify(data));
+					if (StandAlone){
+						CaptionText = data.Stext.substr(data.Stext.indexOf("]") + 2);
+						CaptionCC = "#FFFFFF";
+						CaptionOC = "#000000";
+						RepaintResizeRelocateCaption(null);
+					} else {
+						ws.send(JSON.stringify(data));
+					}					
+				} else if ((FilterMessageTag(authorname)) || FilterMessageKeyword(data.Stext.substr(data.Stext.indexOf("]") + 2))) {
+					if (StandAlone){
+						CaptionText = data.Stext.substr(data.Stext.indexOf("]") + 2);
+						CaptionCC = "#FFFFFF";
+						CaptionOC = "#000000";
+						RepaintResizeRelocateCaption(null);
+					} else {
+						ws.send(JSON.stringify(data));
+					}					
 				}
 
 				//console.log(JSON.stringify(data))
@@ -217,11 +231,13 @@ function ChatListener(){
 		ListenerTarget = Chatbox[0].firstChild;
 		ChatItemObserver.observe(ListenerTarget, config);
 	} else {
-		ws.close();
+		if (!StandAlone){
+			ws.close();
+		}				
 		spn.textContent = "Can't find Chat Box";
 	}
 
-	VidDur = document.getElementById("updatetimer");
+	VidDur = document.getElementsByClassName("vjs-current-time-display")[0];
 }
 
 function TimespanStringify(timechange){
@@ -327,7 +343,7 @@ function OpenSync() {
         ws.onclose = function (event) {
 			switch (mode){
 				case 1:
-					spn.textContent = "Can't reach server";
+					spn.textContent = "Can't connect to MChad desktop app";
 					break;
 				case 3:
 					MainVid.onseeked = null;
@@ -343,6 +359,7 @@ function OpenSync() {
 					break;
 				case 5:
 					ChatItemObserver.disconnect();
+					FrontFilterBtn.remove();
 					break;
 				case 6:
 					MainVid.onseeked = null;
@@ -351,7 +368,7 @@ function OpenSync() {
 					spn.textContent = "Disconnected";
 					break;
 			}
-			btn.textContent = "Sync MChat Dekstop Client";
+			btn.textContent = "Sync MChad Dekstop Client";
 			mode = 0;
         };
 		
@@ -460,6 +477,7 @@ function MsgNexus(StringData) {
 				if (mode < 3){
 					mode = 5;
 					btn.textContent = "Synced - Listener (Click to Unsync)";
+					ExtContainer.appendChild(FrontFilterBtn);
 					ChatListener();
 				}
 				break;
@@ -729,6 +747,8 @@ function inheritCheck(){
 	MMCaptionOptionBtn.style.color = "inherit";
 	MMRoomBtn.style.color = "inherit";
 	MMArchiveBtn.style.color = "inherit";
+	MMFilterBtn.style.color = "inherit";
+	FrontFilterBtn.style.color = "inherit";
 	NoticeSpn.style.color = "inherit";
 	btn.style.color = "inherit";
 	spn.style.color = "inherit";
@@ -792,6 +812,8 @@ function inheritCheck(){
 	MMCaptionOptionBtn.style.backgroundColor = "inherit";
 	MMRoomBtn.style.backgroundColor = "inherit";
 	MMArchiveBtn.style.backgroundColor = "inherit";
+	MMFilterBtn.style.backgroundColor = "inherit";
+	FrontFilterBtn.style.backgroundColor = "inherit";
 	NoticeSpn.style.backgroundColor = "inherit";
 	btn.style.backgroundColor = "inherit";
 	spn.style.backgroundColor = "inherit";
@@ -812,6 +834,7 @@ function RepaintController(){
 		ModalContent.style.color = PastelWhite;
 		AccModalContent.style.color = PastelWhite;
 		AccStatContainer.style.color = PastelWhite;
+		ModalContentFilter.style.color = PastelWhite;
 
 		ExtContainer.style.backgroundColor = MatteBlack;
 		RoomContainer.style.backgroundColor = MatteBlack;
@@ -819,6 +842,7 @@ function RepaintController(){
 		ModalContent.style.backgroundColor = MatteBlack;
 		AccModalContent.style.backgroundColor = MatteBlack;
 		AccStatContainer.style.backgroundColor = MatteBlack;
+		ModalContentFilter.style.backgroundColor = MatteBlack;
 	} else {
 		var Black = "#000000";
 		var PastelWhite = "#FEFEFE";
@@ -829,6 +853,7 @@ function RepaintController(){
 		ModalContent.style.color = Black;
 		AccModalContent.style.color = Black;
 		AccStatContainer.style.color = Black;
+		ModalContentFilter.style.color = Black;
 
 		ExtContainer.style.backgroundColor = PastelWhite;
 		RoomContainer.style.backgroundColor = PastelWhite;
@@ -836,6 +861,7 @@ function RepaintController(){
 		ModalContent.style.backgroundColor = PastelWhite;
 		AccModalContent.style.backgroundColor = PastelWhite;
 		AccStatContainer.style.backgroundColor = PastelWhite;
+		ModalContentFilter.style.backgroundColor = PastelWhite;
 	}
 }
 
@@ -850,7 +876,7 @@ ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChat Dekstop Client"
+btn.textContent = "Sync MChad Dekstop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';
@@ -859,6 +885,12 @@ btn.style.cursor = 'pointer';
 btn.style.textAlign = 'center';
 btn.style.borderRadius = '15px';
 btn.style.padding = '8px';
+
+var FrontFilterBtn = btn.cloneNode(false);
+FrontFilterBtn.id = "FrontFilterBtn";
+FrontFilterBtn.textContent = "Set Filter";
+FrontFilterBtn.onclick = MMFilterBtnClick;
+FrontFilterBtn.style.float = "left";
 
 var spn = document.createElement('span');
 spn.textContent = "";
@@ -928,6 +960,7 @@ function LoadButtons(ContainerTarget) {
 }
 
 function StartHereClick(){
+	StandAlone = true;
 	SummonMainMenu();
 
 	VidEle = document.getElementsByTagName('video');
@@ -950,6 +983,7 @@ function StartHereClick(){
 	dragElement(CaptionDiv);
 	resizeElement(CaptionDiv);
 	btn.remove();
+	FrontFilterBtn.remove();
 	spn.remove();
 	SMLoadHereBtn.remove();
 	if (ws != undefined){
@@ -976,6 +1010,11 @@ MMCaptionOptionBtn.onclick = MMCaptionOptionOpen;
 MMCaptionOptionBtn.textContent = "Option";
 MMCaptionOptionBtn.style.float = "right";
 
+var MMFilterBtn = btn.cloneNode(false);
+MMFilterBtn.textContent = "Chat Filter Mode";
+MMFilterBtn.onclick = MMFilterBtnClick;
+MMFilterBtn.style.float = "right";
+
 var MMRoomBtn = btn.cloneNode(false);
 MMRoomBtn.textContent = "Room";
 MMRoomBtn.onclick = RoomBtnClick;
@@ -990,6 +1029,10 @@ NoticeSpn.style.background = 'white';
 
 function MMAccBtnClick() {
 	SummonAccModal("");
+}
+
+function MMFilterBtnClick() {
+	SummonModalFilter();
 }
 
 function MMArchiveBtnClick(){
@@ -1010,6 +1053,7 @@ function RemoveMainMenu(){
 	MMRoomBtn.remove();
 	MMArchiveBtn.remove();
 	MMReloadCaptionBtn.remove();
+	MMFilterBtn.remove();
 	MMCaptionOptionBtn.remove();
 	AccStatContainer.remove();
 }
@@ -1021,6 +1065,7 @@ function SummonMainMenu(){
 	ExtContainer.appendChild(MMCloseBtn);
 	ExtContainer.appendChild(MMReloadCaptionBtn);
 	ExtContainer.appendChild(MMCaptionOptionBtn);
+	ExtContainer.appendChild(MMFilterBtn);
 	SummonStatAccContainer();
 	CaptionText = "Caption Box.";
 }
@@ -1049,8 +1094,11 @@ function MMCloseBtnClick(){
 	spn.textContent = "";
 	ExtContainer.appendChild(SMLoadHereBtn);
 	CaptionDiv.remove();
+	StandAlone = false;
+
 	StopListening();
 	StopArchive();
+	ChatItemObserver.disconnect();
 
 	RemoveMainMenu();
 }
@@ -1154,6 +1202,7 @@ function StartListening(RoomName, Password){
 	ResetRoomContainer();
 	RemoveRoomMenu();
 	SummonMainMenu();
+	ChatItemObserver.disconnect();
 
 	var BToken = "";
 	if (!Password){
@@ -1501,6 +1550,7 @@ function StopArchive(){
 function ArchiveGet(Link, Password, ARID){
 	StopListening();
 	StopArchive();
+	ChatItemObserver.disconnect();
 
 	ArchiveID = ARID;
 	CheckRating();
@@ -2964,6 +3014,112 @@ function dragElement(elmnt) {
   }
 //====================================== GRAND CANVAS CONTROLLER ======================================
 
+//---------------------------------------- FILTER MODAL CONTROLLER ----------------------------------------
+var ModalScreenFilter = document.createElement('div');
+ModalScreenFilter.style.position = "fixed";
+ModalScreenFilter.style.zIndex = 1;
+ModalScreenFilter.style.left = 0;
+ModalScreenFilter.style.top = 0;
+ModalScreenFilter.style.width = "100%";
+ModalScreenFilter.style.height = "100%";
+ModalScreenFilter.style.overflow = "auto";
+ModalScreenFilter.style.backgroundColor = "rgba(0,0,0,0.4)";
+ModalScreenFilter.style.display = "block"
+
+var ModalContentFilter = document.createElement('div');
+ModalContentFilter.style.backgroundColor = "#fefefe";
+ModalContentFilter.style.margin = "15% auto";
+ModalContentFilter.style.padding = "20px";
+ModalContentFilter.style.border = "1px solid #888";
+ModalContentFilter.style.width = "200px";
+ModalContentFilter.style.display = "flex";
+ModalContentFilter.style.alignItems = "center";
+ModalContentFilter.style.justifyContent = "center";
+ModalContentFilter.style.flexDirection = "column";
+ModalScreenFilter.appendChild(ModalContentFilter);
+
+var ModalFilterCloseBtn = document.createElement('span');
+ModalFilterCloseBtn.textContent = "X";
+ModalFilterCloseBtn.style.color = "#aaa";
+ModalFilterCloseBtn.style.alignSelf = "end";
+ModalFilterCloseBtn.style.fontSize = "28px";
+ModalFilterCloseBtn.style.fontWeight = "bold";
+ModalFilterCloseBtn.style.cursor = "pointer";
+ModalFilterCloseBtn.onclick = CloseModalFilterBtnClick;
+
+var ModalFilterText = document.createElement('p');
+ModalFilterText.textContent = "FILTER";
+ModalFilterText.style.marginTop = "15px";
+ModalFilterText.style.marginBottom = "15px";
+ModalFilterText.style.fontSize = "17px";
+ModalFilterText.style.fontWeight = "bold";
+
+var ModalFilterText1 = document.createElement('p');
+ModalFilterText1.textContent = "Keywords :";
+ModalFilterText1.style.fontSize = "17px";
+
+var ModalFilterInput1 = document.createElement('input');
+ModalFilterInput1.type = "text";
+ModalFilterInput1.placeholder = "[EN], [翻訳], ..."
+ModalFilterInput1.style.width = "80%";
+
+var ModalFilterText2 = document.createElement('p');
+ModalFilterText2.textContent = "Authors :";
+ModalFilterText2.style.fontSize = "17px";
+
+var ModalFilterInput2 = document.createElement('input');
+ModalFilterInput2.type = "text";
+ModalFilterInput2.placeholder = "XYZ, Gachapon ..."
+ModalFilterInput2.style.width = "80%";
+
+var ModalFilterOk = btn.cloneNode(false);
+ModalFilterOk.style.marginTop = "15px";
+ModalFilterOk.textContent = "Ok";
+ModalFilterOk.onclick = OkModalFilterBtnClick;
+
+ModalContentFilter.appendChild(ModalFilterCloseBtn);
+ModalContentFilter.appendChild(ModalFilterText);
+ModalContentFilter.appendChild(ModalFilterText1);
+ModalContentFilter.appendChild(ModalFilterInput1);
+ModalContentFilter.appendChild(ModalFilterText2);
+ModalContentFilter.appendChild(ModalFilterInput2);
+ModalContentFilter.appendChild(document.createElement('br'));
+ModalContentFilter.appendChild(ModalFilterOk);
+
+function SummonModalFilter() {
+	ExtContainer.parentNode.appendChild(ModalScreenFilter);
+	ModalFilterInput1.value = KeyWordList.replaceAll("\\[", "[").replaceAll("\\]", "]").replaceAll("|", ", ");
+	ModalFilterInput2.value = TagList.replaceAll("\\[", "[").replaceAll("\\]", "]").replaceAll("|", ", ");
+	window.onclick = function(event) {
+		if (event.target == ModalScreenFilter) {
+			ModalScreenFilter.remove();
+			window.onclick = null;
+		}
+	}
+}
+
+function OkModalFilterBtnClick(){
+	KeyWordList = ModalFilterInput1.value.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");;
+	TagList = ModalFilterInput2.value.replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll(", ", "|").replaceAll(",", "|");;
+	if (StandAlone){
+		CaptionText = "Saved new filter";
+		RepaintResizeRelocateCaption(null);
+		StopListening();
+		StopArchive();
+		ChatListener();
+	} else {
+		spn.textContent = "Saved new filter"
+	}
+
+	ModalScreenFilter.remove();
+}
+
+function CloseModalFilterBtnClick(){
+	ModalScreenFilter.remove();
+}
+//======================================== FILTER MODAL CONTROLLER ========================================
+
+
 //========================================= MChad Controller =========================================
 
 
@@ -2976,7 +3132,7 @@ var ChatText;
 var ListenerTarget;
 var ChatInputPanel;
 var CurrentVersion = "3.1.5";
-
+var StandAlone = false;
 var mode = 0;
 /*
 	0 : NOT SYNCED
