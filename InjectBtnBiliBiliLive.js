@@ -2840,8 +2840,15 @@ function dragElement(elmnt) {
   
 		if (ctx.measureText(StringContainer).width + 10 > CaptionCanvas.width){
 			if (StringContainer.lastIndexOf(" ") == -1){
-				TextContainer.push(StringContainer);
-				StringContainer = "";
+				let s = "";
+				for (let i = 0; i < StringContainer.length; i++){
+					s += StringContainer[i];
+					if (ctx.measureText(s).width + 10 > CaptionCanvas.width){
+						TextContainer.push(s.substring(0, s.length - 1));
+						s = s.substring(s.length - 1);
+					}
+				}
+				StringContainer = s;
 			} else {
 				TextContainer.push(StringContainer.substr(0, StringContainer.lastIndexOf(" ")));
 				StringContainer = StringContainer.substr(StringContainer.lastIndexOf(" ") + 1);
@@ -2849,7 +2856,16 @@ function dragElement(elmnt) {
 		}
   
 		if (i == TextFragment.length - 1){
-			TextContainer.push(StringContainer);
+			let s = "";
+			for (let i = 0; i < StringContainer.length; i++){
+				s += StringContainer[i];
+				if (ctx.measureText(s).width + 10 > CaptionCanvas.width){
+					TextContainer.push(s.substring(0, s.length - 1));
+					s = s.substring(s.length - 1);
+				}
+			}
+			TextContainer.push(s);
+
 			const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
 			ctx.textAlign = "center";
 			ctx.font = FullFontCaption;
@@ -2891,8 +2907,15 @@ function dragElement(elmnt) {
 
 		if (ctx.measureText(StringContainer).width + 10 > CaptionCanvas.width){
 			if (StringContainer.lastIndexOf(" ") == -1){
-				TextContainer.push(StringContainer);
-				StringContainer = "";
+				let s = "";
+				for (let i = 0; i < StringContainer.length; i++){
+					s += StringContainer[i];
+					if (ctx.measureText(s).width + 10 > CaptionCanvas.width){
+						TextContainer.push(s.substring(0, s.length - 1));
+						s = s.substring(s.length - 1);
+					}
+				}
+				StringContainer = s;
 			} else {
 				TextContainer.push(StringContainer.substr(0, StringContainer.lastIndexOf(" ")));
 				StringContainer = StringContainer.substr(StringContainer.lastIndexOf(" ") + 1);
@@ -2900,13 +2923,24 @@ function dragElement(elmnt) {
 		}
 
 		if (i == TextFragment.length - 1){
-			TextContainer.push(StringContainer);
+			let s = "";
+			for (let i = 0; i < StringContainer.length; i++){
+				s += StringContainer[i];
+				if (ctx.measureText(s).width + 10 > CaptionCanvas.width){
+					TextContainer.push(s.substring(0, s.length - 1));
+					s = s.substring(s.length - 1);
+				}
+			}
+			TextContainer.push(s);
+
 			const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
 
 			if (VidElement) {
-				CaptionDiv.style.top = ((VidElement.getBoundingClientRect().bottom - VidElement.getBoundingClientRect().top)*0.9 - textheight*TextContainer.length - 30) + "px";
+				DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
+				CaptionDiv.style.top = (VidElement.getBoundingClientRect().bottom + DocTopOffset - (VidElement.getBoundingClientRect().bottom - VidElement.getBoundingClientRect().top)*0.1 - textheight*TextContainer.length - 30) + "px";
 			} else {
-				CaptionDiv.style.top = (Number.parseFloat(CaptionDiv.style.top.replace("px", "")) + Number.parseFloat(CaptionDiv.style.height.replace("px", "")) - textheight*TextContainer.length - 30) + "px";
+				DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
+				CaptionDiv.style.top = (CaptionDiv.getBoundingClientRect().bottom + DocTopOffset - textheight*TextContainer.length - 30) + "px";
 			}
 
 			CaptionDiv.style.height = (textheight*TextContainer.length + 30) + "px";
@@ -2945,7 +2979,7 @@ var sendBtn;
 var ChatText;
 var ListenerTarget;
 var ChatInputPanel;
-var CurrentVersion = "3.1.5";
+var CurrentVersion = "3.1.6";
 
 var mode = 0;
 /*

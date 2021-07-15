@@ -500,7 +500,7 @@ var ChatInputPanel;
 var Live = false;
 var mode = 0;
 
-var CurrentVersion = "3.1.5";
+var CurrentVersion = "3.1.6";
 
 var ChatElementTarget = "chat-room-header-label";
 /*
