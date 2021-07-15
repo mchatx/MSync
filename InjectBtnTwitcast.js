@@ -2060,6 +2060,77 @@ CODelayText.style.fontSize = '15px';
 CODelayText.style.background = 'white';
 CODelayForm.appendChild(CODelayText);
 
+//	FONT COLOUR FORM
+var COFCForm = document.createElement('div');
+COFCForm.style.display = "inline-block";
+COFCForm.style.margin = "2px";
+
+var COFCInput = document.createElement('input');
+COFCInput.type = "color";
+COFCInput.style.position = "relative";
+COFCInput.style.left = "25%";
+COFCInput.onchange = COFCInputChange;
+COFCForm.appendChild(COFCInput);
+COFCForm.appendChild(document.createElement('br'));
+
+var COFCCheck = document.createElement('input');
+COFCCheck.type = "checkbox";
+COFCCheck.style.left = "25%";
+COFCCheck.onchange = COFCCheckedChange;
+COFCForm.appendChild(COFCCheck);
+
+var COFCText = document.createElement('span');
+COFCText.textContent = "Overrride Colour";
+COFCText.style.fontSize = '15px';
+COFCText.style.background = 'white';
+COFCForm.appendChild(COFCText);
+
+//	OUTLINE COLOUR FORM
+var COOCForm = document.createElement('div');
+COOCForm.style.display = "inline-block";
+COOCForm.style.margin = "2px";
+
+var COOCInput = document.createElement('input');
+COOCInput.type = "color";
+COOCInput.style.position = "relative";
+COOCInput.style.left = "25%";
+COOCInput.onchange = COOCInputChange;
+COOCForm.appendChild(COOCInput);
+COOCForm.appendChild(document.createElement('br'));
+
+var COOCCheck = document.createElement('input');
+COOCCheck.type = "checkbox";
+COOCCheck.style.left = "25%";
+COOCCheck.onchange = COOCCheckedChange;
+COOCForm.appendChild(COOCCheck);
+
+var COOCText = document.createElement('span');
+COOCText.textContent = "Overrride Outline";
+COOCText.style.fontSize = '15px';
+COOCText.style.background = 'white';
+COOCForm.appendChild(COOCText);
+
+
+function COOCInputChange() {
+	FixOC = COOCInput.value;
+	RepaintResizeRelocateCaption(null);
+}
+
+function COOCCheckedChange() {
+	OverrideOC = COOCCheck.checked;
+	RepaintResizeRelocateCaption(null);
+}
+
+function COFCInputChange() {
+	FixCC = COFCInput.value;
+	RepaintResizeRelocateCaption(null);
+}
+
+function COFCCheckedChange() {
+	OverrideCC = COFCCheck.checked;
+	RepaintResizeRelocateCaption(null);
+}
+
 function COModeChangeBtnClick() {
 	ConStyleBlack = !ConStyleBlack;
 	if (ConStyleBlack){
@@ -2123,6 +2194,8 @@ function SummonCaptionOption(){
 	ExtContainer.appendChild(COCloseBtn);
 	ExtContainer.appendChild(COTypeForm);
 	ExtContainer.appendChild(CODelayForm);
+	ExtContainer.appendChild(COFCForm);
+	ExtContainer.appendChild(COOCForm);
 	ExtContainer.appendChild(COModeChangeBtn);
 	
 	COColourInput.value = CaptionColour.substring(0, 7);
@@ -2140,6 +2213,8 @@ function COCloseBtnClick() {
 	COFontSizeForm.remove();
 	CODefaultBtn.remove();
 	CODelayForm.remove();
+	COFCForm.remove();
+	COOCForm.remove();
 	COTypeForm.remove();
 	COModeChangeBtn.remove();
 
