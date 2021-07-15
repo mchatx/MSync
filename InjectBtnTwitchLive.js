@@ -814,6 +814,7 @@ function inheritCheck(){
 	CODefaultBtn.style.color = "inherit";
 	COModeChangeBtn.style.color = "inherit";
 	COColourForm.style.color = "inherit";
+	COColourInput.style.color = "inherit";
 	COColourText.style.color = "inherit";
 	COOpacityForm.style.color = "inherit";
 	COOpacityInput.style.color = "inherit";
@@ -885,6 +886,7 @@ function inheritCheck(){
 	CODefaultBtn.style.backgroundColor = "inherit";
 	COModeChangeBtn.style.backgroundColor = "inherit";
 	COColourForm.style.backgroundColor = "inherit";
+	COColourInput.style.backgroundColor = "inherit";
 	COColourText.style.backgroundColor = "inherit";
 	COOpacityForm.style.backgroundColor = "inherit";
 	COOpacityInput.style.backgroundColor = "inherit";

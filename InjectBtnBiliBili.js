@@ -652,6 +652,12 @@ function inheritCheck(){
 	CODelayForm.style.color = "inherit";
 	CODelayInput.style.color = "inherit";
 	CODelayText.style.color = "inherit";
+	COFCForm.style.color = "inherit";
+	COFCInput.style.color = "inherit";
+	COFCText.style.color = "inherit";
+	COOCForm.style.color = "inherit";
+	COOCInput.style.color = "inherit";
+	COOCText.style.color = "inherit";
 	AccModalTextNick.style.color = "inherit";
 	AccModalTextTitle.style.color = "inherit";
 	AccModalCloseBtn.style.color = "inherit";
@@ -715,6 +721,12 @@ function inheritCheck(){
 	CODelayForm.style.backgroundColor = "inherit";
 	CODelayInput.style.backgroundColor = "inherit";
 	CODelayText.style.backgroundColor = "inherit";
+	COFCForm.style.backgroundColor = "inherit";
+	COFCInput.style.backgroundColor = "inherit";
+	COFCText.style.backgroundColor = "inherit";
+	COOCForm.style.backgroundColor = "inherit";
+	COOCInput.style.backgroundColor = "inherit";
+	COOCText.style.backgroundColor = "inherit";
 	AccModalTextNick.style.backgroundColor = "inherit";
 	AccModalTextTitle.style.backgroundColor = "inherit";
 	AccModalCloseBtn.style.backgroundColor = "inherit";
