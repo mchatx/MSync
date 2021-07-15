@@ -2837,6 +2837,10 @@ var CaptionFontSize = 30;
 var CaptionOC = "#000000";
 var CaptionCC = "#FFFFFF";
 var CaptionFont = "sans-serif";
+var OverrideCC = false;
+var FixCC = "#FFFFFF";
+var OverrideOC = false;
+var FixOC = "#000000";
 
 const rgba2hex = (rgba) => `#${rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/).slice(1).map((n, i) => (i === 3 ? Math.round(parseFloat(n) * 255) : parseFloat(n)).toString(16).padStart(2, '0').replace('NaN', '')).join('')}`
 
@@ -3044,11 +3048,19 @@ function dragElement(elmnt) {
 			const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
 			ctx.textAlign = "center";
 			ctx.font = FullFontCaption;
+			if (OverrideCC){
+				ctx.fillStyle = FixCC;
+			} else {
+				ctx.fillStyle = CaptionCC;
+			}
+			if (OverrideOC){
+				ctx.strokeStyle = FixOC;
+			} else {
+				ctx.strokeStyle = CaptionOC;
+			}
 
 			for (let j = 0; j < TextContainer.length; j++) {
-				ctx.fillStyle = CaptionCC;
 				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
-				ctx.strokeStyle = CaptionOC;
 				ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
 			}
 		}
@@ -3096,8 +3108,17 @@ function dragElement(elmnt) {
 			CaptionCanvas.height = CaptionCanvas.clientHeight;
 			ctx.textAlign = "center";
 			ctx.font = FullFontCaption;
-			ctx.fillStyle = CaptionCC;
-			ctx.strokeStyle = CaptionOC;
+			if (OverrideCC){
+				ctx.fillStyle = FixCC;
+			} else {
+				ctx.fillStyle = CaptionCC;
+			}
+			if (OverrideOC){
+				ctx.strokeStyle = FixOC;
+			} else {
+				ctx.strokeStyle = CaptionOC;
+			}
+						
 
 			for (let j = 0; j < TextContainer.length; j++) {
 				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
