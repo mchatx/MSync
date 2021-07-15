@@ -400,7 +400,8 @@ function TGEncoding(input){
     while (head == 0){
         head = Date.now() % 100;
     }
-        
+
+    input = input.replace(/[^\x00-\x7F]+/g, SelectiveURIReplacer);
     output = btoa(input);
 
     key = head.toString();
@@ -531,12 +532,19 @@ function TGDecoding(input) {
     for (var i = 0; i <= teeth; i++){
         output = output.slice(teethsize) + output.slice(0, teethsize);
     }
-	
+
+
 	output = atob(output);
+	output = decodeURI(output);
 
     return (output);
 }
+
+function SelectiveURIReplacer(match){
+    return(encodeURI(match));
+}
 //======================== TSUGE GUSHI ENCODING ========================
+
 
 
 
@@ -1402,21 +1410,20 @@ function ArchiveGet(Link, Password, ARID){
 
 		ArchiveEntries = JSON.parse(TGDecoding(JSONtemp["BToken"]));
 
-		var startime = 0;
-		for (var index = 0; index < ArchiveEntries.length; index++){
-			if (index == 0)	{
-				startime = ArchiveEntries[index]["Stime"];
-			}
-			ArchiveEntries[index]["Stime"] = ArchiveEntries[index]["Stime"] - startime;
-			//console.log(JSON.stringify(ArchiveEntries[index]));
-			
-			if (index == ArchiveEntries.length - 1){
-				LatchCaptionArchive();
-				ResetArchiveContainer();
-				//RemoveArchiveMenu();
-				SummonCaptionOption();
-			}
+		let startime = ArchiveEntries[0]["Stime"];
+		let startmatch = ArchiveEntries.filter(e => (e.Stext.match(/--.*Stream.*Start.*--/i) != null));
+		if (startmatch.length != 0){
+		  startime = startmatch[0].Stime;
+		} else if (startime < 24*60*60*1000) {
+		  startime = 0;
 		}
+
+		ArchiveEntries = ArchiveEntries.filter(e => (e.Stime >= startime)).map(e => { e.Stime -= startime; return(e); });
+
+		LatchCaptionArchive();
+		ResetArchiveContainer();
+		RemoveArchiveMenu();
+		SummonCaptionOption();
 	};
 
 	xhr.send('{ "BToken":"' + BToken + '" }');

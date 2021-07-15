@@ -599,7 +599,8 @@ function TGEncoding(input){
     while (head == 0){
         head = Date.now() % 100;
     }
-        
+
+    input = input.replace(/[^\x00-\x7F]+/g, SelectiveURIReplacer);
     output = btoa(input);
 
     key = head.toString();
@@ -730,10 +731,16 @@ function TGDecoding(input) {
     for (var i = 0; i <= teeth; i++){
         output = output.slice(teethsize) + output.slice(0, teethsize);
     }
-	
+
+
 	output = atob(output);
+	output = decodeURI(output);
 
     return (output);
+}
+
+function SelectiveURIReplacer(match){
+    return(encodeURI(match));
 }
 //======================== TSUGE GUSHI ENCODING ========================
 
@@ -762,6 +769,12 @@ function inheritCheck(){
 	CODelayForm.style.color = "inherit";
 	CODelayInput.style.color = "inherit";
 	CODelayText.style.color = "inherit";
+	COFCForm.style.color = "inherit";
+	COFCInput.style.color = "inherit";
+	COFCText.style.color = "inherit";
+	COOCForm.style.color = "inherit";
+	COOCInput.style.color = "inherit";
+	COOCText.style.color = "inherit";
 	AccModalTextNick.style.color = "inherit";
 	AccModalTextTitle.style.color = "inherit";
 	AccModalCloseBtn.style.color = "inherit";
@@ -827,6 +840,12 @@ function inheritCheck(){
 	CODelayForm.style.backgroundColor = "inherit";
 	CODelayInput.style.backgroundColor = "inherit";
 	CODelayText.style.backgroundColor = "inherit";
+	COFCForm.style.backgroundColor = "inherit";
+	COFCInput.style.backgroundColor = "inherit";
+	COFCText.style.backgroundColor = "inherit";
+	COOCForm.style.backgroundColor = "inherit";
+	COOCInput.style.backgroundColor = "inherit";
+	COOCText.style.backgroundColor = "inherit";
 	AccModalTextNick.style.backgroundColor = "inherit";
 	AccModalTextTitle.style.backgroundColor = "inherit";
 	AccModalCloseBtn.style.backgroundColor = "inherit";
@@ -1651,21 +1670,20 @@ function ArchiveGet(Link, Password, ARID){
 
 		ArchiveEntries = JSON.parse(TGDecoding(JSONtemp["BToken"]));
 
-		var startime = 0;
-		for (var index = 0; index < ArchiveEntries.length; index++){
-			if (index == 0)	{
-				startime = ArchiveEntries[index]["Stime"];
-			}
-			ArchiveEntries[index]["Stime"] = ArchiveEntries[index]["Stime"] - startime;
-			//console.log(JSON.stringify(ArchiveEntries[index]));
-			
-			if (index == ArchiveEntries.length - 1){
-				LatchCaptionArchive();
-				ResetArchiveContainer();
-				RemoveArchiveMenu();
-				SummonCaptionOption();
-			}
+		let startime = ArchiveEntries[0]["Stime"];
+		let startmatch = ArchiveEntries.filter(e => (e.Stext.match(/--.*Stream.*Start.*--/i) != null));
+		if (startmatch.length != 0){
+		  startime = startmatch[0].Stime;
+		} else if (startime < 24*60*60*1000) {
+		  startime = 0;
 		}
+
+		ArchiveEntries = ArchiveEntries.filter(e => (e.Stime >= startime)).map(e => { e.Stime -= startime; return(e); });
+
+		LatchCaptionArchive();
+		ResetArchiveContainer();
+		RemoveArchiveMenu();
+		SummonCaptionOption();
 	};
 
 	xhr.send('{ "BToken":"' + BToken + '" }');
@@ -2101,6 +2119,77 @@ CODelayText.style.fontSize = '15px';
 CODelayText.style.background = 'white';
 CODelayForm.appendChild(CODelayText);
 
+//	FONT COLOUR FORM
+var COFCForm = document.createElement('div');
+COFCForm.style.display = "inline-block";
+COFCForm.style.margin = "2px";
+
+var COFCInput = document.createElement('input');
+COFCInput.type = "color";
+COFCInput.style.position = "relative";
+COFCInput.style.left = "25%";
+COFCInput.onchange = COFCInputChange;
+COFCForm.appendChild(COFCInput);
+COFCForm.appendChild(document.createElement('br'));
+
+var COFCCheck = document.createElement('input');
+COFCCheck.type = "checkbox";
+COFCCheck.style.left = "25%";
+COFCCheck.onchange = COFCCheckedChange;
+COFCForm.appendChild(COFCCheck);
+
+var COFCText = document.createElement('span');
+COFCText.textContent = "Overrride Colour";
+COFCText.style.fontSize = '15px';
+COFCText.style.background = 'white';
+COFCForm.appendChild(COFCText);
+
+//	OUTLINE COLOUR FORM
+var COOCForm = document.createElement('div');
+COOCForm.style.display = "inline-block";
+COOCForm.style.margin = "2px";
+
+var COOCInput = document.createElement('input');
+COOCInput.type = "color";
+COOCInput.style.position = "relative";
+COOCInput.style.left = "25%";
+COOCInput.onchange = COOCInputChange;
+COOCForm.appendChild(COOCInput);
+COOCForm.appendChild(document.createElement('br'));
+
+var COOCCheck = document.createElement('input');
+COOCCheck.type = "checkbox";
+COOCCheck.style.left = "25%";
+COOCCheck.onchange = COOCCheckedChange;
+COOCForm.appendChild(COOCCheck);
+
+var COOCText = document.createElement('span');
+COOCText.textContent = "Overrride Outline";
+COOCText.style.fontSize = '15px';
+COOCText.style.background = 'white';
+COOCForm.appendChild(COOCText);
+
+
+function COOCInputChange() {
+	FixOC = COOCInput.value;
+	RepaintResizeRelocateCaption(null);
+}
+
+function COOCCheckedChange() {
+	OverrideOC = COOCCheck.checked;
+	RepaintResizeRelocateCaption(null);
+}
+
+function COFCInputChange() {
+	FixCC = COFCInput.value;
+	RepaintResizeRelocateCaption(null);
+}
+
+function COFCCheckedChange() {
+	OverrideCC = COFCCheck.checked;
+	RepaintResizeRelocateCaption(null);
+}
+
 function COModeChangeBtnClick() {
 	ConStyleBlack = !ConStyleBlack;
 	if (ConStyleBlack){
@@ -2164,6 +2253,8 @@ function SummonCaptionOption(){
 	ExtContainer.appendChild(COCloseBtn);
 	ExtContainer.appendChild(COTypeForm);
 	ExtContainer.appendChild(CODelayForm);
+	ExtContainer.appendChild(COFCForm);
+	ExtContainer.appendChild(COOCForm);
 	ExtContainer.appendChild(COModeChangeBtn);
 	
 	COColourInput.value = CaptionColour.substring(0, 7);
@@ -2181,6 +2272,8 @@ function COCloseBtnClick() {
 	COFontSizeForm.remove();
 	CODefaultBtn.remove();
 	CODelayForm.remove();
+	COFCForm.remove();
+	COOCForm.remove();
 	COTypeForm.remove();
 	COModeChangeBtn.remove();
 
@@ -2714,6 +2807,10 @@ var CaptionFontSize = 30;
 var CaptionOC = "#000000";
 var CaptionCC = "#FFFFFF";
 var CaptionFont = "sans-serif";
+var OverrideCC = false;
+var FixCC = "#FFFFFF";
+var OverrideOC = false;
+var FixOC = "#000000";
 
 const rgba2hex = (rgba) => `#${rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/).slice(1).map((n, i) => (i === 3 ? Math.round(parseFloat(n) * 255) : parseFloat(n)).toString(16).padStart(2, '0').replace('NaN', '')).join('')}`
 
@@ -2921,11 +3018,19 @@ function dragElement(elmnt) {
 			const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
 			ctx.textAlign = "center";
 			ctx.font = FullFontCaption;
+			if (OverrideCC){
+				ctx.fillStyle = FixCC;
+			} else {
+				ctx.fillStyle = CaptionCC;
+			}
+			if (OverrideOC){
+				ctx.strokeStyle = FixOC;
+			} else {
+				ctx.strokeStyle = CaptionOC;
+			}
 
 			for (let j = 0; j < TextContainer.length; j++) {
-				ctx.fillStyle = CaptionCC;
 				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
-				ctx.strokeStyle = CaptionOC;
 				ctx.strokeText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);
 			}
 		}
@@ -2975,8 +3080,17 @@ function dragElement(elmnt) {
 			CaptionCanvas.height = CaptionCanvas.clientHeight;
 			ctx.textAlign = "center";
 			ctx.font = FullFontCaption;
-			ctx.fillStyle = CaptionCC;
-			ctx.strokeStyle = CaptionOC;
+			if (OverrideCC){
+				ctx.fillStyle = FixCC;
+			} else {
+				ctx.fillStyle = CaptionCC;
+			}
+			if (OverrideOC){
+				ctx.strokeStyle = FixOC;
+			} else {
+				ctx.strokeStyle = CaptionOC;
+			}
+						
 
 			for (let j = 0; j < TextContainer.length; j++) {
 				ctx.fillText(TextContainer[j], CaptionCanvas.width/2.0, CaptionCanvas.height/2.0 - TextYShift + j*textheight);

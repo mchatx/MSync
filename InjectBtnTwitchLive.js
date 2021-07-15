@@ -656,7 +656,8 @@ function TGEncoding(input){
     while (head == 0){
         head = Date.now() % 100;
     }
-        
+
+    input = input.replace(/[^\x00-\x7F]+/g, SelectiveURIReplacer);
     output = btoa(input);
 
     key = head.toString();
@@ -787,12 +788,19 @@ function TGDecoding(input) {
     for (var i = 0; i <= teeth; i++){
         output = output.slice(teethsize) + output.slice(0, teethsize);
     }
-	
+
+
 	output = atob(output);
+	output = decodeURI(output);
 
     return (output);
 }
+
+function SelectiveURIReplacer(match){
+    return(encodeURI(match));
+}
 //======================== TSUGE GUSHI ENCODING ========================
+
 
 
 
@@ -806,7 +814,6 @@ function inheritCheck(){
 	CODefaultBtn.style.color = "inherit";
 	COModeChangeBtn.style.color = "inherit";
 	COColourForm.style.color = "inherit";
-	COColourInput.style.color = "inherit";
 	COColourText.style.color = "inherit";
 	COOpacityForm.style.color = "inherit";
 	COOpacityInput.style.color = "inherit";
@@ -820,6 +827,12 @@ function inheritCheck(){
 	CODelayForm.style.color = "inherit";
 	CODelayInput.style.color = "inherit";
 	CODelayText.style.color = "inherit";
+	COFCForm.style.color = "inherit";
+	COFCInput.style.color = "inherit";
+	COFCText.style.color = "inherit";
+	COOCForm.style.color = "inherit";
+	COOCInput.style.color = "inherit";
+	COOCText.style.color = "inherit";
 	AccModalTextNick.style.color = "inherit";
 	AccModalTextTitle.style.color = "inherit";
 	AccModalCloseBtn.style.color = "inherit";
@@ -872,7 +885,6 @@ function inheritCheck(){
 	CODefaultBtn.style.backgroundColor = "inherit";
 	COModeChangeBtn.style.backgroundColor = "inherit";
 	COColourForm.style.backgroundColor = "inherit";
-	COColourInput.style.backgroundColor = "inherit";
 	COColourText.style.backgroundColor = "inherit";
 	COOpacityForm.style.backgroundColor = "inherit";
 	COOpacityInput.style.backgroundColor = "inherit";
@@ -886,6 +898,12 @@ function inheritCheck(){
 	CODelayForm.style.backgroundColor = "inherit";
 	CODelayInput.style.backgroundColor = "inherit";
 	CODelayText.style.backgroundColor = "inherit";
+	COFCForm.style.backgroundColor = "inherit";
+	COFCInput.style.backgroundColor = "inherit";
+	COFCText.style.backgroundColor = "inherit";
+	COOCForm.style.backgroundColor = "inherit";
+	COOCInput.style.backgroundColor = "inherit";
+	COOCText.style.backgroundColor = "inherit";
 	AccModalTextNick.style.backgroundColor = "inherit";
 	AccModalTextTitle.style.backgroundColor = "inherit";
 	AccModalCloseBtn.style.backgroundColor = "inherit";
@@ -1699,21 +1717,20 @@ function ArchiveGet(Link, Password, ARID){
 
 		ArchiveEntries = JSON.parse(TGDecoding(JSONtemp["BToken"]));
 
-		var startime = 0;
-		for (var index = 0; index < ArchiveEntries.length; index++){
-			if (index == 0)	{
-				startime = ArchiveEntries[index]["Stime"];
-			}
-			ArchiveEntries[index]["Stime"] = ArchiveEntries[index]["Stime"] - startime;
-			//console.log(JSON.stringify(ArchiveEntries[index]));
-			
-			if (index == ArchiveEntries.length - 1){
-				LatchCaptionArchive();
-				ResetArchiveContainer();
-				//RemoveArchiveMenu();
-				SummonCaptionOption();
-			}
+		let startime = ArchiveEntries[0]["Stime"];
+		let startmatch = ArchiveEntries.filter(e => (e.Stext.match(/--.*Stream.*Start.*--/i) != null));
+		if (startmatch.length != 0){
+		  startime = startmatch[0].Stime;
+		} else if (startime < 24*60*60*1000) {
+		  startime = 0;
 		}
+
+		ArchiveEntries = ArchiveEntries.filter(e => (e.Stime >= startime)).map(e => { e.Stime -= startime; return(e); });
+
+		LatchCaptionArchive();
+		ResetArchiveContainer();
+		RemoveArchiveMenu();
+		SummonCaptionOption();
 	};
 
 	xhr.send('{ "BToken":"' + BToken + '" }');
