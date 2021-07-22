@@ -455,7 +455,7 @@ var ChatInputPanel;
 
 var mode = 0;
 
-var CurrentVersion = "3.1.6";
+var CurrentVersion = "3.1.7";
 
 var ChatElementTarget = "chat-messages";
 /*

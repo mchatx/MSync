@@ -1032,6 +1032,16 @@ SMLoadHereBtn.onclick = StartHereClick;
 SMLoadHereBtn.textContent = "Stand-Alone mode";
 SMLoadHereBtn.style.float = "right";
 
+var WFloader = document.createElement("link");
+WFloader.rel = "stylesheet";
+WFloader.href = "https://fonts.googleapis.com/css2?family=Acme&family=Asap:wght@700&family=Kalam:wght@700&family=Patrick+Hand&display=swap";
+
+async function WebFontLoader(GFont) {
+	//WFloader.href = "https://fonts.googleapis.com/css2?family=" + GFont.replace(/ /g, "+") + "&display=swap";
+	CaptionFont = GFont;
+	RepaintCaption();
+}
+
 function LoadButtons(ContainerTarget) {
 	inheritCheck();
 
@@ -1040,8 +1050,18 @@ function LoadButtons(ContainerTarget) {
 		dt = JSON.parse(dt);
 		CaptionColour = dt["BColour"];
 		CaptionFontSize = dt["CFSize"];
-		CaptionFont = dt["CFStyle"];
 		ConStyleBlack = dt["ControlColour"];
+		CaptionFont = dt["CFStyle"];
+
+		if (!dt["CFStyle"]){
+			CaptionFont = "sans-serif";
+			RepaintCaption();
+		} else if (("Helvetica","sans-serif","Courier New").indexOf(dt["CFStyle"]) != -1) {
+			CaptionFont = dt["CFStyle"];
+			RepaintCaption();
+		} else {
+			WebFontLoader(dt["CFStyle"]);
+		}
 	}
 	 
 	if (!CaptionColour){
@@ -1092,6 +1112,7 @@ function LoadButtons(ContainerTarget) {
 function StartHereClick(){
 	StandAlone = true;
 	SummonMainMenu();
+
 
 	VidEle = document.getElementsByTagName('video');
 	if (VidEle.length == 1){
@@ -2133,6 +2154,18 @@ COTypeSelect.options[1].text = "Sans-Serif";
 COTypeSelect.add(document.createElement("option"));
 COTypeSelect.options[2].value = "Courier New";
 COTypeSelect.options[2].text = "Courier New";
+COTypeSelect.add(document.createElement("option"));
+COTypeSelect.options[3].value = "Asap";
+COTypeSelect.options[3].text = "Asap";
+COTypeSelect.add(document.createElement("option"));
+COTypeSelect.options[4].value = "Patrick Hand";
+COTypeSelect.options[4].text = "Patrick Hand";
+COTypeSelect.add(document.createElement("option"));
+COTypeSelect.options[5].value = "Kalam";
+COTypeSelect.options[5].text = "Kalam";
+COTypeSelect.add(document.createElement("option"));
+COTypeSelect.options[6].value = "Acme";
+COTypeSelect.options[6].text = "Acme";
 COTypeSelect.onchange = COTypeSelectChange;
 COTypeForm.appendChild(COTypeSelect);
 COTypeForm.appendChild(document.createElement('br'));
@@ -2247,8 +2280,12 @@ function COModeChangeBtnClick() {
 }
 
 function COTypeSelectChange() {
-	CaptionFont = COTypeSelect.value;
-	RepaintResizeRelocateCaption();
+	if (("Helvetica","sans-serif","Courier New").indexOf(COTypeSelect.value) != -1) {
+		CaptionFont = COTypeSelect.value;
+		RepaintCaption();
+	} else {
+		WebFontLoader(COTypeSelect.value);
+	}
 }
 
 function CODelayInputChange() {
@@ -3228,11 +3265,9 @@ function dragElement(elmnt) {
 			const TextYShift = textheight*(TextContainer.length/2.0 - 0.75);
 
 			if (VidElement) {
-				DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
-				CaptionDiv.style.top = (VidElement.getBoundingClientRect().bottom + DocTopOffset - (VidElement.getBoundingClientRect().bottom - VidElement.getBoundingClientRect().top)*0.1 - textheight*TextContainer.length - 30) + "px";
+				CaptionDiv.style.top = ((VidElement.getBoundingClientRect().bottom - VidElement.getBoundingClientRect().top)*0.9 - textheight*TextContainer.length - 30) + "px";
 			} else {
-				DocTopOffset = window.pageYOffset || document.documentElement.scrollTop;
-				CaptionDiv.style.top = (CaptionDiv.getBoundingClientRect().bottom + DocTopOffset - textheight*TextContainer.length - 30) + "px";
+				CaptionDiv.style.top = (Number.parseFloat(CaptionDiv.style.top.replace("px", "")) + Number.parseFloat(CaptionDiv.style.height.replace("px", "")) - textheight*TextContainer.length - 30) + "px";
 			}
 
 			CaptionDiv.style.height = (textheight*TextContainer.length + 30) + "px";
@@ -3376,7 +3411,7 @@ var sendBtn;
 var ChatText;
 var ListenerTarget;
 var ChatInputPanel;
-var CurrentVersion = "3.1.6";
+var CurrentVersion = "3.1.7";
 var StandAlone = false;
 
 var Live = false;
@@ -3396,7 +3431,18 @@ var mode = 0;
 	5 : SYNCED-LISTENER
 	6 : SYNCED TL
 */
+var WFloader2 = document.createElement("link");
+WFloader2.rel = "preconnect";
+WFloader2.href = "https://fonts.googleapis.com";
 
+var WFloader3 = document.createElement("link");
+WFloader3.rel = "preconnect";
+WFloader3.href = "https://fonts.gstatic.com";
+WFloader3.crossorigin = "";
+
+document.head.append(WFloader2);
+document.head.append(WFloader3);
+document.head.append(WFloader);
 async function WaitUntilLoad(){
 	var i = 0;
 	while (true){
