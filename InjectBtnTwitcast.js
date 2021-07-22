@@ -549,7 +549,7 @@ function TGEncoding(input){
         head = Date.now() % 100;
     }
 
-    input = input.replace(/[^\x00-\x7F]+/g, SelectiveURIReplacer);
+    input = input.replace(/([^\x00-\x7F]|\%)+/g, SelectiveURIReplacer);
     output = btoa(input);
 
     key = head.toString();
