@@ -3114,7 +3114,7 @@ var sendBtn;
 var ChatText;
 var ListenerTarget;
 var ChatInputPanel;
-var CurrentVersion = "3.1.7";
+var CurrentVersion = "3.1.8";
 
 var mode = 0;
 /*
