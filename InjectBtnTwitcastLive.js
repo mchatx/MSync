@@ -116,55 +116,40 @@ function SetTimePrecise(timeseek, timestamp) {
 
 //---------------------------------------   BOUNCING TRANSLATION   -------------------------------------------
 //   BOUNCING INCOMING MESSAGE TO THE LIVE CHAT SUBMITTER 
-
 function SendTextEnter(inputtext){
-	/*
-	ChatText.textContent = inputtext;
-	ChatText.dispatchEvent(new InputEvent("input"));
+	ChatText.value = inputtext;
+	var evt = document.createEvent("Events");
+	evt.initEvent("change", true, true);
+	ChatText.dispatchEvent(evt);
 	sendBtn.click();
-	*/
 }
 
 function LatchChatBox(){
-	/*
-	var testN = document.getElementsByClassName("tw-player-page__comment__post tw-comment-post");
-	console.log(testN[0].tagName);
-	if (testN.length == 1){
-		ChatText = testN[0].querySelector(".tw-textarea");
-		console.log(ChatText);
-		console.log(ChatText.textContent);
-		ChatText.textContent = "Oh no, I missed Aki-chan twitcast again!!";
-		
-		ChatText.dispatchEvent(new InputEvent("input"));
-		
-		sendBtn = testN[0].querySelector(".tw-comment-post-operations button");
-	}
-	*/
-	/*
-	var iframeChat = document.getElementsByTagName("iframe");
-    for (let i = 0; i < iframeChat.length; i++){
-        if (iframeChat[i].id == "chatframe"){
-			if (iframeChat[i].offsetHeight == 0){
-				ws.close();
-				spn.textContent = "Chatbox needs to be open";
-			} else {
-				ChatInputPanel = iframeChat[i].contentDocument.querySelector("#panel-pages.yt-live-chat-renderer",);
-				if (ChatInputPanel.offsetHeight == 1){
-					ws.close();
-					spn.textContent = "The stream is not LIVE"
-				} else {
-					sendBtn = iframeChat[i].contentDocument.querySelector("#send-button button",); 
-					ChatText = iframeChat[i].contentDocument.querySelector("#input.yt-live-chat-text-input-field-renderer",);
-				}
-			}
-			
+	ChatText = null;
+	sendBtn = null;
+
+	var testT = document.getElementsByTagName('textarea');
+	for (var i = 0; i < testT.length; i++) {
+		if (testT[i].className.indexOf("tw-textarea") != -1) {
+			ChatText = testT[i];
 			break;
-        } else if (i == iframeChat.length - 1) {
-			ws.close();
-			spn.textContent = "Can't find Live Chat Input";
 		}
 	}
-	*/
+
+	var testB = document.getElementsByTagName('button');
+	console.log(testB)
+	for (var i = 0; i < testB.length; i++) {
+		if (testB[i].className == "tw-button-primary") {
+			sendBtn = testB[i];
+			break;
+		}
+	}
+
+	if ((ChatText != null) && (sendBtn != null)){
+	} else {
+		ws.close();
+		spn.textContent = "Can't find Live Chat Input";
+	}
 }
 //=============================================================================================================
 
@@ -305,7 +290,7 @@ function SendReg(){
     var data = {                           
 		"Act": 'MChad-Reg',
 		"UID": UID,
-		"Nick": title.textContent.substring(0, title.textContent.lastIndexOf("#")).trim()
+		"Nick": title.textContent.substring(title.textContent.lastIndexOf("\n") + 1).trim()
 	};	
 	ws.send(JSON.stringify(data));
 }
@@ -411,14 +396,9 @@ function MsgNexus(StringData) {
 							break;
 						case ("LiveChat"):
 							if (mode < 3){
-								/*
 								mode = 4;
 								btn.textContent = "Synced - LiveChat (Click to Unsync)";
 								LatchChatBox();
-								*/
-								mode = 2;
-								btn.textContent = "Synced - Idle";
-								spn.textContent = "LIVE CHAT BOUNCING IS NOT AVAILABLE FOR TWITCAST";
 							}
 							break;
 						case ("SyncTL"):

@@ -121,13 +121,6 @@ function SendTextEnter(inputtext){
 	sendBtn.click();
 }
 
-function setKeywordText(text, el) {
-    el.value = text;
-    var evt = document.createEvent("Events");
-    evt.initEvent("change", true, true);
-    el.dispatchEvent(evt);
-}
-
 function LatchChatBox(){
 	ChatText = null;
 	sendBtn = null;
