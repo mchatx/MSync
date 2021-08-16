@@ -114,53 +114,49 @@ function SetTimePrecise(timeseek, timestamp) {
 //   BOUNCING INCOMING MESSAGE TO THE LIVE CHAT SUBMITTER 
 
 function SendTextEnter(inputtext){
-	/*
-	ChatText.textContent = inputtext;
-	ChatText.dispatchEvent(new InputEvent("input"));
+	ChatText.value = inputtext;
+	var evt = document.createEvent("Events");
+	evt.initEvent("change", true, true);
+	ChatText.dispatchEvent(evt);
 	sendBtn.click();
-	*/
+}
+
+function setKeywordText(text, el) {
+    el.value = text;
+    var evt = document.createEvent("Events");
+    evt.initEvent("change", true, true);
+    el.dispatchEvent(evt);
 }
 
 function LatchChatBox(){
-	/*
-	var testN = document.getElementsByClassName("tw-player-page__comment__post tw-comment-post");
-	console.log(testN[0].tagName);
-	if (testN.length == 1){
-		ChatText = testN[0].querySelector(".tw-textarea");
-		console.log(ChatText);
-		console.log(ChatText.textContent);
-		ChatText.textContent = "Oh no, I missed Aki-chan twitcast again!!";
-		
-		ChatText.dispatchEvent(new InputEvent("input"));
-		
-		sendBtn = testN[0].querySelector(".tw-comment-post-operations button");
-	}
-	*/
-	/*
-	var iframeChat = document.getElementsByTagName("iframe");
-    for (let i = 0; i < iframeChat.length; i++){
-        if (iframeChat[i].id == "chatframe"){
-			if (iframeChat[i].offsetHeight == 0){
-				ws.close();
-				spn.textContent = "Chatbox needs to be open";
-			} else {
-				ChatInputPanel = iframeChat[i].contentDocument.querySelector("#panel-pages.yt-live-chat-renderer",);
-				if (ChatInputPanel.offsetHeight == 1){
-					ws.close();
-					spn.textContent = "The stream is not LIVE"
-				} else {
-					sendBtn = iframeChat[i].contentDocument.querySelector("#send-button button",); 
-					ChatText = iframeChat[i].contentDocument.querySelector("#input.yt-live-chat-text-input-field-renderer",);
-				}
-			}
-			
+	ChatText = null;
+	sendBtn = null;
+
+	var testT = document.getElementsByTagName('textarea');
+	for (var i = 0; i < testT.length; i++) {
+		if (!testT[i].getAttribute("data-a-target")){
+			continue;
+		} else if (testT[i].getAttribute("data-a-target").indexOf("chat-input") != -1) {
+			ChatText = testT[i];
 			break;
-        } else if (i == iframeChat.length - 1) {
-			ws.close();
-			spn.textContent = "Can't find Live Chat Input";
 		}
 	}
-	*/
+
+	var testB = document.getElementsByTagName('button');
+	for (var i = 0; i < testB.length; i++) {
+		if (!testB[i].getAttribute("data-a-target")){
+			continue;
+		} else if (testB[i].getAttribute("data-a-target").indexOf("chat-send-button") != -1) {
+			sendBtn = testB[i];
+			break;
+		}
+	}	
+
+	if ((ChatText != null) && (sendBtn != null)){
+	} else {
+		ws.close();
+		spn.textContent = "Can't find Live Chat Input";
+	}
 }
 //=============================================================================================================
 
@@ -398,10 +394,17 @@ function FilterMessageKeyword(text){
 function SendReg(){
 	var title = document.getElementsByTagName("h2");
 
+	for (var i = 0; i < title.length; i++){
+		if (title[i].getAttribute("data-a-target").indexOf("stream-title") != -1) {
+			title = title[i];
+			break;
+		}
+	}
+
     var data = {                           
 		"Act": 'MChad-Reg',
 		"UID": UID,
-		"Nick": title[0].textContent.substring(0, title[0].textContent.lastIndexOf("•")).trim()
+		"Nick": title.textContent
 	};	
 	ws.send(JSON.stringify(data));
 }
@@ -448,7 +451,7 @@ function OpenSync() {
 					sendBtn = null;
 					ChatText = null;
 					ChatInputPanel = null;
-					ChatBoxObserver.disconnect();
+					//ChatBoxObserver.disconnect();
 					break;
 				case 5:
 					ChatItemObserver.disconnect();
@@ -519,14 +522,11 @@ function MsgNexus(StringData) {
 							break;
 						case ("LiveChat"):
 							if (mode < 3){
-								/*
-								mode = 4;
-								btn.textContent = "Synced - LiveChat (Click to Unsync)";
-								LatchChatBox();
-								*/
-								mode = 2;
-								btn.textContent = "Synced - Idle";
-								spn.textContent = "LIVE CHAT BOUNCING IS NOT AVAILABLE FOR TWITCH";
+								if (mode < 3){
+									mode = 4;
+									btn.textContent = "Synced - LiveChat (Click to Unsync)";
+									LatchChatBox();
+								}
 							}
 							break;
 
