@@ -134,7 +134,7 @@ function SendRollCall(){
     var data = {                           
 		"Act": 'MChad-RollCall',
 		"UID": UID,
-		"Nick": title[0].textContent.replaceAll("】", "]").replaceAll("【", "[").replaceAll("～", "-")
+		"Nick": UID
 	};	
 	ws.send(JSON.stringify(data));
 }
@@ -158,26 +158,7 @@ function OpenSync() {
 		};
         
         ws.onclose = function (event) {
-			switch (mode){
-				case 1:
-					spn.textContent = "Can't connect to MChad desktop app";
-					break;
-				case 3:
-					spn.textContent = "Disconnected";
-					break;
-				case 4:
-					sendBtn = null;
-					ChatText = null;
-					ChatInputPanel = null;
-					break;
-				case 5:
-					ChatItemObserver.disconnect();
-					FrontFilterBtn.remove();
-					break;
-				case 6:
-					spn.textContent = "Disconnected";
-					break;
-			}
+			CancelConnection();
 			btn.textContent = "Sync MChad Desktop Client";
 			mode = 0;
         };
@@ -191,8 +172,31 @@ function OpenSync() {
 	}
 }
 
+function CancelConnection(){
+	switch (mode){
+		case 1:
+			spn.textContent = "Can't connect to MChad desktop app";
+			break;
+		case 3:
+			spn.textContent = "Disconnected";
+			break;
+		case 4:
+			sendBtn = null;
+			ChatText = null;
+			ChatInputPanel = null;
+			break;
+		case 5:
+			ChatItemObserver.disconnect();
+			FrontFilterBtn.remove();
+			break;
+		case 6:
+			spn.textContent = "Disconnected";
+			break;
+	}
+}
+
 function MsgNexus(StringData) {
-	var NexusParse = StringData.toString().match(/\"Act\":\"MChad-RegOK\"|\"Act\":\"MChad-RollCallApp\"|\"Act\":\"MChad-SetMode\"|\"Act\":\"MChad-PlayApp\"|\"Act\":\"MChad-PauseApp\"|\"Act\":\"MChad-TimeSetApp\"|\"Act\":\"MChad-LiveSend\"|\"Act\":\"MChad-RegListener\"|\"Act\":\"MChad-FilterApp\"|\"Act\":\"MChad-PreciseSyncApp\"|\"Act\":\"MChad-PreciseTimeSetApp\"/);
+	var NexusParse = StringData.toString().match(/\"Act\":\"MChad-RegOK\"|\"Act\":\"MChad-RollCallApp\"|\"Act\":\"MChad-SetMode\"|\"Act\":\"MChad-PlayApp\"|\"Act\":\"MChad-PauseApp\"|\"Act\":\"MChad-TimeSetApp\"|\"Act\":\"MChad-LiveSend\"|\"Act\":\"MChad-RegListener\"|\"Act\":\"MChad-FilterApp\"|\"Act\":\"MChad-PreciseSyncApp\"|\"Act\":\"MChad-PreciseTimeSetApp\"|\"Act\":\"MChad-Unsync\"/);
 	
 	if (NexusParse == null){
 		return;
@@ -291,7 +295,18 @@ function MsgNexus(StringData) {
 					SetTimePrecise(ParsedData[2].split("\":\"")[1], ParsedData[3].split("\":\"")[1].replace("\"}",""));
 				}				
 				break;
-	
+			case ("\"Act\":\"MChad-Unsync\""):
+				var ParsedData = StringData.toString().split("\",\"");
+				if (ParsedData.length != 2){
+					return;
+				}
+
+				if (ParsedData[1].split("\":\"")[1].replace("\"}","") == UID){
+					CancelConnection();
+					mode = 2;
+					btn.textContent = "Synced - Idle";	
+				}				
+				break;	
 		}
 	}
 }

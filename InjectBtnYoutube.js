@@ -368,6 +368,8 @@ function SendReg(){
 }
 
 function SendRollCall(){
+	var title = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer");
+
     var data = {                           
 		"Act": 'MChad-RollCall',
 		"UID": UID,
@@ -395,34 +397,7 @@ function OpenSync() {
 		};
         
         ws.onclose = function (event) {
-			switch (mode){
-				case 1:
-					spn.textContent = "Can't connect to MChad desktop app";
-					break;
-				case 3:
-					MainVid.onseeked = null;
-					MainVid.onpause = null;
-					MainVid.onplay = null;
-					spn.textContent = "Disconnected";
-					break;
-				case 4:
-					sendBtn = null;
-					ChatText = null;
-					ChatInputPanel = null;
-					ChatBoxObserver.disconnect();
-					break;
-				case 5:
-					ChatItemObserver.disconnect();
-					ChatBoxObserver.disconnect();
-					FrontFilterBtn.remove();
-					break;
-				case 6:
-					MainVid.onseeked = null;
-					MainVid.onpause = null;
-					MainVid.onplay = null;
-					spn.textContent = "Disconnected";
-					break;
-			}
+			CancelConnection();
 			btn.textContent = "Sync MChad Desktop Client";
 			mode = 0;
         };
@@ -433,6 +408,37 @@ function OpenSync() {
 	
 	} else {
 		alert('NOT IN SYNCING TARGET WEBPAGE');
+	}
+}
+
+function CancelConnection(){
+	switch (mode){
+		case 1:
+			spn.textContent = "Can't connect to MChad desktop app";
+			break;
+		case 3:
+			MainVid.onseeked = null;
+			MainVid.onpause = null;
+			MainVid.onplay = null;
+			spn.textContent = "Disconnected";
+			break;
+		case 4:
+			sendBtn = null;
+			ChatText = null;
+			ChatInputPanel = null;
+			ChatBoxObserver.disconnect();
+			break;
+		case 5:
+			ChatItemObserver.disconnect();
+			ChatBoxObserver.disconnect();
+			FrontFilterBtn.remove();
+			break;
+		case 6:
+			MainVid.onseeked = null;
+			MainVid.onpause = null;
+			MainVid.onplay = null;
+			spn.textContent = "Disconnected";
+			break;
 	}
 }
 
@@ -570,7 +576,18 @@ function MsgNexus(StringData) {
 					SetTimePrecise(ParsedData[2].split("\":\"")[1], ParsedData[3].split("\":\"")[1].replace("\"}",""));
 				}				
 				break;
-	
+			case ("\"Act\":\"MChad-Unsync\""):
+				var ParsedData = StringData.toString().split("\",\"");
+				if (ParsedData.length != 2){
+					return;
+				}
+
+				if (ParsedData[1].split("\":\"")[1].replace("\"}","") == UID){
+					CancelConnection();
+					mode = 2;
+					btn.textContent = "Synced - Idle";	
+				}				
+				break;
 		}
 	}
 }
