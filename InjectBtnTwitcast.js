@@ -368,7 +368,7 @@ function OpenSync() {
 					spn.textContent = "Disconnected";
 					break;
 			}
-			btn.textContent = "Sync MChad Dekstop Client";
+			btn.textContent = "Sync MChad Desktop Client";
 			mode = 0;
         };
 		
@@ -896,7 +896,7 @@ ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChad Dekstop Client"
+btn.textContent = "Sync MChad Desktop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';
