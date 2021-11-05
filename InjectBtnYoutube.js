@@ -406,6 +406,7 @@ function OpenSync() {
 		//}
 
 		SMWASyncBtn.remove();
+		SMOneClickSetBtn.remove();
 
 		ws.onopen = function (event) {
 			SendReg();
@@ -414,6 +415,7 @@ function OpenSync() {
         ws.onclose = function (event) {
 			CancelConnection();
 			btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+			btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
 			btn.textContent = "Sync Desktop Client";
 			mode = 0;
         };
@@ -881,7 +883,8 @@ function inheritCheck(){
 	btn.style.color = "inherit";
 	spn.style.color = "inherit";
 	SMLoadHereBtn.style.color = "inherit";
-	SMWASyncBtn.style.color = "inherit";	
+	SMWASyncBtn.style.color = "inherit";
+	SMOneClickSetBtn.style.color = "inherit";
 	AccModalLinkSignUp.style.color = "inherit";
 	AccModalDivPS.style.color = "inherit";
 	AccModalLinkRestartPass.style.color = "inherit";
@@ -958,6 +961,7 @@ function inheritCheck(){
 	spn.style.backgroundColor = "inherit";
 	SMLoadHereBtn.style.backgroundColor = "inherit";	
 	SMWASyncBtn.style.backgroundColor = "inherit";		
+	SMOneClickSetBtn.style.backgroundColor = "inherit";		
 	AccModalLinkSignUp.style.backgroundColor = "inherit";
 	AccModalDivPS.style.backgroundColor = "inherit";
 	AccModalLinkRestartPass.style.backgroundColor = "inherit";
@@ -1051,6 +1055,10 @@ var SMWASyncBtn = btn.cloneNode(false);
 SMWASyncBtn.onclick = SMWASyncBtnClick;
 SMWASyncBtn.textContent = "Sync Web Client";
 
+var SMOneClickSetBtn = btn.cloneNode(false);
+SMOneClickSetBtn.onclick = OneClickSetup;
+SMOneClickSetBtn.textContent = "Open TL Client";
+
 var WFloader = document.createElement("link");
 WFloader.rel = "stylesheet";
 WFloader.href = "https://fonts.googleapis.com/css2?family=Acme&family=Asap:wght@700&family=Kalam:wght@700&family=Patrick+Hand&display=swap";
@@ -1059,6 +1067,82 @@ async function WebFontLoader(GFont) {
 	//WFloader.href = "https://fonts.googleapis.com/css2?family=" + GFont.replace(/ /g, "+") + "&display=swap";
 	CaptionFont = GFont;
 	RepaintCaption();
+}
+
+function OneClickSetup() {
+	if (mode == 0){
+		mode = 10;
+		SMOneClickSetBtn.textContent = "Syncing..."
+		btn.remove();
+		SMWASyncBtn.remove();
+
+		var BToken = "";
+		BToken = TGEncoding(JSON.stringify({
+			link: "https://www.youtube.com/watch?v=" + UID.split(" ")[1]
+		}));
+	
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', 'https://repo.mchatx.org/APISync/AutoSync/SignIn', true);
+		xhr.setRequestHeader('Content-type', 'application/json');
+		xhr.onload = function () {
+			var dt = JSON.parse(xhr.response);
+	
+			var BToken2 = "";
+			BToken2 = TGEncoding(JSON.stringify({
+				Token: dt.Token
+			}));
+			var xhr2 = new XMLHttpRequest();
+			xhr2.open('POST', 'https://repo.mchatx.org/APISync/AutoSync/Sync', true);
+			xhr2.setRequestHeader('Content-type', 'application/json');
+			xhr2.onload = function () {
+				mode = 0;
+				SMOneClickSetBtn.textContent = "Open TL Client";
+				SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+				btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+
+				var dt2 = JSON.parse(xhr2.response);
+				
+				ModalInputSync.value = dt2.SyncToken;
+				ModalOkSyncClick();
+			};
+			
+			xhr2.onerror = e => {
+				spn.textContent = "Quick Setup Failed";
+				mode = 0;
+				SMOneClickSetBtn.textContent = "Open TL Client";
+				SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+				btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+			}
+		
+			xhr2.send(JSON.stringify({
+				BToken: BToken2
+			}));
+			
+			const loginwin = open("https://mchatx.org/TLClient?token=" + dt.Token, "TLClient", "scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=no");
+			loginwin.onclose = function() {
+				console.log("TESTl");
+				if (mode == 10) {
+					spn.textContent = "Quick Setup Failed";
+					mode = 0;
+					SMOneClickSetBtn.textContent = "Open TL Client";
+					SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+					btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+				}
+			}
+		};
+		
+		xhr.onerror = e => {
+			spn.textContent = "Quick Setup Failed";
+			mode = 0;
+			SMOneClickSetBtn.textContent = "Open TL Client";
+			SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+			btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+		}
+	
+		xhr.send(JSON.stringify({
+			BToken: BToken
+		}));
+	}
 }
 
 function SMWASyncBtnClick() {
@@ -1112,6 +1196,7 @@ function LoadButtons(ContainerTarget) {
 	}
 	
 	ContainerTarget.prepend(ExtContainer);
+	ExtContainer.appendChild(SMOneClickSetBtn);
 	ExtContainer.appendChild(btn);
 	ExtContainer.appendChild(SMWASyncBtn);
 	ExtContainer.appendChild(spn);
@@ -1166,6 +1251,7 @@ function StartHereClick(){
 	spn.remove();
 	FrontFilterBtn.remove();
 	SMWASyncBtn.remove();
+	SMOneClickSetBtn.remove();
 	SMLoadHereBtn.remove();
 	if (ws != undefined){
 		ws.close();
@@ -1276,6 +1362,7 @@ function MMReloadCaption(){
 }
 
 function MMCloseBtnClick(){
+	ExtContainer.appendChild(SMOneClickSetBtn);
 	ExtContainer.appendChild(btn);
 	ExtContainer.appendChild(SMWASyncBtn);
 	ExtContainer.appendChild(spn);
@@ -3537,6 +3624,7 @@ function ModalOkSyncClick() {
 	mode = 1;
 	SMWASyncBtn.textContent = "Syncing..."
 	btn.remove();
+	SMOneClickSetBtn.remove();
 
 	SocketMode = false;
 	ES = new EventSource("https://repo.mchatx.org/APISync/Client?token=btoken " + ModalInputSync.value + " " + UID);
@@ -3549,6 +3637,7 @@ function ModalOkSyncClick() {
 		spn.textContent = "CAN'T REACH SERVER, HALP!";
 		CancelConnection();
 		SMWASyncBtn.parentNode.insertBefore(btn, SMWASyncBtn);
+		btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
 		SMWASyncBtn.textContent = "Sync Web Client";
 		mode = 0;
 	}
@@ -3561,6 +3650,7 @@ function ModalOkSyncClick() {
 				clearInterval(id);
 				CancelConnection();
 				SMWASyncBtn.parentNode.insertBefore(btn, SMWASyncBtn);
+				btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
 				SMWASyncBtn.textContent = "Sync Web Client";
 				mode = 0;
 			}
