@@ -133,12 +133,20 @@ function LatchChatBox(){
     for (let i = 0; i < iframeChat.length; i++){
         if (iframeChat[i].id == "chatframe"){
 			if (iframeChat[i].offsetHeight == 0){
-				ws.close();
+				if (SocketMode){
+					ws.close();
+				} else {
+					ES.close();
+				}
 				spn.textContent = "Chatbox needs to be open";
 			} else {
 				ChatInputPanel = iframeChat[i].contentDocument.querySelector("#panel-pages.yt-live-chat-renderer",);
 				if (ChatInputPanel.offsetHeight == 1){
-					ws.close();
+					if (SocketMode) {
+						ws.close();
+					} else {
+						ES.close();
+					}
 					spn.textContent = "The stream is not LIVE"
 				} else {
 					sendBtn = iframeChat[i].contentDocument.querySelector("#send-button button",); 
@@ -149,7 +157,11 @@ function LatchChatBox(){
 			
 			break;
         } else if (i == iframeChat.length - 1) {
-			ws.close();
+			if (SocketMode) {
+				ws.close();
+			} else {
+				ES.close();
+			}
 			spn.textContent = "Can't find Live Chat Input";
 		}
 	}
@@ -388,9 +400,12 @@ function SendUnsync(){
 
 function OpenSync() {
 	if (document.location.toString().indexOf("www.youtube.com/watch?v=") != -1){
+		SocketMode = true;
 		ws = new WebSocket("ws://localhost:20083/"); //	This one is fixed, host 2008 for Mio's birthday 20 Aug and 3 for "Mi" in Mio
 		//ws.onerror = function (err) {
 		//}
+
+		SMWASyncBtn.remove();
 
 		ws.onopen = function (event) {
 			SendReg();
@@ -398,7 +413,8 @@ function OpenSync() {
         
         ws.onclose = function (event) {
 			CancelConnection();
-			btn.textContent = "Sync MChad Desktop Client";
+			btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+			btn.textContent = "Sync Desktop Client";
 			mode = 0;
         };
 		
@@ -443,7 +459,7 @@ function CancelConnection(){
 }
 
 function MsgNexus(StringData) {
-	var NexusParse = StringData.toString().match(/\"Act\":\"MChad-RegOK\"|\"Act\":\"MChad-RollCallApp\"|\"Act\":\"MChad-SetMode\"|\"Act\":\"MChad-PlayApp\"|\"Act\":\"MChad-PauseApp\"|\"Act\":\"MChad-TimeSetApp\"|\"Act\":\"MChad-LiveSend\"|\"Act\":\"MChad-RegListener\"|\"Act\":\"MChad-FilterApp\"|\"Act\":\"MChad-PreciseSyncApp\"|\"Act\":\"MChad-PreciseTimeSetApp\"|\"Act\":\"MChad-Unsync\"/);
+	var NexusParse = StringData.toString().match(/\"Act\":\"MChad-RegOK\"|\"Act\":\"MChad-RollCallApp\"|\"Act\":\"MChad-SetMode\"|\"Act\":\"MChad-PlayApp\"|\"Act\":\"MChad-PauseApp\"|\"Act\":\"MChad-TimeSetApp\"|\"Act\":\"MChad-LiveSend\"|\"Act\":\"MChad-RegListener\"|\"Act\":\"MChad-FilterApp\"|\"Act\":\"MChad-PreciseSyncApp\"|\"Act\":\"MChad-PreciseTimeSetApp\"|\"Act\":\"MChad-Unsync\"|\"Act\":\"MChad-Disconnect\"/);
 	
 	if (NexusParse == null){
 		return;
@@ -467,23 +483,45 @@ function MsgNexus(StringData) {
 				if (ParsedData[1].split("\":\"")[1].replace("\"","") == UID){
 					switch (ParsedData[2].split("\":\"")[1].replace("\"}","")){
 						case ("Archive"):
+							if (!SocketMode){
+								ES.close();
+								spn.textContent = "ONLIE LiveChat MODE AVAILABLE FOR WEBAPP SYNC";
+								break;
+							}
 							if (mode < 3){
 								mode = 3;
-								btn.textContent = "Synced - Archive (Click to Unsync)";
+								if (SocketMode){
+									btn.textContent = "Synced - Archive (Click to Unsync)";
+								} else {
+									SMWASyncBtn.textContent = "Synced - Archive (Click to Unsync)";
+								}
 								LatchToVideo();
 							}
 							break;
 						case ("LiveChat"):
 							if (mode < 3){
 								mode = 4;
-								btn.textContent = "Synced - LiveChat (Click to Unsync)";
+								if (SocketMode){
+									btn.textContent = "Synced - LiveChat (Click to Unsync)";
+								} else {
+									SMWASyncBtn.textContent = "Synced - LiveChat (Click to Unsync)";
+								}
 								LatchChatBox();
 							}
 							break;
 						case ("SyncTL"):
+							if (!SocketMode){
+								ES.close();
+								spn.textContent = "ONLIE LiveChat MODE AVAILABLE FOR WEBAPP SYNC";
+								break;
+							}
 							if (mode < 3){
 								mode = 6;
-								btn.textContent = "Synced - Precise Sync Mode (Click to Unsync)";
+								if (SocketMode){
+									btn.textContent = "Synced - Precise Sync Mode (Click to Unsync)";
+								} else {
+									SMWASyncBtn.textContent = "Synced - Precise Sync Mode (Click to Unsync)";
+								}
 								LatchToVideo();
 							}
 							break;
@@ -587,6 +625,11 @@ function MsgNexus(StringData) {
 					mode = 2;
 					btn.textContent = "Synced - Idle";	
 				}				
+				break;
+			
+			case ("\"Act\":\"MChad-Disconnect\""):
+				CancelConnection();
+				mode = 0;
 				break;
 		}
 	}
@@ -805,6 +848,10 @@ function inheritCheck(){
 	ModalText.style.color = "inherit";
 	ModalInput.style.color = "inherit";
 	ModalOk.style.color = "inherit";
+	ModalCloseBtnSync.style.color = "inherit";
+	ModalTextSync.style.color = "inherit";
+	ModalInputSync.style.color = "inherit";
+	ModalOkSync.style.color = "inherit";
 	ARCardTemplate.style.color = "inherit";
 	ARCardText.style.color = "inherit";
 	ARCardOpenBtn.style.color = "inherit";
@@ -834,6 +881,7 @@ function inheritCheck(){
 	btn.style.color = "inherit";
 	spn.style.color = "inherit";
 	SMLoadHereBtn.style.color = "inherit";
+	SMWASyncBtn.style.color = "inherit";	
 	AccModalLinkSignUp.style.color = "inherit";
 	AccModalDivPS.style.color = "inherit";
 	AccModalLinkRestartPass.style.color = "inherit";
@@ -876,6 +924,10 @@ function inheritCheck(){
 	ModalText.style.backgroundColor = "inherit";
 	ModalInput.style.backgroundColor = "inherit";
 	ModalOk.style.backgroundColor = "inherit";
+	ModalCloseBtnSync.style.backgroundColor = "inherit";
+	ModalTextSync.style.backgroundColor = "inherit";
+	ModalInputSync.style.backgroundColor = "inherit";
+	ModalOkSync.style.backgroundColor = "inherit";
 	ARCardTemplate.style.backgroundColor = "inherit";
 	ARCardText.style.backgroundColor = "inherit";
 	ARCardOpenBtn.style.backgroundColor = "inherit";
@@ -905,6 +957,7 @@ function inheritCheck(){
 	btn.style.backgroundColor = "inherit";
 	spn.style.backgroundColor = "inherit";
 	SMLoadHereBtn.style.backgroundColor = "inherit";	
+	SMWASyncBtn.style.backgroundColor = "inherit";		
 	AccModalLinkSignUp.style.backgroundColor = "inherit";
 	AccModalDivPS.style.backgroundColor = "inherit";
 	AccModalLinkRestartPass.style.backgroundColor = "inherit";
@@ -919,6 +972,7 @@ function RepaintController(){
 		RoomContainer.style.color = PastelWhite;
 		ARContainer.style.color = PastelWhite;
 		ModalContent.style.color = PastelWhite;
+		ModalContentSync.style.color = PastelWhite;
 		AccModalContent.style.color = PastelWhite;
 		AccStatContainer.style.color = PastelWhite;
 		ModalContentFilter.style.color = PastelWhite;
@@ -927,6 +981,7 @@ function RepaintController(){
 		RoomContainer.style.backgroundColor = MatteBlack;
 		ARContainer.style.backgroundColor = MatteBlack;
 		ModalContent.style.backgroundColor = MatteBlack;
+		ModalContentSync.style.backgroundColor = MatteBlack;
 		AccModalContent.style.backgroundColor = MatteBlack;
 		AccStatContainer.style.backgroundColor = MatteBlack;
 		ModalContentFilter.style.backgroundColor = MatteBlack;
@@ -938,6 +993,7 @@ function RepaintController(){
 		RoomContainer.style.color = Black;
 		ARContainer.style.color = Black;
 		ModalContent.style.color = Black;
+		ModalContentSync.style.color = Black;
 		AccModalContent.style.color = Black;
 		AccStatContainer.style.color = Black;
 		ModalContentFilter.style.color = Black;
@@ -946,6 +1002,7 @@ function RepaintController(){
 		RoomContainer.style.backgroundColor = PastelWhite;
 		ARContainer.style.backgroundColor = PastelWhite;
 		ModalContent.style.backgroundColor = PastelWhite;
+		ModalContentSync.style.backgroundColor = PastelWhite;
 		AccModalContent.style.backgroundColor = PastelWhite;
 		AccStatContainer.style.backgroundColor = PastelWhite;
 		ModalContentFilter.style.backgroundColor = PastelWhite;
@@ -960,10 +1017,11 @@ ExtContainer.id = "Extcontainer";
 ExtContainer.style.border = "1px solid black"; 
 ExtContainer.style.width = '100%';
 ExtContainer.style.backgroundColor = "white";
+ExtContainer.style.display = 'block';
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChad Desktop Client"
+btn.textContent = "Sync Desktop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';
@@ -989,6 +1047,10 @@ SMLoadHereBtn.onclick = StartHereClick;
 SMLoadHereBtn.textContent = "Stand-Alone mode";
 SMLoadHereBtn.style.float = "right";
 
+var SMWASyncBtn = btn.cloneNode(false);
+SMWASyncBtn.onclick = SMWASyncBtnClick;
+SMWASyncBtn.textContent = "Sync Web Client";
+
 var WFloader = document.createElement("link");
 WFloader.rel = "stylesheet";
 WFloader.href = "https://fonts.googleapis.com/css2?family=Acme&family=Asap:wght@700&family=Kalam:wght@700&family=Patrick+Hand&display=swap";
@@ -997,6 +1059,14 @@ async function WebFontLoader(GFont) {
 	//WFloader.href = "https://fonts.googleapis.com/css2?family=" + GFont.replace(/ /g, "+") + "&display=swap";
 	CaptionFont = GFont;
 	RepaintCaption();
+}
+
+function SMWASyncBtnClick() {
+	if (mode == 0) {
+		SummonModalSync();
+	} else {
+		ES.close();
+	}	
 }
 
 function LoadButtons(ContainerTarget) {
@@ -1043,6 +1113,7 @@ function LoadButtons(ContainerTarget) {
 	
 	ContainerTarget.prepend(ExtContainer);
 	ExtContainer.appendChild(btn);
+	ExtContainer.appendChild(SMWASyncBtn);
 	ExtContainer.appendChild(spn);
 	ExtContainer.appendChild(SMLoadHereBtn);
 
@@ -1094,9 +1165,13 @@ function StartHereClick(){
 	btn.remove();
 	spn.remove();
 	FrontFilterBtn.remove();
+	SMWASyncBtn.remove();
 	SMLoadHereBtn.remove();
 	if (ws != undefined){
 		ws.close();
+	}
+	if (ES) {
+		ES.close();
 	}
 }
 //======================================= START MENU CONTROLLER =======================================
@@ -1202,6 +1277,7 @@ function MMReloadCaption(){
 
 function MMCloseBtnClick(){
 	ExtContainer.appendChild(btn);
+	ExtContainer.appendChild(SMWASyncBtn);
 	ExtContainer.appendChild(spn);
 	spn.textContent = "";
 	ExtContainer.appendChild(SMLoadHereBtn);
@@ -3385,12 +3461,127 @@ function CloseModalFilterBtnClick(){
 
 
 
+//---------------------------------------- SYNC MODAL CONTROLLER ----------------------------------------
+var ModalScreenSync = document.createElement('div');
+ModalScreenSync.style.position = "fixed";
+ModalScreenSync.style.zIndex = 1;
+ModalScreenSync.style.left = 0;
+ModalScreenSync.style.top = 0;
+ModalScreenSync.style.width = "100%";
+ModalScreenSync.style.height = "100%";
+ModalScreenSync.style.overflow = "auto";
+ModalScreenSync.style.backgroundColor = "rgba(0,0,0,0.4)";
+ModalScreenSync.style.display = "block"
+
+var ModalContentSync = document.createElement('div');
+ModalContentSync.style.backgroundColor = "#fefefe";
+ModalContentSync.style.margin = "15% auto";
+ModalContentSync.style.padding = "20px";
+ModalContentSync.style.border = "1px solid #888";
+ModalContentSync.style.width = "200px";
+ModalContentSync.style.display = "flex";
+ModalContentSync.style.alignItems = "center";
+ModalContentSync.style.justifyContent = "center";
+ModalContentSync.style.flexDirection = "column";
+ModalScreenSync.appendChild(ModalContentSync);
+
+var ModalCloseBtnSync = document.createElement('span');
+ModalCloseBtnSync.textContent = "X";
+ModalCloseBtnSync.style.color = "#aaa";
+ModalCloseBtnSync.style.alignSelf = "end";
+ModalCloseBtnSync.style.fontSize = "28px";
+ModalCloseBtnSync.style.fontWeight = "bold";
+ModalCloseBtnSync.style.cursor = "pointer";
+ModalCloseBtnSync.onclick = CloseModalSyncBtnClick;
+
+var ModalTextSync = document.createElement('p');
+ModalTextSync.textContent = "Sync code :";
+ModalTextSync.style.marginTop = "15px";
+ModalTextSync.style.marginBottom = "15px";
+ModalTextSync.style.fontSize = "17px";
+ModalTextSync.style.fontWeight = "bold";
+
+var ModalInputSync = document.createElement('input');
+ModalInputSync.type = "text";
+ModalInputSync.maxLength = 5;
+ModalInputSync.style.width = "80%";
+
+var ModalOkSync = btn.cloneNode(false);
+ModalOkSync.style.marginTop = "15px";
+ModalOkSync.textContent = "Sync";
+ModalOkSync.onclick = ModalOkSyncClick;
+
+ModalContentSync.appendChild(ModalCloseBtnSync);
+ModalContentSync.appendChild(ModalTextSync);
+ModalContentSync.appendChild(ModalInputSync);
+ModalContentSync.appendChild(document.createElement('br'));
+ModalContentSync.appendChild(ModalOkSync);
+
+function SummonModalSync() {
+	ExtContainer.appendChild(ModalScreenSync);
+	ModalInputSync.value = "";
+	window.onclick = function(event) {
+		if (event.target == ModalScreenSync) {
+			ModalScreenSync.remove();
+			window.onclick = null;
+		}
+	}
+}
+
+function ModalOkSyncClick() {
+	if (ES) {
+		ES.close();
+	}
+
+	ModalScreenSync.remove();
+	mode = 1;
+	SMWASyncBtn.textContent = "Syncing..."
+	btn.remove();
+
+	SocketMode = false;
+	ES = new EventSource("https://repo.mchatx.org/APISync/Client?token=btoken " + ModalInputSync.value + " " + UID);
+	ES.onmessage = e => {
+		MsgNexus(e.data.toString());
+	}
+  
+	ES.onerror = e => {
+		ES.close();
+		spn.textContent = "CAN'T REACH SERVER, HALP!";
+		CancelConnection();
+		SMWASyncBtn.parentNode.insertBefore(btn, SMWASyncBtn);
+		SMWASyncBtn.textContent = "Sync Web Client";
+		mode = 0;
+	}
+	
+	ES.onopen = e => {
+		mode = 2;
+		SMWASyncBtn.textContent = "Synced - Idle"
+		var id = setInterval(() => {
+			if (ES.readyState == 2){
+				clearInterval(id);
+				CancelConnection();
+				SMWASyncBtn.parentNode.insertBefore(btn, SMWASyncBtn);
+				SMWASyncBtn.textContent = "Sync Web Client";
+				mode = 0;
+			}
+		}, 2000);
+	}
+}
+
+function CloseModalSyncBtnClick(){
+	ModalScreenSync.remove();
+}
+//======================================== SYNC MODAL CONTROLLER ========================================
+
+
+
 //========================================= MChad Controller =========================================
 
 
 
 var ws;
-
+var ES;
+var SocketMode = false;
 var MainVid = document.createElement('video');
 var sendBtn; 
 var ChatText;
