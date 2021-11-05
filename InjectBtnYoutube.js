@@ -1118,17 +1118,27 @@ function OneClickSetup() {
 				BToken: BToken2
 			}));
 			
-			const loginwin = open("https://mchatx.org/TLClient?token=" + dt.Token, "TLClient", "scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=no");
-			loginwin.onclose = function() {
-				console.log("TESTl");
-				if (mode == 10) {
+			const ClientWin = open("https://mchatx.org/TLClient?token=" + dt.Token, "TLClient", "scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=no");
+			var Checker = setInterval(() => {
+				var test = true;
+				try {
+					test = !ClientWin.closed;
+				} catch (error) {
+					test = false;
+				}
+				
+				if ((mode == 10) && (!test)){
 					spn.textContent = "Quick Setup Failed";
 					mode = 0;
 					SMOneClickSetBtn.textContent = "Open TL Client";
 					SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
 					btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+					clearInterval(Checker);
 				}
-			}
+				if (mode == 0){
+					clearInterval(Checker);
+				}
+			}, 2000);
 		};
 		
 		xhr.onerror = e => {
