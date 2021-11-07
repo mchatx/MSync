@@ -1,12 +1,16 @@
-var UID = document.location.toString().substring(document.location.toString().indexOf("v=") + 2);
-if (UID.indexOf("?") != -1){
-	UID = UID.substring(0, UID.indexOf("?"));
-}
-if (UID.indexOf("&") != -1){
-	UID = UID.substring(0, UID.indexOf("&"));
-}
-UID = "Youtube " + UID;
+var UID = "";
+var HeadUID = 'YT_';
 
+function ReloadUniqueID() {
+	UID = document.location.toString().substring(document.location.toString().indexOf("v=") + 2);
+	if (UID.indexOf("?") != -1){
+		UID = UID.substring(0, UID.indexOf("?"));
+	}
+	if (UID.indexOf("&") != -1){
+		UID = UID.substring(0, UID.indexOf("&"));
+	}
+	UID = "Youtube " + UID;
+}
 //-------------------------------------   LISTEN TO LIVE CHAT BOX   -----------------------------------------
 //   READING LIVE CHAT BOX NODE CHANGE
 const callback = function(mutationsList, observer) {
@@ -149,9 +153,13 @@ function SendUnsync(){
 
 function OpenSync() {
 	if (document.location.toString().indexOf("https://www.youtube.com/live_chat?") != -1){
+		SocketMode = true;
 		ws = new WebSocket("ws://localhost:20083/"); //	This one is fixed, host 2008 for Mio's birthday 20 Aug and 3 for "Mi" in Mio
 		//ws.onerror = function (err) {
 		//}
+
+		SMWASyncBtn.remove();
+		SMOneClickSetBtn.remove();
 
 		ws.onopen = function (event) {
 			SendReg();
@@ -159,7 +167,9 @@ function OpenSync() {
         
         ws.onclose = function (event) {
 			CancelConnection();
-			btn.textContent = "Sync MChad Desktop Client";
+			btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+			btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
+			btn.textContent = "Sync Desktop Client";
 			mode = 0;
         };
 		
@@ -175,7 +185,11 @@ function OpenSync() {
 function CancelConnection(){
 	switch (mode){
 		case 1:
-			spn.textContent = "Can't connect to MChad desktop app";
+			if (SocketMode){
+				spn.textContent = "Can't connect to MChad desktop app";
+			} else {
+				spn.textContent = "Can't reach Sync Server, Halp!";
+			}		
 			break;
 		case 3:
 			spn.textContent = "Disconnected";
@@ -196,12 +210,12 @@ function CancelConnection(){
 }
 
 function MsgNexus(StringData) {
-	var NexusParse = StringData.toString().match(/\"Act\":\"MChad-RegOK\"|\"Act\":\"MChad-RollCallApp\"|\"Act\":\"MChad-SetMode\"|\"Act\":\"MChad-PlayApp\"|\"Act\":\"MChad-PauseApp\"|\"Act\":\"MChad-TimeSetApp\"|\"Act\":\"MChad-LiveSend\"|\"Act\":\"MChad-RegListener\"|\"Act\":\"MChad-FilterApp\"|\"Act\":\"MChad-PreciseSyncApp\"|\"Act\":\"MChad-PreciseTimeSetApp\"|\"Act\":\"MChad-Unsync\"/);
+	var NexusParse = StringData.toString().match(/\"Act\":\"MChad-RegOK\"|\"Act\":\"MChad-RollCallApp\"|\"Act\":\"MChad-SetMode\"|\"Act\":\"MChad-PlayApp\"|\"Act\":\"MChad-PauseApp\"|\"Act\":\"MChad-TimeSetApp\"|\"Act\":\"MChad-LiveSend\"|\"Act\":\"MChad-RegListener\"|\"Act\":\"MChad-FilterApp\"|\"Act\":\"MChad-PreciseSyncApp\"|\"Act\":\"MChad-PreciseTimeSetApp\"|\"Act\":\"MChad-Unsync\"|\"Act\":\"MChad-Disconnect\"/);
 	
 	if (NexusParse == null){
 		return;
 	}
-
+	
 	if (NexusParse.length != 0){
 		switch(NexusParse[0]){
 			case ("\"Act\":\"MChad-RegOK\""):
@@ -222,19 +236,24 @@ function MsgNexus(StringData) {
 						case ("Archive"):
 							if (mode < 3){
 								mode = 2;
-								btn.textContent = "ARCHIVE MODE UNAVAILABLE";
+								spn.textContent = "ARCHIVE MODE UNAVAILABLE";
 							}
 							break;
 						case ("LiveChat"):
 							if (mode < 3){
-								mode = 2;
-								btn.textContent = "BOUNCING NOT AVAILABLE";
+								mode = 4;
+								if (SocketMode){
+									btn.textContent = "Synced - LiveChat (Click to Unsync)";
+								} else {
+									SMWASyncBtn.textContent = "Synced - LiveChat (Click to Unsync)";
+								}
+								LatchChatBox();
 							}
 							break;
 						case ("SyncTL"):
 							if (mode < 3){
 								mode = 2;
-								btn.textContent = "PRECISE SYNC MODE UNAVAILABLE";
+								spn.textContent = "PRECISE SYNC MODE UNAVAILABLE";
 							}
 							break;
 					}
@@ -307,6 +326,11 @@ function MsgNexus(StringData) {
 					btn.textContent = "Synced - Idle";	
 				}				
 				break;	
+
+			case ("\"Act\":\"MChad-Disconnect\""):
+				CancelConnection();
+				mode = 0;
+				break;	
 		}
 	}
 }
@@ -314,6 +338,7 @@ function MsgNexus(StringData) {
 function BtnNexus() {
 	spn.textContent = "";
 	if (mode == 0) {
+		ReloadUniqueID();
 		btn.textContent = "Syncing..."
 		mode = 1;
 		OpenSync();
@@ -435,9 +460,12 @@ function CloseModalFilterBtnClick(){
 
 
 var ws;
+var ES;
+var SocketMode = false;
+
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChad Desktop Client"
+btn.textContent = "Sync Desktop Client"
 btn.style.margin = "5px"
 btn.style.background = 'black';
 btn.style.color = 'white';
@@ -446,6 +474,14 @@ btn.style.cursor = 'pointer';
 btn.style.textAlign = 'center';
 btn.style.borderRadius = '15px';
 btn.style.padding = '8px';
+
+var SMWASyncBtn = btn.cloneNode(false);
+SMWASyncBtn.onclick = SMWASyncBtnClick;
+SMWASyncBtn.textContent = "Sync Web Client";
+
+var SMOneClickSetBtn = btn.cloneNode(false);
+SMOneClickSetBtn.onclick = OneClickSetup;
+SMOneClickSetBtn.textContent = "Open TL Client";
 
 var spn = document.createElement('span');
 spn.textContent = "";
@@ -459,18 +495,22 @@ FrontFilterBtn.textContent = "Set Filter";
 FrontFilterBtn.onclick = MMFilterBtnClick;
 FrontFilterBtn.style.float = "left";
 
+var ExtContainer = document.createElement('div');
+ExtContainer.id = "Extcontainer";
+ExtContainer.appendChild(SMOneClickSetBtn);
+ExtContainer.appendChild(btn);
+ExtContainer.appendChild(SMWASyncBtn);
+ExtContainer.appendChild(spn);
+
 function MMFilterBtnClick() {
 	SummonModalFilter();
 }
 
-var sendBtn; 
-var ChatText;
 var ListenerTarget;
-var ChatInputPanel;
 
 var mode = 0;
 
-var CurrentVersion = "3.1.8";
+var CurrentVersion = "3.1.9";
 
 var ChatElementTarget = "chat-messages";
 /*
@@ -482,13 +522,11 @@ var ChatElementTarget = "chat-messages";
 	5 : SYNCED-LISTENER
 */
 
+ReloadUniqueID();
+
 function LoadButtons() {
 	var target = document.getElementById(ChatElementTarget);
-	var ExtContainer = document.createElement('div');
-	ExtContainer.id = "Extcontainer";
 	target.prepend(ExtContainer);
-	ExtContainer.appendChild(btn);
-	ExtContainer.appendChild(spn);
 
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', 'https://repo.mchatx.org/MSyncVersion/', true);
@@ -515,8 +553,8 @@ async function WaitUntilLoad(){
 		var target = document.getElementById(ChatElementTarget);
 		if (target.length != 0){
 			if (document.getElementById("Extcontainer") != null){
-				var Extcontainer = document.getElementById("Extcontainer");
-				Extcontainer.parentNode.removeChild(Extcontainer);
+				var ExtcontainerTemp = document.getElementById("Extcontainer");
+				ExtcontainerTemp.parentNode.removeChild(ExtcontainerTemp);
 			}
 			LoadButtons();
 			break;
@@ -527,4 +565,403 @@ async function WaitUntilLoad(){
 	}
 }
 
+function OneClickSetup() {
+	if (mode == 0){
+		ReloadUniqueID();
+		mode = 10;
+		SMOneClickSetBtn.textContent = "Syncing..."
+		spn.textContent = "";
+		btn.remove();
+		SMWASyncBtn.remove();
+
+		var BToken = "";
+		BToken = TGEncoding(JSON.stringify({
+			link: "https://www.youtube.com/watch?v=" + UID.split(" ")[1]
+		}));
+	
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', 'https://repo.mchatx.org/APISync/AutoSync/SignIn', true);
+		xhr.setRequestHeader('Content-type', 'application/json');
+		xhr.onload = function () {
+			var dt = JSON.parse(xhr.response);
+	
+			var BToken2 = "";
+			BToken2 = TGEncoding(JSON.stringify({
+				Token: dt.Token
+			}));
+			var xhr2 = new XMLHttpRequest();
+			xhr2.open('POST', 'https://repo.mchatx.org/APISync/AutoSync/Sync', true);
+			xhr2.setRequestHeader('Content-type', 'application/json');
+			xhr2.onload = function () {
+				mode = 0;
+				SMOneClickSetBtn.textContent = "Open TL Client";
+				SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+				btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+
+				var dt2 = JSON.parse(xhr2.response);
+				
+				ModalInputSync.value = dt2.SyncToken;
+				ModalOkSyncClick();
+			};
+			
+			xhr2.onerror = e => {
+				spn.textContent = "Quick Setup Failed";
+				mode = 0;
+				SMOneClickSetBtn.textContent = "Open TL Client";
+				SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+				btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+			}
+		
+			xhr2.send(JSON.stringify({
+				BToken: BToken2
+			}));
+			
+			const ClientWin = open("https://app.mchatx.org/TLClient?token=" + dt.Token, "TLClient", "scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=no,width=1000,height=600,left=" + (screen.width - 1000).toString());
+			var Checker = setInterval(() => {
+				var test = true;
+				try {
+					test = !ClientWin.closed;
+				} catch (error) {
+					test = false;
+				}
+				
+				if ((mode == 10) && (!test)){
+					spn.textContent = "Quick Setup Failed";
+					mode = 0;
+					SMOneClickSetBtn.textContent = "Open TL Client";
+					SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+					btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+					clearInterval(Checker);
+				}
+				if (mode == 0){
+					clearInterval(Checker);
+				}
+			}, 2000);
+		};
+		
+		xhr.onerror = e => {
+			spn.textContent = "Quick Setup Failed";
+			mode = 0;
+			SMOneClickSetBtn.textContent = "Open TL Client";
+			SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+			btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+		}
+	
+		xhr.send(JSON.stringify({
+			BToken: BToken
+		}));
+	}
+}
+
+function SMWASyncBtnClick() {
+	if (mode == 0) {
+		ReloadUniqueID();
+		SummonModalSync();
+	} else {
+		ES.close();
+	}
+}
+
 WaitUntilLoad();
+
+
+
+//---------------------------------------   BOUNCING TRANSLATION   -------------------------------------------
+//   BOUNCING INCOMING MESSAGE TO THE LIVE CHAT SUBMITTER 
+var sendBtn; 
+var ChatText;
+
+function SendTextEnter(inputtext){
+	ChatText.textContent = inputtext;
+	ChatText.dispatchEvent(new InputEvent("input"));
+	sendBtn.click();
+}
+
+function LatchChatBox(){
+	sendBtn = document.querySelector("#send-button button",); 
+	ChatText = document.querySelector("#input.yt-live-chat-text-input-field-renderer",);
+	if ((sendBtn == null) || (ChatText == null)) {
+		if (SocketMode){
+			ws.close();
+		} else {
+			ES.close();
+		}
+		spn.textContent = "Can't find message input";
+	}
+}
+//=============================================================================================================
+
+
+
+//---------------------------------------- SYNC MODAL CONTROLLER ----------------------------------------
+var ModalScreenSync = document.createElement('div');
+ModalScreenSync.style.position = "fixed";
+ModalScreenSync.style.zIndex = 1;
+ModalScreenSync.style.left = 0;
+ModalScreenSync.style.top = 0;
+ModalScreenSync.style.width = "100%";
+ModalScreenSync.style.height = "100%";
+ModalScreenSync.style.overflow = "auto";
+ModalScreenSync.style.backgroundColor = "rgba(0,0,0,0.4)";
+ModalScreenSync.style.display = "block"
+
+var ModalContentSync = document.createElement('div');
+ModalContentSync.style.background = 'black';
+ModalContentSync.style.color = 'white';
+ModalContentSync.style.margin = "15% auto";
+ModalContentSync.style.padding = "20px";
+ModalContentSync.style.border = "1px solid #888";
+ModalContentSync.style.width = "200px";
+ModalContentSync.style.display = "flex";
+ModalContentSync.style.alignItems = "center";
+ModalContentSync.style.justifyContent = "center";
+ModalContentSync.style.flexDirection = "column";
+ModalScreenSync.appendChild(ModalContentSync);
+
+var ModalCloseBtnSync = document.createElement('span');
+ModalCloseBtnSync.textContent = "X";
+ModalCloseBtnSync.style.color = "#aaa";
+ModalCloseBtnSync.style.alignSelf = "end";
+ModalCloseBtnSync.style.fontSize = "28px";
+ModalCloseBtnSync.style.fontWeight = "bold";
+ModalCloseBtnSync.style.cursor = "pointer";
+ModalCloseBtnSync.onclick = CloseModalSyncBtnClick;
+
+var ModalTextSync = document.createElement('p');
+ModalTextSync.textContent = "Sync code :";
+ModalTextSync.style.marginTop = "15px";
+ModalTextSync.style.marginBottom = "15px";
+ModalTextSync.style.fontSize = "17px";
+ModalTextSync.style.fontWeight = "bold";
+
+var ModalInputSync = document.createElement('input');
+ModalInputSync.type = "text";
+ModalInputSync.maxLength = 5;
+ModalInputSync.style.width = "80%";
+
+var ModalOkSync = btn.cloneNode(false);
+ModalOkSync.style.marginTop = "15px";
+ModalOkSync.textContent = "Sync";
+ModalOkSync.onclick = ModalOkSyncClick;
+
+ModalContentSync.appendChild(ModalCloseBtnSync);
+ModalContentSync.appendChild(ModalTextSync);
+ModalContentSync.appendChild(ModalInputSync);
+ModalContentSync.appendChild(document.createElement('br'));
+ModalContentSync.appendChild(ModalOkSync);
+
+function SummonModalSync() {
+	ExtContainer.appendChild(ModalScreenSync);
+	ModalInputSync.value = "";
+	window.onclick = function(event) {
+		if (event.target == ModalScreenSync) {
+			ModalScreenSync.remove();
+			window.onclick = null;
+		}
+	}
+}
+
+function ModalOkSyncClick() {
+	spn.textContent = "";
+	if (ES) {
+		ES.close();
+	}
+
+	ModalScreenSync.remove();
+	mode = 1;
+	SMWASyncBtn.textContent = "Syncing..."
+	btn.remove();
+	SMOneClickSetBtn.remove();
+	SocketMode = false;
+	ES = new EventSource("https://repo.mchatx.org/APISync/Client?token=btoken " + ModalInputSync.value + " " + UID);
+	ES.onmessage = e => {
+		MsgNexus(e.data.toString());
+	}
+  
+	ES.onerror = e => {
+		ES.close();
+		spn.textContent = "CAN'T REACH SERVER, HALP!";
+		CancelConnection();
+		SMWASyncBtn.parentNode.insertBefore(btn, SMWASyncBtn);
+		btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
+		SMWASyncBtn.textContent = "Sync Web Client";
+		mode = 0;
+	}
+	
+	ES.onopen = e => {
+		mode = 2;
+		SMWASyncBtn.textContent = "Synced - Idle"
+		var id = setInterval(() => {
+			if (ES.readyState == 2){
+				clearInterval(id);
+				CancelConnection();
+				SMWASyncBtn.parentNode.insertBefore(btn, SMWASyncBtn);
+				btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
+				SMWASyncBtn.textContent = "Sync Web Client";
+				mode = 0;
+			}
+		}, 2000);
+	}
+}
+
+function CloseModalSyncBtnClick(){
+	ModalScreenSync.remove();
+}
+//======================================== SYNC MODAL CONTROLLER ========================================
+
+
+
+//------------------------ TSUGE GUSHI ENCODING------------------------
+function TGEncoding(input){
+    var output = "";
+    var key = "";
+    var teethsize = 0;
+    var head = 0;
+
+    while (head == 0){
+        head = Date.now() % 100;
+    }
+
+    input = input.replace(/([^\x00-\x7F]|\%)+/g, SelectiveURIReplacer);
+    output = btoa(input);
+
+    key = head.toString();
+    
+    teethsize = Math.floor(output.length*3.0/4.0);
+    for (var i  = 0; i <= head; i++){
+        output = output.slice(teethsize) + output.slice(0, teethsize);
+    }
+    
+    for (var i = 0; i <= head; i++){
+        if ((/[a-zA-Z]/).test(output[i])){
+            key += output[i];
+            break;
+        }
+    }
+
+    for (; key.length < output.length;){
+        var TeethLoc = Math.floor(Math.random()*output.length);
+        var Halfend = output.slice(TeethLoc);
+        output = output.slice(0, TeethLoc);
+        key += TeethLoc.toString();
+          
+        if (Date.now() % 2 == 0){
+          key += "~";
+        } else {
+          key += "|";
+        }
+  
+        key += Halfend[0];
+  
+          
+        Halfend = Halfend.slice(1);
+    
+        for (var i = 0;((Date.now() % 2 == 0) && (i < 5));i++){
+            if (Halfend.length != 0){
+                key += Halfend.slice(0,1);
+                Halfend = Halfend.slice(1);
+            }
+            if (key.length > output.length + Halfend.length){
+              break;
+            }
+        }
+    
+        output += Halfend;
+        if (Date.now() % 2 == 0){
+            key += "_";
+        } else {
+            key += "\\";
+        }
+    
+        if (key.length >= output.length){
+            break;
+        }
+    }
+
+    for (var i = 0; ((i < 3) || (Date.now() % 2 != 0)) && (i < key.length/3.0); i++){
+        var incision = Math.floor(Math.random()*output.length);
+        if (Date.now() % 2 == 0){
+            output = output.slice(0, incision) + "~" + output.slice(incision);
+        } else {
+            output = output.slice(0, incision) + "_" + output.slice(incision);
+        }
+    }
+
+    output = output + " " + key;
+    
+    head = Math.floor((Date.now() % 100) * 16.0 / 100.0);
+    teethsize = Math.floor(output.length*3.0/4.0);
+    for (var i = 0; i <= head; i++){
+        output = output.slice(teethsize) + output.slice(0, teethsize);
+    }
+  
+    key = head.toString(16);
+    output = key + output;
+	
+    return (output);
+}
+    
+function TGDecoding(input) {
+    var teeth = Number.parseInt(input.slice(0, 1), 16);
+    input = input.slice(1);
+
+    var teethsize = input.length - Math.floor(input.length*3.0/4.0);
+    for (var i = 0; i <= teeth; i++){
+        input = input.slice(teethsize) + input.slice(0, teethsize);
+    }
+
+    var output = input.split(" ")[0];
+    output = output.replace(/~|_/g, "");
+    var key = input.split(" ")[1];
+
+    var cutloc = 0;
+    for (cutloc = 0; cutloc < key.length; cutloc++){
+        if ((/[a-zA-Z]/).test(key[cutloc])){
+            break;
+        }
+    }
+    
+    teeth = Number.parseInt(key.slice(0,cutloc));
+    
+    key = "\\" + key.slice(cutloc + 1);
+  
+    var cutstring = "";
+    var cutstring2 = "";
+    
+    for (var taking = false; key.length > 0;){
+        if((key.slice(-1) == "_") || (key.slice(-1) == "\\")) {
+            if (cutstring == ""){
+              cutloc = 0
+            } else {
+              cutloc = Number.parseInt(cutstring);
+            }
+            output = output.slice(0, cutloc) + cutstring2 + output.slice(cutloc);
+            cutstring = "";
+            cutstring2 = "";
+            taking = false;
+        } else if ((key.slice(-1) == "~") || (key.slice(-1) == "|")) {
+            taking = true;
+        } else if (taking){
+            cutstring = key.slice(-1) + cutstring;
+        } else {
+            cutstring2 = key.slice(-1) + cutstring2;
+        }
+        key = key.slice(0, key.length - 1);
+    }
+
+    teethsize = output.length - Math.floor(output.length*3.0/4.0);
+    for (var i = 0; i <= teeth; i++){
+        output = output.slice(teethsize) + output.slice(0, teethsize);
+    }
+
+
+	output = atob(output);
+	output = decodeURI(output);
+
+    return (output);
+}
+
+function SelectiveURIReplacer(match){
+    return(encodeURI(match));
+}
+//======================== TSUGE GUSHI ENCODING ========================
