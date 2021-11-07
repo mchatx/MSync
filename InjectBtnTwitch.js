@@ -448,7 +448,7 @@ function OpenSync() {
         
         ws.onclose = function (event) {
 			CancelConnection();
-			btn.textContent = "Sync MChad Desktop Client";
+			btn.textContent = "Sync Desktop Client";
 			mode = 0;
         };
 		
@@ -1034,7 +1034,7 @@ ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChad Desktop Client"
+btn.textContent = "Sync Desktop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';

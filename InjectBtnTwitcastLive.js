@@ -1,11 +1,17 @@
 //-------------------------------------------  HEAD VARIABLES  -------------------------------------------
 const VideoElementID = "tw-stream-movie-layout";
 const ExtContainerParentID = "tw-player-page__component tw-player-page__player-header";
-var UID = document.location.toString().substring(document.location.toString().indexOf("/movie/") + 7);
-if (UID.indexOf("?") != -1){
-	UID = UID.substring(0, UID.indexOf("?"));
+var UID = "";
+
+function ReloadUniqueID() {
+	UID = document.location.toString().substring(document.location.toString().indexOf("twitcasting.tv/") + 15);
+	if (UID.indexOf("?") != -1){
+		UID = UID.substring(0, UID.indexOf("?"));
+	}
+	UID = "Twitcast " + UID;
 }
-UID = "Twitcast " + UID;
+ReloadUniqueID();
+
 var HeadUID = 'TC_';
 //===========================================  HEAD VARIABLES  ===========================================
 
@@ -147,7 +153,11 @@ function LatchChatBox(){
 
 	if ((ChatText != null) && (sendBtn != null)){
 	} else {
-		ws.close();
+		if (SocketMode){
+			ws.close();
+		} else {
+			ES.close();
+		}
 		spn.textContent = "Can't find Live Chat Input";
 	}
 }
@@ -316,9 +326,13 @@ function SendUnsync(){
 
 function OpenSync() {
 	if (document.location.toString().indexOf("://twitcasting.tv/") != -1){
+		SocketMode = true;
 		ws = new WebSocket("ws://localhost:20083/"); //	This one is fixed, host 2008 for Mio's birthday 20 Aug and 3 for "Mi" in Mio
 		//ws.onerror = function (err) {
 		//}
+
+		SMWASyncBtn.remove();
+		SMOneClickSetBtn.remove();
 
 		ws.onopen = function (event) {
 			SendReg();
@@ -326,7 +340,9 @@ function OpenSync() {
         
         ws.onclose = function (event) {
 			CancelConnection();
-			btn.textContent = "Sync MChad Desktop Client";
+			btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+			btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
+			btn.textContent = "Sync Desktop Client";
 			mode = 0;
         };
 		
@@ -342,7 +358,11 @@ function OpenSync() {
 function CancelConnection() {
 	switch (mode){
 		case 1:
-			spn.textContent = "Can't connect to MChad desktop app";
+			if (SocketMode){
+				spn.textContent = "Can't connect to MChad desktop app";
+			} else {
+				spn.textContent = "Can't reach Sync Server, Halp!";
+			}			
 			break;
 		case 3:
 			MainVid.onseeked = null;
@@ -354,7 +374,7 @@ function CancelConnection() {
 			sendBtn = null;
 			ChatText = null;
 			ChatInputPanel = null;
-			ChatBoxObserver.disconnect();
+			//ChatBoxObserver.disconnect();
 			break;
 		case 5:
 			ChatItemObserver.disconnect();
@@ -396,21 +416,33 @@ function MsgNexus(StringData) {
 						case ("Archive"):
 							if (mode < 3){
 								mode = 3;
-								btn.textContent = "Synced - Archive (Click to Unsync)";
+								if (SocketMode){
+									btn.textContent = "Synced - Archive (Click to Unsync)";
+								} else {
+									SMWASyncBtn.textContent = "Synced - Archive (Click to Unsync)";
+								}
 								LatchToVideo();
 							}
 							break;
 						case ("LiveChat"):
 							if (mode < 3){
 								mode = 4;
-								btn.textContent = "Synced - LiveChat (Click to Unsync)";
+								if (SocketMode){
+									btn.textContent = "Synced - LiveChat (Click to Unsync)";
+								} else {
+									SMWASyncBtn.textContent = "Synced - LiveChat (Click to Unsync)";
+								}
 								LatchChatBox();
 							}
 							break;
 						case ("SyncTL"):
 							if (mode < 3){
 								mode = 6;
-								btn.textContent = "Synced - Precise Sync Mode (Click to Unsync)";
+								if (SocketMode){
+									btn.textContent = "Synced - Precise Sync Mode (Click to Unsync)";
+								} else {
+									SMWASyncBtn.textContent = "Synced - Precise Sync Mode (Click to Unsync)";
+								}
 								LatchToVideo();
 							}
 							break;
@@ -522,6 +554,7 @@ function MsgNexus(StringData) {
 function BtnNexus() {
 	spn.textContent = "";
 	if (mode == 0) {
+		ReloadUniqueID();
 		btn.textContent = "Syncing..."
 		mode = 1;
 		OpenSync();
@@ -762,6 +795,8 @@ function inheritCheck(){
 	btn.style.color = "inherit";
 	spn.style.color = "inherit";
 	SMLoadHereBtn.style.color = "inherit";
+	SMWASyncBtn.style.color = "inherit";
+	SMOneClickSetBtn.style.color = "inherit";
 	AccModalLinkSignUp.style.color = "inherit";
 	AccModalDivPS.style.color = "inherit";
 	AccModalLinkRestartPass.style.color = "inherit";
@@ -833,6 +868,8 @@ function inheritCheck(){
 	btn.style.backgroundColor = "inherit";
 	spn.style.backgroundColor = "inherit";
 	SMLoadHereBtn.style.backgroundColor = "inherit";	
+	SMWASyncBtn.style.backgroundColor = "inherit";		
+	SMOneClickSetBtn.style.backgroundColor = "inherit";		
 	AccModalLinkSignUp.style.backgroundColor = "inherit";
 	AccModalDivPS.style.backgroundColor = "inherit";
 	AccModalLinkRestartPass.style.backgroundColor = "inherit";
@@ -847,6 +884,7 @@ function RepaintController(){
 		RoomContainer.style.color = PastelWhite;
 		ARContainer.style.color = PastelWhite;
 		ModalContent.style.color = PastelWhite;
+		ModalContentSync.style.color = PastelWhite;
 		AccModalContent.style.color = PastelWhite;
 		AccStatContainer.style.color = PastelWhite;
 		ModalContentFilter.style.color = PastelWhite;
@@ -855,6 +893,7 @@ function RepaintController(){
 		RoomContainer.style.backgroundColor = MatteBlack;
 		ARContainer.style.backgroundColor = MatteBlack;
 		ModalContent.style.backgroundColor = MatteBlack;
+		ModalContentSync.style.backgroundColor = MatteBlack;
 		AccModalContent.style.backgroundColor = MatteBlack;
 		AccStatContainer.style.backgroundColor = MatteBlack;
 		ModalContentFilter.style.backgroundColor = MatteBlack;
@@ -866,6 +905,7 @@ function RepaintController(){
 		RoomContainer.style.color = Black;
 		ARContainer.style.color = Black;
 		ModalContent.style.color = Black;
+		ModalContentSync.style.color = Black;
 		AccModalContent.style.color = Black;
 		AccStatContainer.style.color = Black;
 		ModalContentFilter.style.color = Black;
@@ -874,6 +914,7 @@ function RepaintController(){
 		RoomContainer.style.backgroundColor = PastelWhite;
 		ARContainer.style.backgroundColor = PastelWhite;
 		ModalContent.style.backgroundColor = PastelWhite;
+		ModalContentSync.style.backgroundColor = PastelWhite;
 		AccModalContent.style.backgroundColor = PastelWhite;
 		AccStatContainer.style.backgroundColor = PastelWhite;
 		ModalContentFilter.style.backgroundColor = PastelWhite;
@@ -891,7 +932,7 @@ ExtContainer.style.backgroundColor = "white";
 
 var btn = document.createElement('button');
 btn.onclick = BtnNexus;
-btn.textContent = "Sync MChad Desktop Client"
+btn.textContent = "Sync Desktop Client"
 btn.style.margin = "5px"
 btn.style.background = 'white';
 btn.style.color = 'black';
@@ -917,6 +958,14 @@ SMLoadHereBtn.onclick = StartHereClick;
 SMLoadHereBtn.textContent = "Stand-Alone mode";
 SMLoadHereBtn.style.float = "right";
 
+var SMWASyncBtn = btn.cloneNode(false);
+SMWASyncBtn.onclick = SMWASyncBtnClick;
+SMWASyncBtn.textContent = "Sync Web Client";
+
+var SMOneClickSetBtn = btn.cloneNode(false);
+SMOneClickSetBtn.onclick = OneClickSetup;
+SMOneClickSetBtn.textContent = "Open TL Client";
+
 var WFloader = document.createElement("link");
 WFloader.rel = "stylesheet";
 WFloader.href = "https://fonts.googleapis.com/css2?family=Acme&family=Asap:wght@700&family=Kalam:wght@700&family=Patrick+Hand&display=swap";
@@ -925,6 +974,103 @@ async function WebFontLoader(GFont) {
 	//WFloader.href = "https://fonts.googleapis.com/css2?family=" + GFont.replace(/ /g, "+") + "&display=swap";
 	CaptionFont = GFont;
 	RepaintCaption();
+}
+
+function OneClickSetup() {
+	if (mode == 0){
+		ReloadUniqueID();
+		mode = 10;
+		SMOneClickSetBtn.textContent = "Syncing..."
+		spn.textContent = "";
+		btn.remove();
+		SMWASyncBtn.remove();
+
+		var BToken = "";
+		BToken = TGEncoding(JSON.stringify({
+			link: "https://twitcasting.tv/" + UID.split(" ")[1]
+		}));
+	
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', 'https://repo.mchatx.org/APISync/AutoSync/SignIn', true);
+		xhr.setRequestHeader('Content-type', 'application/json');
+		xhr.onload = function () {
+			var dt = JSON.parse(xhr.response);
+	
+			var BToken2 = "";
+			BToken2 = TGEncoding(JSON.stringify({
+				Token: dt.Token
+			}));
+			var xhr2 = new XMLHttpRequest();
+			xhr2.open('POST', 'https://repo.mchatx.org/APISync/AutoSync/Sync', true);
+			xhr2.setRequestHeader('Content-type', 'application/json');
+			xhr2.onload = function () {
+				mode = 0;
+				SMOneClickSetBtn.textContent = "Open TL Client";
+				SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+				btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+
+				var dt2 = JSON.parse(xhr2.response);
+				
+				ModalInputSync.value = dt2.SyncToken;
+				ModalOkSyncClick();
+			};
+			
+			xhr2.onerror = e => {
+				spn.textContent = "Quick Setup Failed";
+				mode = 0;
+				SMOneClickSetBtn.textContent = "Open TL Client";
+				SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+				btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+			}
+		
+			xhr2.send(JSON.stringify({
+				BToken: BToken2
+			}));
+			
+			const ClientWin = open("https://app.mchatx.org/TLClient?token=" + dt.Token, "TLClient", "scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=no,width=1000,height=600,left=" + (screen.width - 1000).toString());
+			var Checker = setInterval(() => {
+				var test = true;
+				try {
+					test = !ClientWin.closed;
+				} catch (error) {
+					test = false;
+				}
+				
+				if ((mode == 10) && (!test)){
+					spn.textContent = "Quick Setup Failed";
+					mode = 0;
+					SMOneClickSetBtn.textContent = "Open TL Client";
+					SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+					btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+					clearInterval(Checker);
+				}
+				if (mode == 0){
+					clearInterval(Checker);
+				}
+			}, 2000);
+		};
+		
+		xhr.onerror = e => {
+			spn.textContent = "Quick Setup Failed";
+			mode = 0;
+			SMOneClickSetBtn.textContent = "Open TL Client";
+			SMOneClickSetBtn.parentNode.insertBefore(btn, SMOneClickSetBtn.nextSibling);
+			btn.parentNode.insertBefore(SMWASyncBtn, btn.nextSibling);
+		}
+	
+		xhr.send(JSON.stringify({
+			BToken: BToken
+		}));
+	}
+}
+
+function SMWASyncBtnClick() {
+	if (mode == 0) {
+		ReloadUniqueID();
+		SummonModalSync();
+	} else {
+		ES.close();
+	}	
 }
 
 function LoadButtons(ContainerTarget) {
@@ -970,7 +1116,9 @@ function LoadButtons(ContainerTarget) {
 	}
 
 	ContainerTarget.prepend(ExtContainer);
+	ExtContainer.appendChild(SMOneClickSetBtn);
 	ExtContainer.appendChild(btn);
+	ExtContainer.appendChild(SMWASyncBtn);
 	ExtContainer.appendChild(spn);
 	ExtContainer.appendChild(SMLoadHereBtn);
 
@@ -997,6 +1145,7 @@ function LoadButtons(ContainerTarget) {
 function StartHereClick(){
 	StandAlone = true;
 	SummonMainMenu();
+	ReloadUniqueID();
 
 
     VidEle = document.getElementsByClassName("tw-stream-movie-layout");
@@ -1016,6 +1165,8 @@ function StartHereClick(){
 	dragElement(CaptionDiv);
 	resizeElement(CaptionDiv);
 	btn.remove();
+	SMWASyncBtn.remove();
+	SMOneClickSetBtn.remove();
 	spn.remove();
 	FrontFilterBtn.remove();
 	SMLoadHereBtn.remove();
@@ -1119,7 +1270,9 @@ function MMReloadCaption(){
 }
 
 function MMCloseBtnClick(){
+	ExtContainer.appendChild(SMOneClickSetBtn);
 	ExtContainer.appendChild(btn);
+	ExtContainer.appendChild(SMWASyncBtn);
 	ExtContainer.appendChild(spn);
 	spn.textContent = "";
 	ExtContainer.appendChild(SMLoadHereBtn);
@@ -3286,11 +3439,131 @@ function CloseModalFilterBtnClick(){
 }
 //======================================== FILTER MODAL CONTROLLER ========================================
 
+
+
+//---------------------------------------- SYNC MODAL CONTROLLER ----------------------------------------
+var ModalScreenSync = document.createElement('div');
+ModalScreenSync.style.position = "fixed";
+ModalScreenSync.style.zIndex = 1;
+ModalScreenSync.style.left = 0;
+ModalScreenSync.style.top = 0;
+ModalScreenSync.style.width = "100%";
+ModalScreenSync.style.height = "100%";
+ModalScreenSync.style.overflow = "auto";
+ModalScreenSync.style.backgroundColor = "rgba(0,0,0,0.4)";
+ModalScreenSync.style.display = "block"
+
+var ModalContentSync = document.createElement('div');
+ModalContentSync.style.backgroundColor = "#fefefe";
+ModalContentSync.style.margin = "15% auto";
+ModalContentSync.style.padding = "20px";
+ModalContentSync.style.border = "1px solid #888";
+ModalContentSync.style.width = "200px";
+ModalContentSync.style.display = "flex";
+ModalContentSync.style.alignItems = "center";
+ModalContentSync.style.justifyContent = "center";
+ModalContentSync.style.flexDirection = "column";
+ModalScreenSync.appendChild(ModalContentSync);
+
+var ModalCloseBtnSync = document.createElement('span');
+ModalCloseBtnSync.textContent = "X";
+ModalCloseBtnSync.style.color = "#aaa";
+ModalCloseBtnSync.style.alignSelf = "end";
+ModalCloseBtnSync.style.fontSize = "28px";
+ModalCloseBtnSync.style.fontWeight = "bold";
+ModalCloseBtnSync.style.cursor = "pointer";
+ModalCloseBtnSync.onclick = CloseModalSyncBtnClick;
+
+var ModalTextSync = document.createElement('p');
+ModalTextSync.textContent = "Sync code :";
+ModalTextSync.style.marginTop = "15px";
+ModalTextSync.style.marginBottom = "15px";
+ModalTextSync.style.fontSize = "17px";
+ModalTextSync.style.fontWeight = "bold";
+
+var ModalInputSync = document.createElement('input');
+ModalInputSync.type = "text";
+ModalInputSync.maxLength = 5;
+ModalInputSync.style.width = "80%";
+
+var ModalOkSync = btn.cloneNode(false);
+ModalOkSync.style.marginTop = "15px";
+ModalOkSync.textContent = "Sync";
+ModalOkSync.onclick = ModalOkSyncClick;
+
+ModalContentSync.appendChild(ModalCloseBtnSync);
+ModalContentSync.appendChild(ModalTextSync);
+ModalContentSync.appendChild(ModalInputSync);
+ModalContentSync.appendChild(document.createElement('br'));
+ModalContentSync.appendChild(ModalOkSync);
+
+function SummonModalSync() {
+	ExtContainer.appendChild(ModalScreenSync);
+	ModalInputSync.value = "";
+	window.onclick = function(event) {
+		if (event.target == ModalScreenSync) {
+			ModalScreenSync.remove();
+			window.onclick = null;
+		}
+	}
+}
+
+function ModalOkSyncClick() {
+	spn.textContent = "";
+	if (ES) {
+		ES.close();
+	}
+
+	ModalScreenSync.remove();
+	mode = 1;
+	SMWASyncBtn.textContent = "Syncing..."
+	btn.remove();
+	SMOneClickSetBtn.remove();
+
+	SocketMode = false;
+	ES = new EventSource("https://repo.mchatx.org/APISync/Client?token=btoken " + ModalInputSync.value + " " + UID);
+	ES.onmessage = e => {
+		MsgNexus(e.data.toString());
+	}
+  
+	ES.onerror = e => {
+		ES.close();
+		spn.textContent = "CAN'T REACH SERVER, HALP!";
+		CancelConnection();
+		SMWASyncBtn.parentNode.insertBefore(btn, SMWASyncBtn);
+		btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
+		SMWASyncBtn.textContent = "Sync Web Client";
+		mode = 0;
+	}
+	
+	ES.onopen = e => {
+		mode = 2;
+		SMWASyncBtn.textContent = "Synced - Idle"
+		var id = setInterval(() => {
+			if (ES.readyState == 2){
+				clearInterval(id);
+				CancelConnection();
+				SMWASyncBtn.parentNode.insertBefore(btn, SMWASyncBtn);
+				btn.parentNode.insertBefore(SMOneClickSetBtn, btn);
+				SMWASyncBtn.textContent = "Sync Web Client";
+				mode = 0;
+			}
+		}, 2000);
+	}
+}
+
+function CloseModalSyncBtnClick(){
+	ModalScreenSync.remove();
+}
+//======================================== SYNC MODAL CONTROLLER ========================================
+
 //========================================= MChad Controller =========================================
 
 
 
 var ws;
+var ES;
+var SocketMode = false;
 
 var MainVid = document.createElement('video');
 var sendBtn; 
