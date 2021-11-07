@@ -2,15 +2,19 @@
 const VideoElementID = "video-stream html5-main-video";
 const ExtContainerParentID = "ytd-video-primary-info-renderer";
 const TitleCSSSelector = 'h1.title:nth-child(4)';
-var UID = document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
-if (UID.indexOf("?") != -1){
-	UID = UID.substring(0, UID.indexOf("?"));
-}
-if (UID.indexOf("&") != -1){
-	UID = UID.substring(0, UID.indexOf("&"));
-}
-UID = "Youtube " + UID;
+var UID = "";
 var HeadUID = 'YT_';
+
+function ReloadUniqueID() {
+	UID = document.location.toString().substring(document.location.toString().indexOf("watch?v=") + 8);
+	if (UID.indexOf("?") != -1){
+		UID = UID.substring(0, UID.indexOf("?"));
+	}
+	if (UID.indexOf("&") != -1){
+		UID = UID.substring(0, UID.indexOf("&"));
+	}
+	UID = "Youtube " + UID;
+}
 //===========================================  HEAD VARIABLES  ===========================================
 
 
@@ -432,7 +436,11 @@ function OpenSync() {
 function CancelConnection(){
 	switch (mode){
 		case 1:
-			spn.textContent = "Can't connect to MChad desktop app";
+			if (SocketMode){
+				spn.textContent = "Can't connect to MChad desktop app";
+			} else {
+				spn.textContent = "Can't reach Sync Server, Halp!";
+			}			
 			break;
 		case 3:
 			MainVid.onseeked = null;
@@ -640,6 +648,7 @@ function MsgNexus(StringData) {
 function BtnNexus() {
 	spn.textContent = "";
 	if (mode == 0) {
+		ReloadUniqueID();
 		btn.textContent = "Syncing..."
 		mode = 1;
 		OpenSync();
@@ -1071,8 +1080,10 @@ async function WebFontLoader(GFont) {
 
 function OneClickSetup() {
 	if (mode == 0){
+		ReloadUniqueID();
 		mode = 10;
 		SMOneClickSetBtn.textContent = "Syncing..."
+		spn.textContent = "";
 		btn.remove();
 		SMWASyncBtn.remove();
 
@@ -1118,7 +1129,7 @@ function OneClickSetup() {
 				BToken: BToken2
 			}));
 			
-			const ClientWin = open("https://mchatx.org/TLClient?token=" + dt.Token, "TLClient", "scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=no");
+			const ClientWin = open("https://app.mchatx.org/TLClient?token=" + dt.Token, "TLClient", "scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=no,width=1000,height=600,left=" + (screen.width - 1000).toString());
 			var Checker = setInterval(() => {
 				var test = true;
 				try {
@@ -1157,6 +1168,7 @@ function OneClickSetup() {
 
 function SMWASyncBtnClick() {
 	if (mode == 0) {
+		ReloadUniqueID();
 		SummonModalSync();
 	} else {
 		ES.close();
@@ -1234,6 +1246,7 @@ function LoadButtons(ContainerTarget) {
 
 function StartHereClick(){
 	StandAlone = true;
+	ReloadUniqueID();
 	SummonMainMenu();
 
 	VidEle = document.getElementsByTagName('video');
@@ -3626,6 +3639,7 @@ function SummonModalSync() {
 }
 
 function ModalOkSyncClick() {
+	spn.textContent = "";
 	if (ES) {
 		ES.close();
 	}
@@ -3713,6 +3727,9 @@ WFloader3.crossorigin = "";
 document.head.append(WFloader2);
 document.head.append(WFloader3);
 document.head.append(WFloader);
+
+ReloadUniqueID();
+
 async function WaitUntilLoad(){
 	var i = 0;
 	while (true){
