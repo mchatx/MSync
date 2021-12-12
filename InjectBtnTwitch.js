@@ -3445,7 +3445,7 @@ var sendBtn;
 var ChatText;
 var ListenerTarget;
 var ChatInputPanel;
-var CurrentVersion = "3.1.9";
+var CurrentVersion = "3.9.10";
 var StandAlone = false;
 if (document.location.toString().indexOf("/video") == -1){
 	Live = true;
