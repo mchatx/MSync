@@ -127,7 +127,7 @@ function SetTimePrecise(timeseek, timestamp) {
 //   BOUNCING INCOMING MESSAGE TO THE LIVE CHAT SUBMITTER 
 
 function SendTextEnter(inputtext){
-	ChatText.textContent = inputtext.replaceAll("\"", "");
+	ChatText.textContent = inputtext.replaceAll("\\\"", "\"");
 	ChatText.dispatchEvent(new InputEvent("input"));
 	sendBtn.click();
 }

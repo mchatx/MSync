@@ -123,7 +123,7 @@ function SetTimePrecise(timeseek, timestamp) {
 //---------------------------------------   BOUNCING TRANSLATION   -------------------------------------------
 //   BOUNCING INCOMING MESSAGE TO THE LIVE CHAT SUBMITTER 
 function SendTextEnter(inputtext){
-	ChatText.value = inputtext.replaceAll("\"", "");;
+	ChatText.value = inputtext.replaceAll("\\\"", "\"");
 	var evt = document.createEvent("Events");
 	evt.initEvent("change", true, true);
 	ChatText.dispatchEvent(evt);
