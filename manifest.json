@@ -47,8 +47,20 @@
     },
     {
       "run_at": "document_end",
+      "matches": ["https://player.bilibili.com/player.html*"],
+      "js": ["InjectBiliBiliEmbed.js"],
+      "all_frames": true
+    },
+    {
+      "run_at": "document_end",
       "matches": ["*://www.nicovideo.jp/watch/*"],
       "js": ["InjectBtnNND.js"]
+    },
+    {
+      "run_at": "document_end",
+      "matches": ["https://embed.nicovideo.jp/watch/*"],
+      "js": ["InjectNNDEmbed.js"],
+      "all_frames": true
     },
     {
       "run_at": "document_end",
@@ -57,14 +69,21 @@
     },
     {
       "run_at": "document_end",
+      "matches": ["https://twitcasting.tv/*/embeddedplayer/*"],
+      "js": ["InjectTwitcastEmbed.js"],
+      "all_frames": true
+    },
+    {
+      "run_at": "document_end",
       "matches": ["*://twitcasting.tv/*/movie*", "*://*.twitcasting.tv/*/movie*"],
       "js": ["InjectBtnTwitcast.js"]
     },
     {
       "run_at": "document_end",
+      "exclude_matches": ["https://twitcasting.tv/*/embeddedplayer/*"],
       "matches": ["*://twitcasting.tv/*", "*://*.twitcasting.tv/*"],
       "js": ["InjectBtnTwitcastLive.js"]
-    }    
+    }
   ],
   
   "permissions": [
