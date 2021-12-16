@@ -607,7 +607,7 @@ var ChatInputPanel;
 var Live = false;
 var mode = 0;
 
-var CurrentVersion = "3.9.10";
+var CurrentVersion = "4.0.0";
 
 var ChatElementTarget = "chat-room-header-label";
 /*
