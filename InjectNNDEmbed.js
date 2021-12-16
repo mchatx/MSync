@@ -42,15 +42,17 @@ function OpenReceiver(vid) {
 }
 
 function Load() {
-    const intv = setInterval(() => {
-        if (document.getElementsByTagName('video').length > 0) {
-            if (document.getElementsByTagName('video')[0].src != "") {
-                TransmitTime(document.getElementsByTagName('video')[0]);
-                OpenReceiver(document.getElementsByTagName('video')[0]);
-                clearInterval(intv);
+    if ((document.referrer == "https://app.mchatx.org/") && (window.location != parent.location)) {
+        const intv = setInterval(() => {
+            if (document.getElementsByTagName('video').length > 0) {
+                if (document.getElementsByTagName('video')[0].src != "") {
+                    TransmitTime(document.getElementsByTagName('video')[0]);
+                    OpenReceiver(document.getElementsByTagName('video')[0]);
+                    clearInterval(intv);
+                }
             }
-        }
-    }, 1000);
+        }, 1000);
+    }
 }
 
 Load();
